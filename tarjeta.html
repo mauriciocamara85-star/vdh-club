@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi tarjeta · VDH Club</title>
+<meta name="description" content="Tu tarjeta del Club VDH: mostrala en la caja.">
+<meta name="theme-color" content="#EDEEF0">
+<!-- Agregada a la pantalla de inicio, se abre sin la barra del navegador:
+     es lo que hace que se sienta la tarjeta y no una página guardada.
+
+     El manifest declara una start_url FIJA —tarjeta.html, sin código— y eso
+     está bien desde que la tarjeta se recupera con el teléfono: el código
+     lo pone el navegador, que se lo acuerda, y el día que lo pierda la app
+     abre en "poné tu WhatsApp" y entra igual. Antes de eso un manifest
+     habría instalado a todos apuntando a una página vacía, y por eso no
+     estaba. -->
+<link rel="manifest" href="tarjeta.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mi tarjeta">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── La tarjeta ──────────────────────────────────────────────────────────
+     Esto lo abre alguien parado en la caja, con la fila atrás. Todo lo que
+     hace falta tiene que verse SIN scrollear: el código de barras, el número
+     y cuántas compras lleva. Lo demás va abajo. */
+  :root {
+    --bg:      #EDEEF0;
+    --hoja:    #FFFFFF;
+    --txt:     #16181B;
+    --txt-2:   #4A4F55;
+    --txt-3:   #55595F;
+    --linea:   #DCDEE3;
+    --acc:     #B51222;
+    --acc-2:   #8E0E1B;
+    --acc-soft:#FBEAEC;
+    --ok:      #0F7444;
+    --ok-soft: #E7F6EE;
+    --r:       20px;
+    --r-sm:    14px;
+    --sans:    'DM Sans', system-ui, -apple-system, sans-serif;
+    --display: 'Space Grotesk', var(--sans);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg); color: var(--txt);
+    font: 400 16px/1.55 var(--sans);
+    min-height: 100dvh;
+    padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 30px);
+  }
+  .hoja { width: 100%; max-width: 520px; margin: 0 auto; padding: 22px 20px 0; }
+
+  .cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .cab b { font: 700 17px/1.1 var(--display); letter-spacing: -.3px; }
+  .cab span { font-size: 12px; color: var(--txt-3); text-transform: uppercase; letter-spacing: .4px; }
+
+  /* ── El carnet ──
+     El material del tablero: grafito a negro y un resplandor rojo a la
+     derecha. Llevaba además una textura de rayas diagonales; se fue el
+     25/09/2026 junto con la de las tarjetas de números —Mauricio las vio y
+     no le gustaron— y no hizo falta reemplazarla: el resplandor ya evita
+     que el negro sea una tapa plana. Es lo único oscuro de la pantalla, así que
+     es lo primero que se mira —que es exactamente lo que tiene que pasar—.
+     El código de barras va sobre blanco adentro, porque un lector necesita
+     negro sobre blanco y nada más. */
+  .carnet {
+    background:
+      radial-gradient(70% 130% at 110% 42%, rgba(181, 18, 34, .55) 0%, rgba(181, 18, 34, .14) 46%, transparent 74%),
+      linear-gradient(158deg, #2B2E33 0%, #141517 78%);
+    border-radius: var(--r);
+    padding: 16px;
+    color: #fff;
+    box-shadow: 0 16px 34px -18px rgba(22, 24, 27, .85);
+  }
+  .carnet-nom { font: 700 20px/1.2 var(--display); letter-spacing: -.4px; }
+  .carnet-desde { font-size: 12px; opacity: .8; margin-top: 2px; }
+
+  .barras {
+    background: #fff;
+    border-radius: var(--r-sm);
+    padding: 11px 11px 8px;
+    margin-top: 12px;
+  }
+  /* El número, grande y agrupado de a cuatro: es el respaldo para cuando el
+     lector no llega a leer la pantalla, y hay que poder dictarlo sin
+     equivocarse. */
+  .numero {
+    display: block; text-align: center;
+    margin-top: 8px;
+    font: 700 clamp(19px, 6vw, 25px)/1 var(--display);
+    letter-spacing: 2px;
+    color: #16181B;
+    font-variant-numeric: tabular-nums;
+  }
+  .carnet-pie { font-size: 12.5px; opacity: .85; margin-top: 11px; text-align: center; }
+
+  /* ── El avance ── */
+  .caja {
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--r);
+    padding: 20px;
+    margin-top: 18px;
+  }
+  .caja h2 { font: 700 16px var(--display); letter-spacing: -.2px; }
+
+  .cuenta { display: flex; align-items: baseline; gap: 9px; margin-top: 4px; }
+  .cuenta b { font: 700 clamp(34px, 11vw, 46px)/1 var(--display); color: var(--acc); letter-spacing: -1.5px; }
+  .cuenta span { font-size: 15px; color: var(--txt-2); }
+  .falta {
+    font: 600 17px/1.35 var(--sans);
+    color: var(--txt);
+    margin-top: 4px;
+  }
+  .falta b { color: var(--acc); font-weight: 700; }
+
+  /* Los sellos, uno por compra. Se ven y se cuentan de un vistazo, que es
+     todo lo que el cliente quiere saber. */
+  /* ── Los sellos ──
+     En GRILLA y no en fila que se acomoda sola. Suelto, el ancho del teléfono
+     decidía el corte: diez sellos entraban de a siete y tres, y con ese
+     reparto el 5 y el 10 —que son los premios— caían en cualquier lado. En
+     filas del largo del primer premio, el 5 termina una fila y el 10 termina
+     la otra, y la relación se ve sin explicarla.
+
+     El largo lo pone pintar() según los hitos, en --por-fila. Si los premios
+     cambian a 4 y 8, las filas pasan a cuatro solas. */
+  .sellos {
+    display: grid;
+    grid-template-columns: repeat(var(--por-fila, 5), 1fr);
+    gap: 9px; margin-top: 16px;
+    justify-items: center;
+  }
+  .sello {
+    width: 100%; max-width: 46px; aspect-ratio: 1; height: auto;
+    border-radius: 50%;
+    border: 2px dashed var(--linea);
+    display: grid; place-items: center;
+    font: 700 12px var(--display); color: var(--txt-3);
+  }
+  .sello.lleno { border: 0; background: var(--acc); color: #fff; }
+  .sello.premio { border-color: var(--acc); color: var(--acc); border-style: solid; }
+  .sello svg { width: 16px; height: 16px; }
+
+  .hitos { margin-top: 20px; display: grid; gap: 11px; }
+  .hito {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px;
+    border: 1px solid var(--linea);
+    border-radius: var(--r-sm);
+    font-size: 14.5px;
+  }
+  .hito-n {
+    width: 38px; height: 38px; flex: none; border-radius: 12px;
+    background: var(--acc-soft); color: var(--acc);
+    display: grid; place-items: center; font: 700 15px var(--display);
+  }
+  .hito b { display: block; font-size: 15px; }
+  .hito small { display: block; font-size: 13px; color: var(--txt-3); }
+  .hito.listo { border-color: #A7D9BF; background: var(--ok-soft); }
+  .hito.listo .hito-n { background: #CDEBDC; color: var(--ok); }
+  .hito.listo small { color: var(--ok); font-weight: 600; }
+  .hito.usado { opacity: .6; }
+
+  .lista { margin-top: 18px; }
+  .fila { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--linea); font-size: 14px; }
+  .fila:last-child { border-bottom: 0; }
+  .fila span { color: var(--txt-3); }
+
+  .vacio { font-size: 14.5px; color: var(--txt-2); line-height: 1.55; }
+  .letra-chica { font-size: 12.5px; color: var(--txt-3); margin-top: 22px; text-align: center; line-height: 1.6; }
+  .letra-chica a { color: var(--acc); }
+  .cargando { text-align: center; padding: 60px 0; color: var(--txt-3); }
+
+  /* ── Las pestañas ──────────────────────────────────────────────────────
+     La barra de abajo, al alcance del pulgar. Cuatro, y la del medio —la
+     tarjeta— sobresale: es lo que el cliente viene a mostrar en la caja y lo
+     que abre cuando entra.
+
+     La app ARRANCA en la tarjeta, no en un menú. Hoy se abre y el código de
+     barras está a la vista, y ésa es su mejor virtud: si al agregar pestañas
+     quedara a un toque de distancia, habríamos empeorado. */
+  body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+
+  .tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    /* Esto es una app de CELULAR y sólo de celular (decisión de Mauricio,
+       24/09/2026). Pero se abre igual en una computadora —él la mira ahí
+       mientras la armamos— y una barra de 1900px de ancho con cuatro
+       iconitos perdidos se ve rota. Se queda del ancho de la columna. */
+    max-width: 520px; margin: 0 auto;
+    /* Cinco, y por eso el boton del medio queda de verdad en el medio:
+       con cuatro estaba en el lugar 3 de 4, apenas corrido. */
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    background: var(--hoja);
+    border-top: 1px solid var(--linea);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tab {
+    border: 0; background: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 9px 4px 10px;
+    font: 600 11px var(--sans);
+    color: var(--txt-3);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab svg { width: 22px; height: 22px; }
+  .tab[aria-current="page"] { color: var(--acc); }
+
+  /* La del medio: un círculo rojo que sobresale de la barra. El margen
+     negativo la levanta sin sacarla de la grilla, así las otras tres siguen
+     repartidas parejo. */
+  .tab-centro { position: relative; }
+  .tab-centro .tab-ico {
+    width: 52px; height: 52px; border-radius: 50%;
+    margin-top: -22px; margin-bottom: 1px;
+    background: linear-gradient(150deg, var(--acc), var(--acc-2));
+    color: #fff;
+    display: grid; place-items: center;
+    box-shadow: 0 8px 20px -8px rgba(181, 18, 34, .75);
+    border: 3px solid var(--bg);
+  }
+  .tab-centro svg { width: 25px; height: 25px; }
+
+  /* ── Las vistas ── */
+  .vista[hidden] { display: none; }
+  .vista h1 {
+    font: 700 clamp(25px, 7vw, 32px)/1.15 var(--display);
+    letter-spacing: -.8px; margin-bottom: 4px;
+  }
+  .vista-sub { font-size: 15px; color: var(--txt-2); margin-bottom: 20px; }
+
+  /* ── Promos ──
+     Pantalla entera para lo que Mauricio escribe en Configuración. Si no hay
+     nada cargado, se dice — un cartel vacío es peor que ninguno. */
+  /* Si es lo único que hay en la pantalla, que mande: más grande, más aire
+     y más letra. Antes quedaba un cartelito arriba y media pantalla vacía. */
+  .promo-grande {
+    background:
+      radial-gradient(70% 130% at 110% 20%, rgba(181, 18, 34, .55) 0%, rgba(181, 18, 34, .14) 46%, transparent 74%),
+      linear-gradient(158deg, #2B2E33 0%, #141517 78%);
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    border-radius: var(--r);
+    padding: clamp(34px, 9vw, 52px) clamp(24px, 6vw, 34px);
+    min-height: 44vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    font: 700 clamp(27px, 8vw, 38px)/1.2 var(--display);
+    letter-spacing: -1px;
+    box-shadow: 0 16px 34px -18px rgba(22, 24, 27, .85);
+  }
+  .promo-hasta {
+    display: block;
+    font: 600 13px/1 var(--sans);
+    letter-spacing: .5px; text-transform: uppercase;
+    opacity: .75;
+    margin-top: 18px;
+  }
+  /* La pantalla termina en algo que hacer. Contarle a alguien que hay un
+     2x1 sirve si va al local y muestra la tarjeta; sin esto, la pantalla
+     informa y lo deja ahí parado. */
+  .promo-ir { margin-top: 18px; }
+
+  /* Varias promos, una abajo de la otra, y GRANDES. Es pedido de Mauricio y
+     se sostiene: con una foto cada una, scrollear se parece a mirar un feed
+     de prendas y no a leer carteles. */
+  .promos-lista { display: grid; gap: 22px; }
+
+  /* Las condiciones —qué productos participan, si combina con otros
+     descuentos, en qué locales vale— van en un <details> y no en otra
+     pantalla: se leen una vez de cada diez y no justifican hacer navegar a
+     nadie. Cerradas por defecto, para que no le ganen a la promo. */
+  .promo-cond { margin-top: 10px; }
+  .promo-cond summary {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 700 14px var(--sans);
+    color: var(--acc);
+    cursor: pointer; list-style: none;
+  }
+  .promo-cond summary::-webkit-details-marker { display: none; }
+  .promo-cond p {
+    font-size: 14.5px; color: var(--txt-2); line-height: 1.55;
+    margin-top: 9px;
+    white-space: pre-line;
+  }
+
+  /* ── Con foto ──
+     La foto va atrás de todo y encima un velo NEGRO DE ABAJO HACIA ARRIBA.
+     Ese velo es lo que hace que esto funcione con cualquier imagen: el texto
+     vive abajo (justify-content: flex-end), así que siempre cae sobre la
+     parte más oscura. Sin el velo, una foto clara deja el texto blanco
+     ilegible y no hay forma de saberlo de antemano — la foto la elige
+     Mauricio y puede ser cualquiera.
+
+     El resplandor rojo se va cuando hay foto: estaba para que un rectángulo
+     negro no fuera una tapa plana, y con una imagen sobra.
+
+     El 25/09/2026 el velo se levantó de arriba: antes cubría la foto ENTERA
+     —incluso donde no hay texto— y apagaba la imagen sin necesidad. Ahora
+     el tercio superior queda limpio y lo oscuro vive sólo debajo del texto.
+     Menos de eso no se puede: el texto es blanco y la foto la elige
+     Mauricio, así que puede ser una blanca. */
+  .promo-grande.con-foto {
+    background-image:
+      linear-gradient(to top,
+        rgba(10, 11, 12, .90) 0%,
+        rgba(10, 11, 12, .70) 20%,
+        rgba(10, 11, 12, .12) 50%,
+        rgba(10, 11, 12, 0)   68%),
+      var(--foto);
+  }
+
+  /* ── Locales ── */
+  .local-mapa {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; margin-bottom: 18px;
+    min-height: 52px;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, var(--acc), var(--acc-2));
+    color: #fff;
+    font: 700 16px var(--sans);
+    text-decoration: none;
+  }
+  .local-mapa svg { width: 19px; height: 19px; }
+
+  /* El botón de la ubicación. El permiso se pide CUANDO SE TOCA, no al
+     abrir: pedirlo de entrada —como hace la app de la competencia, con un
+     cartel antes de que hayas visto nada— es lo que hace que la gente
+     apriete "Ahora no", y una vez que dicen que no, volver a pedirlo es un
+     trámite. Tocado el botón, la respuesta casi siempre es que sí. */
+  .local-cerca {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; margin-bottom: 18px;
+    min-height: 48px;
+    border: 1.5px solid var(--linea);
+    border-radius: var(--r-sm);
+    background: var(--hoja);
+    color: var(--txt);
+    font: 700 15px var(--sans);
+    cursor: pointer;
+  }
+  .local-cerca svg { width: 18px; height: 18px; color: var(--acc); }
+  .local-cerca[disabled] { opacity: .6; }
+
+  /* ── Dudas ──
+     Las preguntas van en <details> nativos: cerradas ocupan un renglón cada
+     una, así se ven las siete de un vistazo y el cliente abre la suya. Una
+     lista de respuestas abiertas sería una pared de texto que no lee nadie.
+     Y sin una línea de JavaScript. */
+  .faq { border-top: 1px solid var(--linea); }
+  .faq:first-of-type { border-top: 0; }
+  .faq summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 13px 0;
+    font: 600 15px/1.35 var(--sans);
+    cursor: pointer; list-style: none;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after {
+    content: "+"; flex: none;
+    font: 400 20px/1 var(--sans); color: var(--acc);
+  }
+  .faq[open] summary::after { content: "–"; }
+  .faq p {
+    font-size: 14.5px; color: var(--txt-2); line-height: 1.55;
+    padding-bottom: 14px;
+  }
+
+  .btn-wsp {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; margin-top: 16px;
+    min-height: 52px;
+    border-radius: var(--r-sm);
+    background: #25D366;
+    /* Tinta oscura y no blanca: sobre ese verde, el blanco da 1,8:1. */
+    color: #06331A;
+    font: 700 16px var(--sans);
+    text-decoration: none;
+  }
+  .btn-wsp svg { width: 20px; height: 20px; }
+
+  .local-dist {
+    display: inline-block;
+    margin-left: 8px;
+    background: var(--acc-soft); color: var(--acc);
+    border-radius: 999px; padding: 3px 9px;
+    font: 700 12.5px var(--sans);
+    vertical-align: middle;
+  }
+
+  .local {
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--r-sm);
+    padding: 16px 17px;
+    margin-bottom: 11px;
+  }
+  .local b { display: block; font: 700 17px/1.2 var(--display); letter-spacing: -.3px; }
+  .local-zona { font-size: 12.5px; color: var(--txt-3); margin-top: 2px; }
+  .local-dato {
+    display: flex; gap: 9px; align-items: flex-start;
+    font-size: 14.5px; color: var(--txt-2); line-height: 1.45;
+    margin-top: 11px;
+  }
+  .local-dato svg { width: 17px; height: 17px; flex: none; margin-top: 2px; color: var(--txt-3); }
+  .local-ir {
+    display: inline-flex; align-items: center; gap: 7px;
+    margin-top: 14px;
+    border: 1.5px solid var(--linea);
+    border-radius: 999px;
+    padding: 9px 16px;
+    font: 700 14px var(--sans);
+    color: var(--acc);
+    text-decoration: none;
+  }
+  .local-ir svg { width: 16px; height: 16px; }
+
+  /* El mismo botón que la página de alta: esta pantalla no tenía ninguno
+     porque hasta ahora no había nada que apretar. */
+  .btn {
+    display: block; width: 100%; margin-top: 20px;
+    min-height: 54px; line-height: 54px;
+    border: 0; border-radius: var(--r-sm);
+    background: linear-gradient(135deg, var(--acc), var(--acc-2));
+    color: #fff;
+    font: 700 17px var(--sans); text-align: center; text-decoration: none;
+  }
+  .caja .vacio + .vacio { margin-top: 12px; }
+
+  /* ── La promo ──
+     Va pegada abajo del carnet y no arriba: el cliente abrió esto para ver
+     su tarjeta, no para que le vendan algo. Pero va en rojo lleno, porque
+     una vez que la tarjeta está a la vista esto es lo único nuevo de la
+     pantalla. */
+  /* Campos y aviso: hasta que la tarjeta se pudo recuperar con el teléfono,
+     esta pantalla no tenía nada para completar. Mismos valores que la
+     página de alta, incluidos los 16px de letra que evitan que iOS haga
+     zoom solo al tocar el campo. */
+  label { display: block; font-size: 14px; font-weight: 600; color: var(--txt-2); margin-bottom: 7px; }
+  input[type=tel] {
+    width: 100%;
+    background: #fff;
+    border: 1.5px solid var(--linea);
+    border-radius: var(--r-sm);
+    font: 500 16px var(--sans);
+    color: var(--txt);
+    padding: 14px 15px;
+    outline: none;
+  }
+  input:focus { border-color: var(--acc); box-shadow: 0 0 0 4px rgba(181, 18, 34, .14); }
+  .msg { margin-top: 14px; font-size: 14.5px; line-height: 1.5; border-radius: var(--r-sm); padding: 13px 14px; }
+  .msg.mal { background: #FDF2F3; color: #A00F1E; border: 1px solid #F3CFD3; }
+</style>
+</head>
+<body>
+
+<main class="hoja">
+  <div class="cab">
+    <div>
+      <b>VDH Club</b><br>
+      <span id="cabSub">Tarjeta de beneficios</span>
+    </div>
+  </div>
+
+  <section class="vista" id="vTarjeta">
+    <div id="todo" hidden></div>
+    <p class="cargando" id="cargando">Abriendo tu tarjeta…</p>
+  </section>
+
+  <section class="vista" id="vPromos" hidden>
+    <h1>Promociones</h1>
+    <p class="vista-sub">Lo que está vigente hoy en todos los locales.</p>
+    <div id="promoGrande"></div>
+  </section>
+
+  <section class="vista" id="vLocales" hidden>
+    <h1>Nuestros locales</h1>
+    <p class="vista-sub">Encontrá tu local VDH. Mostrá tu tarjeta en cualquiera.</p>
+
+    <!-- Ver los 14 juntos. Es lo único bueno que tenía el mapa de la
+         competencia —saber cuál queda más cerca— y se resuelve abriendo la
+         app de Maps, que además sabe dónde está el cliente y navega. Un mapa
+         incrustado acá no podría hacer ninguna de las dos cosas, y encima
+         pediría una clave de Google en un repositorio público.
+
+         Es un "Mis Mapas" de Google (maps/d/viewer), que es lo que está
+         hecho para compartir en público — antes era una lista guardada de la
+         cuenta de Mauricio, que funcionaba pero dependía de un permiso suyo.
+         Si algún día deja de andar, mirar primero que el mapa siga
+         compartido, no el código. -->
+    <a class="local-mapa" target="_blank" rel="noopener"
+       href="https://www.google.com/maps/d/viewer?mid=1y8koZ_-YOh37JwyQhBwsMvZJ2EZJans">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>
+      Ver los 14 en el mapa
+    </a>
+
+    <button type="button" class="local-cerca" id="btnCerca">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+      ¿Cuál me queda más cerca?
+    </button>
+    <div id="listaLocales"></div>
+  </section>
+</main>
+
+<!-- ── Las pestañas ──
+     La tarjeta va al medio y sobresale: es lo que se usa parado en la caja.
+     El e-shop es un enlace de verdad y no una pestaña con contenido, así que
+     es un <a>: abre la tienda afuera. -->
+<nav class="tabs" aria-label="Secciones">
+  <button type="button" class="tab" data-vista="promos">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2c0 .5.2 1 .6 1.4l8.8 8.8a2 2 0 0 0 2.8 0l7.2-7.2a2 2 0 0 0 0-2.8Z"/><circle cx="7.5" cy="7.5" r="1.3"/></svg>
+    Promos
+  </button>
+
+  <button type="button" class="tab" data-vista="locales">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+    Locales
+  </button>
+
+  <button type="button" class="tab tab-centro" data-vista="tarjeta">
+    <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg></span>
+    Mi tarjeta
+  </button>
+
+  <a class="tab" href="https://vdh.com.ar/" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    E-shop
+  </a>
+
+  <a class="tab" href="https://instagram.com/vdh.indumentaria" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4"/><path d="M17.6 6.4h.01"/></svg>
+    Instagram
+  </a>
+</nav>
+
+<script src="locales.js"></script>
+<script src="codigo.js"></script>
+<script src="club.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* El suyo, no el de la app de los vendedores: la tarjeta la lleva en el
+     celular un cliente, y no tiene por qué compartir caché ni versiones con
+     la herramienta de trabajo. Ver sw-club.js. */
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw-club.js').catch(function () { /* anda igual */ });
+    });
+  }
+
+  /* El código puede venir en la dirección —el enlace que el cliente se
+     guardó o se pasó— o del celular, si se anotó acá. El de la dirección
+     manda, y se guarda: así abrir el enlace en otro teléfono también
+     funciona. */
+  var m = /[?&]c=([0-9]+)/.exec(location.search);
+  var codigo = m ? m[1] : codigoGuardado();
+  if (m) guardarCodigo(m[1]);
+
+  if (!codigo) { sinTarjeta(); return; }
+
+  /* Sin recargar: la dirección pasa a llevar el código aunque haya venido
+     del navegador. replaceState y no un salto, para no dejar la vuelta
+     atrás llena de la misma página. */
+  if (!m) {
+    try {
+      history.replaceState(null, '', 'tarjeta.html?c=' + encodeURIComponent(codigo));
+    } catch (e) { /* en file:// tira excepción; la tarjeta anda igual */ }
+  }
+
+  /* Lo último que vimos de ESTA tarjeta. Se pinta si la base no contesta:
+     en la caja de un shopping, con o sin señal, el código de barras tiene
+     que estar. Los sellos pueden estar un día viejos y no pasa nada —el
+     que suma es el vendedor, que sí tiene señal—. */
+  var K_ULTIMA = 'vdh_club_ultima';
+
+  function guardarUltima(t) {
+    try { localStorage.setItem(K_ULTIMA, JSON.stringify({ codigo: t.codigo, t: t })); } catch (e) {}
+  }
+  function ultimaGuardada(cod) {
+    try {
+      var g = JSON.parse(localStorage.getItem(K_ULTIMA) || 'null');
+      return (g && g.codigo === cod) ? g.t : null;
+    } catch (e) { return null; }
+  }
+
+  irA((location.hash || '').replace('#', '') || 'tarjeta', false);
+
+  club.tarjeta(codigo)
+    .then(function (t) {
+      if (!t || !t.hay) {
+        var c = $('cargando');
+        c.className = '';
+        c.innerHTML =
+          '<div class="caja">' +
+            '<h2>No encontramos esa tarjeta</h2>' +
+            '<p class="vacio">El código de ese enlace no corresponde a ' +
+            'ninguna tarjeta. Si te la dieron en el local, fijate de haber ' +
+            'copiado los doce números enteros.</p>' +
+            '<a class="btn" href="index.html">Anotarme en el Club</a>' +
+          '</div>';
+        return;
+      }
+      guardarUltima(t);
+      pintar(t);
+    })
+    .catch(function () {
+      var vieja = ultimaGuardada(codigo);
+      if (vieja) { pintar(vieja); sinSenal(); return; }
+      $('cargando').textContent = 'No se pudo abrir. Fijate la señal y recargá.';
+    });
+
+  /* Se dice, no se esconde: el cliente tiene que saber que eso que está
+     mirando puede no tener el sello de recién. */
+  function sinSenal() {
+    var a = document.createElement('p');
+    a.className = 'letra-chica';
+    a.style.marginTop = '14px';
+    a.textContent = 'Sin señal: esto es lo último que vimos. El código de barras sirve igual.';
+    $('todo').appendChild(a);
+  }
+
+  function pintar(t) {
+    var meta = t.meta || 0;
+    var hitos = t.hitos || [];
+
+    /* Los sellos: uno por compra hasta la meta. Los que caen justo en un
+       premio se marcan distinto, así se ve dónde está la próxima parada sin
+       tener que leer nada. */
+    var enPremio = {};
+    hitos.forEach(function (h) { enPremio[h.sellos] = true; });
+    /* El largo de la fila sale del PRIMER premio: si el primero es a los 5,
+       filas de cinco. Entre 3 y 6 para que no queden ni apretadas ni de a
+       dos; fuera de ese rango, cinco, que es lo que venía. */
+    var porFila = (hitos.length && hitos[0].sellos >= 3 && hitos[0].sellos <= 6)
+      ? hitos[0].sellos : 5;
+    var bolitas = '';
+    for (var i = 1; i <= meta; i++) {
+      var lleno = i <= t.sellos;
+      bolitas += '<div class="sello' + (lleno ? ' lleno' : '') +
+                 (!lleno && enPremio[i] ? ' premio' : '') + '">' +
+                 (lleno
+                   ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>'
+                   : i) + '</div>';
+    }
+
+    var falta = 0;
+    var proximo = null;
+    hitos.forEach(function (h) {
+      if (!proximo && t.sellos < h.sellos) { proximo = h; falta = h.sellos - t.sellos; }
+    });
+
+    var html =
+      '<div class="carnet">' +
+        '<div class="carnet-nom">' + esc(t.nombre) + '</div>' +
+        '<div class="carnet-desde">Socio desde ' + fecha(t.desde) + '</div>' +
+        '<div class="barras">' + codigoDeBarras(t.codigo, 84) +
+          '<b class="numero">' + codigoBonito(t.codigo) + '</b>' +
+        '</div>' +
+        '<div class="carnet-pie">Mostralo en la caja cuando comprés</div>' +
+      '</div>' +
+
+
+
+      '<div class="caja">' +
+        '<h2>Tu avance</h2>' +
+        '<div class="cuenta"><b>' + t.sellos + '</b><span>de ' + meta + ' compras</span></div>' +
+        /* Lo que le falta para el próximo premio, en su propio renglón y
+           grande. Iba pegado a "de 10 compras" en gris chico, y era lo único
+           de la pantalla que le dice al cliente para qué está juntando. */
+        (proximo
+          ? '<p class="falta">Te falta' + (falta === 1 ? '' : 'n') + ' <b>' + falta +
+            '</b> para tu ' + esc(proximo.premio.toLowerCase()) + '</p>'
+          : '<p class="falta">Ya alcanzaste todos los premios</p>') +
+        '<div class="sellos" style="--por-fila:' + porFila + '">' + bolitas + '</div>' +
+        '<div class="hitos">' + hitos.map(function (h) {
+          var clase = h.canjeado ? ' usado' : (h.alcanzado ? ' listo' : '');
+          var pie = h.canjeado ? 'Ya te lo llevaste'
+                  : h.alcanzado ? 'Pedilo en cualquier local'
+                  : 'A las ' + h.sellos + ' compras';
+          return '<div class="hito' + clase + '">' +
+                   '<div class="hito-n">' + h.sellos + '</div>' +
+                   '<div><b>' + esc(h.premio) + '</b><small>' + pie + '</small></div>' +
+                 '</div>';
+        }).join('') + '</div>' +
+      '</div>' +
+
+      (t.ultimas && t.ultimas.length
+        ? '<div class="caja"><h2>Tus últimas compras</h2><div class="lista">' +
+            t.ultimas.map(function (u) {
+              return '<div class="fila"><b>' + esc(nombreLocal(u.local)) + '</b>' +
+                     '<span>' + fecha(u.cuando) + '</span></div>';
+            }).join('') + '</div></div>'
+        : '<div class="caja"><h2>Todavía no tenés compras</h2>' +
+          '<p class="vacio">Mostrá tu tarjeta la próxima vez que compres y te ' +
+          'sumamos la primera.</p></div>') +
+
+      (estaInstalada() ? '' : '<div id="instalar"></div>') +
+
+      bloqueAyuda() +
+
+      '<p class="letra-chica">Tu código es sólo tuyo: no lo compartas.<br>' +
+      'Si perdés esta página, en cualquier local te la vuelven a abrir con tu teléfono.</p>';
+
+    $('todo').innerHTML = html;
+    $('todo').hidden = false;
+    $('cargando').hidden = true;
+    pintarInstalar();
+    precargarPromo();
+  }
+
+  /**
+   * La promo se trae al abrir, pero NO se dibuja en la tarjeta.
+   *
+   * Tuvo dos formas antes de esta: un cartel rojo del tamaño de media
+   * pantalla y después un renglón. Las dos estaban entre el código de
+   * barras y el avance, o sea partiendo las dos cosas que son del cliente
+   * para meter una comercial. Mauricio pidió sacarla del todo y tiene razón:
+   * la promo ya tiene su pestaña, y el aviso de que hay algo nuevo va a ser
+   * la campanita.
+   *
+   * El viaje se hace igual y en silencio: deja la promo cargada, así tocar
+   * Promos es instantáneo. Si falla, la tarjeta ni se entera.
+   */
+  function precargarPromo() {
+    club.promos()
+      .then(function (l) { promoCargada = l || []; })
+      .catch(function () { /* sin promos, la tarjeta es la tarjeta */ });
+  }
+
+  /* ── Tenela siempre a mano ──
+     Con Chrome hay botón: el navegador avisó que se puede instalar y lo
+     hace en el acto. Con iPhone no hay evento ni forma de ofrecerlo, así
+     que se dice dónde tocar, que es lo único que Apple deja hacer. */
+  var promptGuardado = null;
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    /* Sin esto Chrome muestra su propio cartelito abajo, que en un celular
+       tapa justo el código de barras. */
+    e.preventDefault();
+    promptGuardado = e;
+    pintarInstalar();
+  });
+
+  window.addEventListener('appinstalled', function () {
+    promptGuardado = null;
+    pintarInstalar();
+  });
+
+  function pintarInstalar() {
+    var caja = $('instalar');
+    if (!caja) return;
+
+    if (estaInstalada()) { caja.innerHTML = ''; return; }
+
+    caja.innerHTML =
+      '<div class="caja">' +
+        '<h2>Tenela siempre a mano</h2>' +
+        '<p class="vacio">Agregala a la pantalla de tu celular: se abre como una ' +
+        'app, con tu tarjeta adentro, y anda aunque no tengas señal.</p>' +
+        (promptGuardado
+          ? '<button type="button" class="btn" id="btnInstalar">Agregar a mi celular</button>'
+          : '<p class="vacio">' + comoAgregar() + '</p>') +
+      '</div>';
+
+    if (promptGuardado && $('btnInstalar')) {
+      $('btnInstalar').onclick = function () {
+        var p = promptGuardado;
+        promptGuardado = null;
+        p.prompt();
+        /* Si dice que no, vuelve el cartel con las instrucciones a mano: el
+           evento no se puede volver a usar, pero el camino del menú sigue
+           estando. */
+        p.userChoice.then(function (r) {
+          if (!r || r.outcome !== 'accepted') pintarInstalar();
+        }).catch(function () { pintarInstalar(); });
+      };
+    }
+  }
+
+  /**
+   * Este teléfono no tiene ningún código guardado.
+   *
+   * No es un error: la tarjeta no tiene usuario ni contraseña, la abre el
+   * código y nada más. Así que puede pasar por tres razones —se anotó en
+   * otro teléfono, el navegador borró los datos del sitio, o nunca se
+   * anotó— y desde acá no hay forma de saber cuál es.
+   *
+   * Lo que NO se puede hacer es pedirle el teléfono y buscarla: el alta con
+   * un número ya anotado tampoco devuelve la tarjeta, y por la misma razón.
+   * Si alcanzara con tipear un número, esto sería un buscador de personas.
+   * La recuperación pasa por el local, donde alguien con el PIN la abre.
+   */
+  function sinTarjeta() {
+    var c = $('cargando');
+    c.className = '';
+    c.innerHTML =
+      '<div class="caja">' +
+        '<h2>Abrí tu tarjeta</h2>' +
+        '<p class="vacio">Poné el WhatsApp con el que te anotaste y te la ' +
+        'abrimos. Queda guardada en este teléfono: la próxima vez entra sola.</p>' +
+        '<div class="campo" style="margin-top:16px">' +
+          '<label for="recTel">Tu WhatsApp</label>' +
+          '<input type="tel" id="recTel" inputmode="numeric" autocomplete="tel" ' +
+                 'placeholder="11 2345 6789">' +
+        '</div>' +
+        '<button type="button" class="btn" id="recBtn">Abrir mi tarjeta</button>' +
+        '<div class="msg mal" id="recMsg" hidden></div>' +
+        '<p class="vacio" style="margin-top:18px">¿Todavía no sos socio? ' +
+        '<a href="index.html">Anotate acá</a>, es gratis.</p>' +
+      '</div>';
+
+    $('recBtn').onclick = recuperar;
+    $('recTel').onkeydown = function (e) { if (e.key === 'Enter') recuperar(); };
+    $('recTel').focus();
+  }
+
+  /* Un solo dato y adentro. El teléfono es una credencial desde el
+     24/09/2026: ver club.sql, arriba de club_recuperar, que es donde está
+     escrito qué se ganó y qué se pagó con eso. */
+  function recuperar() {
+    var b = $('recBtn'), m = $('recMsg');
+    m.hidden = true;
+    b.disabled = true; b.textContent = 'Buscando…';
+
+    club.recuperar($('recTel').value.trim())
+      .then(function (t) {
+        if (t && t.hay) {
+          guardarCodigo(t.codigo);
+          /* replace y no href: la vuelta atrás no tiene por qué pasar por
+             la pantalla de "abrí tu tarjeta" una vez que ya está abierta. */
+          location.replace('tarjeta.html?c=' + encodeURIComponent(t.codigo));
+          return;
+        }
+        m.textContent = (t && t.porque) || 'No encontramos ninguna tarjeta con ese número.';
+        m.hidden = false;
+        b.disabled = false; b.textContent = 'Abrir mi tarjeta';
+      })
+      .catch(function (err) {
+        m.textContent = (err && err.message) || 'No se pudo. Fijate la señal y probá de nuevo.';
+        m.hidden = false;
+        b.disabled = false; b.textContent = 'Abrir mi tarjeta';
+      });
+  }
+
+  /* ═══ Dudas ══════════════════════════════════════════════════════════
+     Las respuestas salen de las reglas que ya están implementadas, no de lo
+     que estaría bueno que dijeran. Si alguna vez cambia una regla —la meta,
+     los premios, el vencimiento— hay que cambiarla también acá, y por eso
+     cada una dice de dónde sale.
+
+     El WhatsApp es un enlace y nada más: no hay ninguna integración detrás,
+     se abre la app del cliente con el mensaje empezado. */
+  var WSP_CONSULTAS = '2235845942';
+
+  var PREGUNTAS = [
+    ['¿Cómo sumo sellos?',
+     'Cada compra suma un sello, sin monto mínimo. Mostrá tu tarjeta en la caja ' +
+     'antes de pagar y el vendedor la escanea.'],
+    /* club_sumar_compra: un sello por compra, sin mirar el importe. */
+
+    ['¿Sirve en todos los locales?',
+     'Sí, en los 14. Podés juntar sellos en uno y llevarte el premio en otro: la ' +
+     'tarjeta es la misma en toda la cadena.'],
+    /* La tarjeta es compartida entre los 14 — ver club.sql. */
+
+    ['¿Los sellos vencen?',
+     'No. Lo que juntaste se queda ahí, sin fecha límite.'],
+    /* club_reglas.vence_dias está en null. */
+
+    ['Si me llevo el premio de las 5 compras, ¿vuelvo a cero?',
+     'No. El contador sigue subiendo: llevarte el perfume a las 5 no te aleja de ' +
+     'la remera de las 10.'],
+    /* La regla que más condiciona el modelo: un canje NO resta sellos. */
+
+    ['Perdí mi tarjeta, ¿qué hago?',
+     'Abrí esta misma página y poné el WhatsApp con el que te anotaste: se abre ' +
+     'sola. Y si no la encontrás, en cualquier local te la vuelven a abrir.'],
+    /* club_recuperar. */
+
+    ['¿Se la puedo prestar a alguien?',
+     'La tarjeta es tuya y los sellos también. Quien tenga tu código puede ver tu ' +
+     'tarjeta, así que mejor no lo compartas.']
+    /* Honesto: el código ES la credencial, no hay nada que lo impida. */
+  ];
+
+  function bloqueAyuda() {
+    var wsp = 'https://wa.me/549' + WSP_CONSULTAS +
+      '?text=' + encodeURIComponent('Hola! Tengo una consulta sobre el VDH Club.');
+
+    var icono = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1 1 21 11.5Z"/></svg>';
+
+    return '<div class="caja">' +
+      '<h2>Dudas</h2>' +
+      PREGUNTAS.map(function (p) {
+        return '<details class="faq"><summary>' + esc(p[0]) + '</summary>' +
+               '<p>' + esc(p[1]) + '</p></details>';
+      }).join('') +
+      '<a class="btn-wsp" target="_blank" rel="noopener" href="' + esc(wsp) + '">' +
+        icono + 'Escribinos por WhatsApp</a>' +
+    '</div>';
+  }
+
+  /* ═══ Las pestañas ═══════════════════════════════════════════════════
+     Mostrar y esconder secciones, sin traer nada de la red: las tres vistas
+     ya están en la página. Cambiar de pestaña tiene que ser instantáneo
+     incluso sin señal — el cliente está parado en la caja.
+
+     La pestaña viaja en el # de la dirección para que el botón de atrás del
+     celular haga lo que se espera: volver a la tarjeta en vez de salirse de
+     la app. Y la dirección SIN # sigue abriendo en la tarjeta, que es lo que
+     usa el acceso directo de la pantalla de inicio. */
+  function irA(nombre, conHistoria) {
+    /* El mapa va ADENTRO y no en un var de afuera: irA() se llama al arrancar,
+       antes de que la ejecución llegue a esta altura del archivo, y un var
+       declarado más abajo todavía vale undefined. Eso tiraba el script entero
+       en la primera línea y ni la tarjeta se dibujaba. Una declaración de
+       función se iza; el valor de un var, no. */
+    var VISTAS = { tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales' };
+    var v = VISTAS[nombre] ? nombre : 'tarjeta';
+
+    Object.keys(VISTAS).forEach(function (k) {
+      var s = $(VISTAS[k]);
+      if (s) s.hidden = (k !== v);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
+      if (b.dataset.vista === v) b.setAttribute('aria-current', 'page');
+      else b.removeAttribute('aria-current');
+    });
+
+    /* "Tarjeta de beneficios" es la bajada de la TARJETA, no de la app.
+       En Promos y en Locales repetía algo que ya dice el título de la
+       sección, y encima decía algo que no era: esa pantalla no es la
+       tarjeta. Arriba queda sólo VDH Club. */
+    var sub = $('cabSub');
+    if (sub) sub.hidden = (v !== 'tarjeta');
+
+    /* Arriba de todo al cambiar: entrar a Locales scrolleado a la mitad
+       porque la tarjeta estaba scrolleada se lee como que se rompió. */
+    window.scrollTo(0, 0);
+
+    if (conHistoria) {
+      try {
+        history.pushState({ v: v }, '', v === 'tarjeta' ? location.pathname + location.search
+                                                        : '#' + v);
+      } catch (e) { /* en file:// tira excepción; las pestañas andan igual */ }
+    }
+
+    if (v === 'promos') pintarPromoGrande();
+    if (v === 'locales') pintarLocales();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
+    b.onclick = function () { irA(b.dataset.vista, true); };
+  });
+
+  window.addEventListener('popstate', function (e) {
+    irA((e.state && e.state.v) || (location.hash || '').replace('#', '') || 'tarjeta', false);
+  });
+
+  /* ── Promociones, a pantalla completa ──
+     Sale de la misma función que el cartel de la tarjeta, así que la fecha
+     de vencimiento la sigue decidiendo la base y no hay dos lugares donde
+     arreglarla. */
+  var promoCargada = null;
+
+  /** Una promoción: la tarjeta grande y, si las tiene, sus condiciones. */
+  function unaPromo(p) {
+    /* La dirección de la foto va en una variable CSS y no pegada en el
+       style: así el velo oscuro que hace legible el texto queda escrito UNA
+       vez en la hoja de estilos, con su explicación al lado. Se escapan las
+       comillas porque la escribe una persona. */
+    var clase = 'promo-grande' + (p.imagen ? ' con-foto' : '');
+    var estilo = p.imagen ? ' style="--foto:url(&quot;' + esc(p.imagen) + '&quot;)"' : '';
+
+    return '<div>' +
+      '<div class="' + clase + '"' + estilo + '>' + esc(p.texto) +
+        (p.hasta ? '<span class="promo-hasta">Hasta el ' + fecha(p.hasta) + '</span>' : '') +
+      '</div>' +
+      (p.condiciones
+        ? '<details class="promo-cond"><summary>Ver condiciones</summary><p>' +
+          esc(p.condiciones) + '</p></details>'
+        : '') +
+    '</div>';
+  }
+
+  function pintarPromoGrande() {
+    var caja = $('promoGrande');
+    if (!caja) return;
+
+    var irALaTarjeta = '<button type="button" class="btn promo-ir" id="promoVerTarjeta">' +
+      'Ver mi tarjeta</button>';
+
+    var pintar = function (lista) {
+      caja.innerHTML =
+        ((lista && lista.length)
+          ? '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>' +
+            '<p class="vacio" style="margin-top:20px">Mostrá tu tarjeta en la caja de ' +
+            'cualquier local para aprovechar' + (lista.length > 1 ? 'las' : 'la') + '.</p>'
+          : '<div class="caja"><h2>No hay promociones activas</h2>' +
+            '<p class="vacio">Cuando haya una, te la mostramos acá. Mientras tanto, tus ' +
+            'compras siguen sumando sellos.</p></div>') +
+        irALaTarjeta;
+
+      if ($('promoVerTarjeta')) {
+        $('promoVerTarjeta').onclick = function () { irA('tarjeta', true); };
+      }
+    };
+
+    if (promoCargada) { pintar(promoCargada); return; }
+    caja.innerHTML = '<p class="vacio">Buscando…</p>';
+    club.promos()
+      .then(function (l) { promoCargada = l || []; pintar(promoCargada); })
+      .catch(function () {
+        caja.innerHTML = '<p class="vacio">No se pudo cargar. Fijate la señal y probá de nuevo.</p>';
+      });
+  }
+
+  /* ── Los locales ──
+     Salen de locales.js, que viaja con la página: catorce direcciones que
+     cambian una vez por año no justifican un viaje a la base, y así la
+     pantalla abre sin señal. */
+  /* Dónde está el cliente, si lo dijo. Sólo en memoria: no hay ninguna
+     razón para dejar anotado dónde estuvo alguien. */
+  var miPosicion = null;
+
+  function pintarLocales() {
+    var caja = $('listaLocales');
+    if (!caja) return;
+    /* Se redibuja si llegó la ubicación; si no, una vez y listo. */
+    if (caja.dataset.listo && !miPosicion) { engancharCerca(); return; }
+
+    var pin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+    var reloj = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+    var flecha = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+    /* Ordenados por cercanía si el cliente compartió dónde está; si no,
+       como vienen, que es alfabético. */
+    var lista = LOCALES_VDH.slice();
+    if (miPosicion) {
+      lista.forEach(function (l) {
+        l._km = distanciaKm(miPosicion.lat, miPosicion.lng, l.lat, l.lng);
+      });
+      lista.sort(function (a, b) { return a._km - b._km; });
+    }
+
+    caja.innerHTML = lista.map(function (l) {
+      /* La zona se esconde cuando repite el nombre: en Caseros decía
+         "Caseros" abajo de "Caseros". En DOT dice "Shopping DOT · CABA" y
+         ahí sí ubica al cliente, así que no se saca para todos. */
+      var zona = (l.zona && l.zona !== l.nombre)
+        ? '<div class="local-zona">' + esc(l.zona) + '</div>' : '';
+
+      var dist = (miPosicion && l._km !== undefined)
+        ? '<span class="local-dist">a ' + distanciaLinda(l._km) + '</span>' : '';
+
+      return '<div class="local">' +
+        '<b>' + esc(l.nombre) + dist + '</b>' + zona +
+        '<div class="local-dato">' + pin + '<span>' + esc(l.dir) + '</span></div>' +
+        '<div class="local-dato">' + reloj + '<span>' + esc(l.hora) + '</span></div>' +
+        '<a class="local-ir" target="_blank" rel="noopener" href="' + esc(comoLlegar(l)) + '">' +
+          'Cómo llegar' + flecha +
+        '</a>' +
+      '</div>';
+    }).join('');
+    caja.dataset.listo = '1';
+    engancharCerca();
+  }
+
+  /* ── El más cercano ──
+     Pide el permiso al tocar, y contesta SIEMPRE algo: si el cliente dice
+     que no, o el teléfono no puede, el botón lo dice y la lista se queda
+     como estaba. Un botón que no hace nada y no explica por qué es peor que
+     no tener botón. */
+  function engancharCerca() {
+    var b = $('btnCerca');
+    if (!b || b.dataset.listo) return;
+    b.dataset.listo = '1';
+
+    b.onclick = function () {
+      if (!navigator.geolocation) {
+        b.textContent = 'Tu teléfono no comparte la ubicación';
+        b.disabled = true;
+        return;
+      }
+      b.disabled = true;
+      b.textContent = 'Buscando dónde estás…';
+
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          miPosicion = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          pintarLocales();
+          b.textContent = 'Ordenados por cercanía';
+        },
+        function () {
+          b.disabled = false;
+          b.textContent = 'No pudimos saber dónde estás';
+        },
+        /* Diez segundos y sin exigir el GPS fino: para elegir entre locales
+           que están a kilómetros, la ubicación de la antena alcanza, y el
+           GPS adentro de un shopping puede tardar una eternidad o no llegar
+           nunca. */
+        { timeout: 10000, maximumAge: 300000, enableHighAccuracy: false }
+      );
+    };
+  }
+
+  /**
+   * El nombre de un local, escrito como se escribe.
+   *
+   * Sale de locales.js, que ya lo tiene bien: "Mar del Plata" y no "Mar Del
+   * Plata", y "DOT" en mayúsculas. bonito() pone mayúscula después de cada
+   * espacio sin distinguir, así que dejaba "Mar Del Plata" y "Villa Del
+   * Parque", y a DOT lo convertía en "Dot". Queda de respaldo por si algún
+   * día aparece un local que todavía no está en la lista.
+   */
+  function nombreLocal(codigo) {
+    var c = String(codigo || '');
+    for (var i = 0; i < LOCALES_VDH.length; i++) {
+      if (LOCALES_VDH[i].codigo === c) return LOCALES_VDH[i].nombre;
+    }
+    return bonito(c);
+  }
+
+  /* Ya agregada a la pantalla de inicio: el cartel de cómo agregarla
+     sobra, y es lo primero que mira alguien que ya lo hizo. */
+  function estaInstalada() {
+    try {
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+             navigator.standalone === true;
+    } catch (e) { return false; }
+  }
+
+  /* El camino es distinto en cada teléfono y no hay forma de hacerlo por el
+     cliente: en iOS no existe ninguna manera de que una página se ofrezca
+     sola. Lo único que se puede es decir dónde tocar, y decirlo bien. */
+  function comoAgregar() {
+    var ua = navigator.userAgent || '';
+    var ios = /iPad|iPhone|iPod/.test(ua) ||
+              (ua.indexOf('Macintosh') > -1 && 'ontouchend' in document);
+
+    if (!ios) return 'Abrí el menú del navegador y tocá <b>Agregar a la pantalla principal</b>.';
+
+    /* En iPhone, "Agregar a inicio" existe SÓLO en Safari. Y el camino
+       principal del Club termina justo al revés: el vendedor le manda la
+       tarjeta por WhatsApp, el cliente la toca ahí, y se le abre en el
+       navegador interno de WhatsApp, donde esa opción no está. O sea que el
+       que más la necesita es el que no puede.
+
+       La seña: los navegadores internos de iOS usan WKWebView y su
+       identificación NO termina en "Safari/...". Safari de verdad sí. No es
+       infalible, pero si se equivoca lo único que pasa es que el cliente lee
+       un renglón de más. */
+    var dentroDeOtraApp = !/Safari\//.test(ua);
+
+    return dentroDeOtraApp
+      ? 'Estás viéndola dentro de otra app. Tocá el botón de <b>abrir en Safari</b> ' +
+        'y ahí sí: <b>Compartir</b> → <b>Agregar a inicio</b>.'
+      : 'Tocá <b>Compartir</b> abajo y después <b>Agregar a inicio</b>.';
+  }
+
+  /* "23 de septiembre", como lo diría alguien. Sin el año: la tarjeta es de
+     este año y ponerlo sólo hace la línea más larga. */
+  function fecha(iso) {
+    if (!iso) return '';
+    try {
+      /* Una fecha SOLA (2026-09-28, sin hora) la interpreta como medianoche
+         UTC, y en Argentina eso es el día anterior a las 21:00. La promo que
+         vencía el 28 mostraba "hasta el 27". Con año, mes y día sueltos el
+         Date se arma en hora local y el día es el que dice el texto.
+         Las marcas con hora —el "socio desde", que viene con zona— siguen
+         por el camino de siempre. */
+      var d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso));
+      var f = d ? new Date(+d[1], +d[2] - 1, +d[3]) : new Date(iso);
+      return f.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' });
+    } catch (e) { return ''; }
+  }
+})();
+</script>
+</body>
+</html>

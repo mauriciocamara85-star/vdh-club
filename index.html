@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VDH Club</title>
+<meta name="description" content="Sumate al Club VDH: juntá compras y llevate beneficios.">
+<meta name="theme-color" content="#EDEEF0">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── VDH Club · la cara de afuera ────────────────────────────────────────
+     Esta página NO se parece a la app, y es a propósito. La app es una
+     herramienta de trabajo: oscura, densa, mirada en un monitor bajo techo.
+     Esto lo abre un cliente parado en el local o en la calle, con el sol de
+     frente y una mano sola.
+
+     Por eso: fondo claro, una columna, todo grande y un solo camino. Lo que
+     se mantiene es la marca —el rojo VDH, las tipografías, las esquinas
+     redondas— para que se note que es de la misma casa.
+
+     Y se queda en CLARO siempre, sin toggle: esto lo abre alguien parado en
+     la vereda con el sol de frente, una vez en la vida. Un interruptor de
+     tema ahí es una decisión más que tomar para nada. El oscuro es de la
+     herramienta de trabajo, que se mira ocho horas bajo techo. */
+  :root {
+    --bg:      #EDEEF0;
+    --hoja:    #FFFFFF;
+    --txt:     #16181B;
+    --txt-2:   #4A4F55;
+    --txt-3:   #55595F;
+    --linea:   #DCDEE3;
+    --acc:     #B51222;
+    --acc-2:   #8E0E1B;
+    --acc-soft:#FBEAEC;
+    --ok:      #0F7444;
+    --mal:     #A00F1E;
+    --r:       20px;
+    --r-sm:    14px;
+    --sans:    'DM Sans', system-ui, -apple-system, sans-serif;
+    --display: 'Space Grotesk', var(--sans);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--txt);
+    font: 400 16px/1.55 var(--sans);
+    min-height: 100dvh;
+    padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 28px);
+  }
+  .hoja {
+    width: 100%;
+    /* 520 y no más: es una columna de lectura en un celular, y en una tablet
+       estirarla a todo lo ancho la volvería un formulario de escritorio. */
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 26px 20px 0;
+  }
+
+  .marca { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+  .marca-ico {
+    width: 46px; height: 46px; border-radius: 15px; flex: none;
+    background: linear-gradient(160deg, var(--acc-2), var(--acc));
+    display: grid; place-items: center; color: #fff;
+    box-shadow: 0 8px 22px -8px rgba(181, 18, 34, .55);
+  }
+  .marca-ico svg { width: 24px; height: 24px; }
+  .marca b { display: block; font: 700 19px/1.1 var(--display); letter-spacing: -.3px; }
+  .marca span { font-size: 12.5px; color: var(--txt-3); letter-spacing: .4px; text-transform: uppercase; }
+
+  h1 { font: 700 clamp(28px, 8vw, 36px)/1.12 var(--display); letter-spacing: -1px; }
+  .bajada { font-size: 16.5px; color: var(--txt-2); margin: 12px 0 6px; }
+  .donde {
+    display: inline-block; margin-top: 14px;
+    background: var(--acc-soft); color: var(--acc);
+    border-radius: 999px; padding: 6px 14px;
+    font-size: 13.5px; font-weight: 600;
+  }
+
+  .caja {
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--r);
+    padding: 22px 20px;
+    margin-top: 24px;
+    box-shadow: 0 10px 30px -18px rgba(22, 24, 27, .35);
+  }
+
+  label { display: block; font-size: 14px; font-weight: 600; color: var(--txt-2); margin-bottom: 7px; }
+  .opc { font-weight: 400; color: var(--txt-3); }
+  /* Los cuatro juntos: un input[type=email] que no esté en esta lista se
+     dibuja con el estilo de fábrica del navegador y canta al lado de los
+     otros. Pasó al sumar el mail. */
+  input[type=text], input[type=tel], input[type=date], input[type=email] {
+    width: 100%;
+    background: #fff;
+    border: 1.5px solid var(--linea);
+    border-radius: var(--r-sm);
+    /* 16px exactos: con menos, iOS hace zoom solo al tocar el campo. */
+    font: 500 16px var(--sans);
+    color: var(--txt);
+    padding: 14px 15px;
+    outline: none;
+  }
+  input:focus { border-color: var(--acc); box-shadow: 0 0 0 4px rgba(181, 18, 34, .14); }
+  .campo + .campo { margin-top: 15px; }
+
+  /* La casilla de promociones. Grande y con el texto entero al lado: un
+     consentimiento que se lee mal no es un consentimiento. */
+  .acepta {
+    display: flex; gap: 12px; align-items: flex-start;
+    margin-top: 20px; padding-top: 18px;
+    border-top: 1px solid var(--linea);
+    font-size: 14.5px; color: var(--txt-2); line-height: 1.5;
+  }
+  .acepta input { width: 22px; height: 22px; flex: none; margin-top: 1px; accent-color: var(--acc); }
+
+  .btn {
+    width: 100%; margin-top: 22px;
+    min-height: 56px;
+    border: 0; border-radius: var(--r-sm);
+    background: linear-gradient(135deg, var(--acc-2), var(--acc));
+    color: #fff;
+    font: 700 17px var(--sans);
+    cursor: pointer;
+    box-shadow: 0 10px 24px -10px rgba(181, 18, 34, .65);
+  }
+  .btn:disabled { opacity: .55; }
+  .btn:active { transform: scale(.99); }
+
+  .msg { margin-top: 16px; font-size: 14.5px; line-height: 1.5; border-radius: var(--r-sm); padding: 14px 15px; }
+  .msg.mal { background: #FDF2F3; color: var(--mal); border: 1px solid #F3CFD3; }
+
+  .letra-chica { font-size: 12.5px; color: var(--txt-3); margin-top: 20px; line-height: 1.6; text-align: center; }
+  .letra-chica a { color: var(--acc); }
+
+  .pasos { margin-top: 26px; display: grid; gap: 14px; }
+  .paso { display: flex; gap: 13px; align-items: flex-start; }
+  .paso b {
+    width: 27px; height: 27px; flex: none; border-radius: 9px;
+    background: var(--acc-soft); color: var(--acc);
+    display: grid; place-items: center;
+    font: 700 14px var(--display);
+  }
+  .paso span { font-size: 14.5px; color: var(--txt-2); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<main class="hoja">
+  <div class="marca">
+    <div class="marca-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+    </div>
+    <div>
+      <b>VDH Club</b>
+      <span>Tarjeta de beneficios</span>
+    </div>
+  </div>
+
+  <h1>Sumate al Club</h1>
+  <p class="bajada">Juntá compras y llevate beneficios. Es gratis y se anota solo.</p>
+  <span class="donde" id="donde" hidden></span>
+
+  <form class="caja" id="forma" autocomplete="on">
+    <div class="campo">
+      <label for="nombre">¿Cómo te llamás?</label>
+      <input type="text" id="nombre" name="name" autocomplete="name" placeholder="Nombre y apellido" required>
+    </div>
+    <div class="campo">
+      <label for="tel">Tu WhatsApp</label>
+      <input type="tel" id="tel" name="tel" inputmode="numeric" autocomplete="tel" placeholder="11 2345 6789" required>
+    </div>
+    <div class="campo">
+      <label for="mail">Tu mail <span class="opc">— opcional</span></label>
+      <input type="email" id="mail" name="email" autocomplete="email"
+             inputmode="email" autocapitalize="off" placeholder="vos@mail.com">
+    </div>
+    <div class="campo">
+      <label for="cumple">Tu cumpleaños <span class="opc">— opcional</span></label>
+      <input type="date" id="cumple" name="bday">
+    </div>
+
+    <label class="acepta">
+      <input type="checkbox" id="acepta">
+      <span>Quiero recibir novedades y beneficios por WhatsApp. Podés pedir que
+      no te escribamos más cuando quieras.</span>
+    </label>
+
+    <button type="submit" class="btn" id="btn">Crear mi tarjeta</button>
+    <div class="msg mal" id="msg" hidden></div>
+  </form>
+
+  <div class="pasos">
+    <div class="paso"><b>1</b><span>Te damos una tarjeta con tu código.</span></div>
+    <div class="paso"><b>2</b><span>Cada vez que comprás, la mostrás en la caja.</span></div>
+    <div class="paso"><b>3</b><span>Sumás una compra y ves cuánto te falta.</span></div>
+  </div>
+
+  <p class="letra-chica">
+    Guardamos tu nombre y tu WhatsApp para identificarte en el local, y el
+    mail para reconocerte también si comprás por la web.
+    No los compartimos con nadie.<br>
+    ¿Ya tenés tarjeta? <a href="tarjeta.html">Abrila con tu WhatsApp</a>.
+  </p>
+</main>
+
+<script src="codigo.js"></script>
+<script src="club.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* Si ya tiene tarjeta en este celular, no tiene sentido mostrarle un
+     formulario de alta: se va derecho a la suya. */
+  if (codigoGuardado()) {
+    location.replace('tarjeta.html?c=' + encodeURIComponent(codigoGuardado()));
+    return;
+  }
+
+  /* El QR de cada local trae su nombre: club/?local=RIVADAVIA. Sirve para
+     saber qué local trae más socios, y para que el cliente vea que el cartel
+     que escaneó era el de acá. */
+  var local = localDelQR();
+  if (local) {
+    $('donde').textContent = 'Te estás anotando en ' + bonito(local);
+    $('donde').hidden = false;
+  }
+
+  $('forma').onsubmit = function (e) {
+    e.preventDefault();
+    var b = $('btn'), m = $('msg');
+    m.hidden = true;
+    b.disabled = true; b.textContent = 'Creando…';
+
+    club.alta($('nombre').value.trim(), $('tel').value.trim(),
+              local, $('cumple').value || null, $('acepta').checked,
+              $('mail').value.trim())
+      .then(function (r) {
+        /* Ese número ya tiene tarjeta: se le abre la suya.
+           Anotarse dos veces con el mismo teléfono no es un error del
+           cliente, es alguien que quiere entrar y no se acuerda de cómo.
+           Contestarle "ya estás anotado" y dejarlo ahí era mandarlo a un
+           callejón: lo probó Mauricio el 24/09/2026 y terminó dando vueltas
+           entre el formulario y el cartel. */
+        if (r && r.ya_estaba) {
+          b.textContent = 'Abriendo tu tarjeta…';
+          club.recuperar($('tel').value.trim())
+            .then(function (t) {
+              if (t && t.hay) {
+                guardarCodigo(t.codigo);
+                location.replace('tarjeta.html?c=' + encodeURIComponent(t.codigo));
+                return;
+              }
+              m.textContent = (t && t.porque) || 'No pudimos abrir esa tarjeta.';
+              m.hidden = false;
+              b.disabled = false; b.textContent = 'Crear mi tarjeta';
+            })
+            .catch(function (err) {
+              m.textContent = (err && err.message) || 'No se pudo. Probá de nuevo.';
+              m.hidden = false;
+              b.disabled = false; b.textContent = 'Crear mi tarjeta';
+            });
+          return;
+        }
+
+        if (!r || !r.alta) {
+          m.textContent = (r && r.porque) || 'No se pudo crear la tarjeta.';
+          m.hidden = false;
+          return;
+        }
+        guardarCodigo(r.codigo);
+        /* Con el código en la dirección: es lo que hace que agregar la
+           tarjeta a la pantalla de inicio sirva de verdad. Ver tarjeta.html. */
+        location.replace('tarjeta.html?c=' + encodeURIComponent(r.codigo));
+      })
+      .catch(function (err) {
+        m.textContent = (err && err.message) || 'No se pudo. Fijate la señal y probá de nuevo.';
+        m.hidden = false;
+      })
+      .then(function () { b.disabled = false; b.textContent = 'Crear mi tarjeta'; });
+  };
+})();
+</script>
+</body>
+</html>
