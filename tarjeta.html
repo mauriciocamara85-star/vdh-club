@@ -60,6 +60,48 @@
   .cab b { font: 700 17px/1.1 var(--display); letter-spacing: -.3px; }
   .cab span { font-size: 12px; color: var(--txt-3); text-transform: uppercase; letter-spacing: .4px; }
 
+  /* ── La campanita ──
+     Chica y gris: es una oferta, no un pedido. El día que esté activada se
+     pone roja, que es la única vez que tiene algo que decir. */
+  .campana {
+    flex-shrink: 0;
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--txt-3);
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .campana:hover { color: var(--txt); border-color: var(--line-alta); }
+  .campana svg { width: 19px; height: 19px; }
+  .campana.si { color: var(--acc-txt); border-color: var(--acc-line); background: var(--acc-soft); }
+  /* El puntito de "está prendida". Misma idea que el del rail del sistema:
+     un indicador tiene que parecer una luz, no un dibujo. */
+  .campana.si::after {
+    content: '';
+    position: absolute;
+    margin: -16px 0 0 16px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #2FE38A;
+    box-shadow: 0 0 0 2px var(--surface), 0 0 8px 1px rgba(47, 227, 138, .6);
+  }
+  .campana { position: relative; }
+
+  .avisos-caja {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 14px 16px;
+    margin: -8px 0 18px;
+    font-size: 13.5px; line-height: 1.5;
+    animation: aparecer .3s var(--curva) backwards;
+  }
+  .avisos-caja p { margin: 0 0 10px; color: var(--txt-2); }
+  .avisos-caja p:last-child { margin-bottom: 0; }
+  .avisos-caja .btn { margin-top: 4px; }
+
   /* ── El carnet ──
      El material del tablero: grafito a negro y un resplandor rojo a la
      derecha. Llevaba además una textura de rayas diagonales; se fue el
@@ -468,7 +510,15 @@
       <b>VDH Club</b><br>
       <span id="cabSub">Tarjeta de beneficios</span>
     </div>
+    <!-- La campanita. Arranca oculta y sólo aparece si el navegador puede
+         hacer notificaciones: un botón que no hace nada es peor que no
+         tenerlo. -->
+    <button type="button" class="campana" id="campana" hidden
+            aria-label="Avisos"></button>
   </div>
+  <!-- El cartel que explica qué se va a mandar, abajo de la campana. Se
+       abre al tocarla y no antes. -->
+  <div class="avisos-caja" id="avisosCaja" hidden></div>
 
   <section class="vista" id="vTarjeta">
     <div id="todo" hidden></div>
@@ -564,6 +614,8 @@
   var m = /[?&]c=([0-9]+)/.exec(location.search);
   var codigo = m ? m[1] : codigoGuardado();
   if (m) guardarCodigo(m[1]);
+
+  mirarAvisos();
 
   if (!codigo) { sinTarjeta(); return; }
 
@@ -1193,6 +1245,202 @@
   /* El camino es distinto en cada teléfono y no hay forma de hacerlo por el
      cliente: en iOS no existe ninguna manera de que una página se ofrezca
      sola. Lo único que se puede es decir dónde tocar, y decirlo bien. */
+  /* ═══ Los avisos ════════════════════════════════════════════════════════
+
+     La campanita NO pide permiso sola. Nunca. El "no" del navegador es
+     definitivo —no se puede volver a preguntar desde la página— y el que lo
+     genera es el cartel que salta de sorpresa, cuando el cliente todavía no
+     entendió qué es esto y aprieta "no" por reflejo.
+
+     Tocando la campana, al permiso del sistema llega sólo el que ya decidió
+     que sí. Se acepta casi siempre y no se pierde a nadie.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* La mitad pública del par de llaves. No es un secreto: identifica a VDH
+     ante los servidores de Google y Apple, y sin ella el navegador no sabe
+     a quién autorizar. La privada firma los envíos y vive en GitHub. */
+  var VAPID = 'BK-Ot9oHIw4peN2oYUsUxMvCSYfvHEOJg34vA5hzNb1KV8wPSZR3BPDU5RNqV259vf5smSte_HZj2VSJ71Uj1Og';
+
+  var suscripcion = null;
+
+  /* El navegador quiere la llave en bytes, no en texto. Y en base64 "de la
+     web": guiones en vez de + y /, y sin el relleno de iguales. */
+  function aBytes(b64) {
+    var s = (b64 + '===').slice(0, b64.length + (4 - b64.length % 4) % 4)
+              .replace(/-/g, '+').replace(/_/g, '/');
+    var crudo = atob(s);
+    var u = new Uint8Array(crudo.length);
+    for (var i = 0; i < crudo.length; i++) { u[i] = crudo.charCodeAt(i); }
+    return u;
+  }
+
+  function hayPush() {
+    return 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
+  }
+
+  function esIOS() {
+    var ua = navigator.userAgent || '';
+    return /iPad|iPhone|iPod/.test(ua) ||
+           (ua.indexOf('Macintosh') > -1 && 'ontouchend' in document);
+  }
+
+  /* Cinco estados, y cada uno dice algo distinto. El que más importa es el
+     de iPhone sin instalar: sin él, el cliente toca la campana, no pasa nada
+     y se va pensando que está roto. */
+  function estadoAvisos() {
+    if (esIOS() && !estaInstalada()) { return 'ios'; }
+    if (!hayPush()) { return 'no'; }
+    if (Notification.permission === 'denied') { return 'bloqueado'; }
+    return suscripcion ? 'si' : 'pedir';
+  }
+
+  function mirarAvisos() {
+    var b = $('campana');
+    if (!b) { return; }
+
+    /* Un botón que no puede hacer nada no va: en un navegador viejo la
+       campana se esconde y listo. El iPhone sin instalar SÍ la muestra,
+       porque ahí hay algo que explicar. */
+    if (!hayPush() && !esIOS()) { b.hidden = true; return; }
+    b.hidden = false;
+    b.onclick = abrirAvisos;
+
+    if (!hayPush()) { pintarCampana(); return; }
+
+    navigator.serviceWorker.ready
+      .then(function (reg) { return reg.pushManager.getSubscription(); })
+      .then(function (s) { suscripcion = s; pintarCampana(); })
+      .catch(function () { pintarCampana(); });
+  }
+
+  function pintarCampana() {
+    var b = $('campana');
+    if (!b) { return; }
+    var prendida = estadoAvisos() === 'si';
+    b.classList.toggle('si', prendida);
+    b.setAttribute('aria-label', prendida ? 'Avisos activados' : 'Activar avisos');
+    b.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="' + (prendida ? 'currentColor' : 'none') +
+      '" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" ' +
+      'stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>' +
+      '<path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
+  }
+
+  /* Abre y cierra. Nada más: lo que se dibuja adentro es asunto de
+     pintarAvisos(), que también se llama sola cuando cambia el estado. */
+  function abrirAvisos() {
+    var caja = $('avisosCaja');
+    if (!caja) { return; }
+    if (!caja.hidden) { caja.hidden = true; return; }
+    pintarAvisos();
+  }
+
+  function pintarAvisos() {
+    var caja = $('avisosCaja');
+    if (!caja) { return; }
+
+    var e = estadoAvisos();
+    var html = '';
+
+    if (e === 'ios') {
+      html = '<p><b>Avisos en tu iPhone</b></p>' +
+             '<p>Para recibirlos, primero agregá la tarjeta a tu pantalla de inicio. ' +
+             'Es la única forma que deja Apple.</p>' +
+             '<p>' + comoAgregar() + '</p>';
+
+    } else if (e === 'no') {
+      html = '<p><b>Avisos</b></p>' +
+             '<p>Este navegador no puede recibirlos. Probá abriendo la tarjeta en Chrome.</p>';
+
+    } else if (e === 'bloqueado') {
+      html = '<p><b>Los avisos están bloqueados</b></p>' +
+             '<p>Los bloqueaste para este sitio y desde acá no se puede volver a pedir. ' +
+             'Se cambia desde el navegador: tocá el candado al lado de la dirección ' +
+             '→ Notificaciones → Permitir.</p>';
+
+    } else if (e === 'si') {
+      html = '<p><b>Tenés los avisos activados</b></p>' +
+             '<p>Te vamos a avisar cuando entre ropa nueva o haya una promoción. Nada más.</p>' +
+             '<button type="button" class="btn btn-sec" id="btnAvisosNo">Desactivar</button>';
+
+    } else {
+      /* La frase de acá es la que decide cuánta gente acepta. "Activar
+         notificaciones" a secas lo acepta poca; decir QUÉ se manda, mucha
+         más. Y decir qué NO se manda todavía más. */
+      html = '<p><b>¿Querés que te avisemos?</b></p>' +
+             '<p>Te llega un aviso cuando entra ropa nueva o hay una promoción. ' +
+             'Nunca más de un par por mes, y lo podés apagar cuando quieras.</p>' +
+             '<button type="button" class="btn" id="btnAvisosSi">Activar avisos</button>';
+    }
+
+    caja.innerHTML = html;
+    caja.hidden = false;
+
+    if ($('btnAvisosSi')) { $('btnAvisosSi').onclick = activarAvisos; }
+    if ($('btnAvisosNo')) { $('btnAvisosNo').onclick = desactivarAvisos; }
+  }
+
+  function activarAvisos() {
+    var btn = $('btnAvisosSi');
+    if (btn) { btn.disabled = true; btn.textContent = 'Esperando…'; }
+
+    /* requestPermission tiene que salir del toque del cliente. Acá lo está:
+       este botón apareció porque él tocó la campana. */
+    Notification.requestPermission().then(function (p) {
+      if (p !== 'granted') {
+        /* Dijo que no. No se insiste: el navegador ya no deja volver a
+           preguntar desde acá, así que el cartel pasa a explicar cómo se
+           revierte a mano. */
+        pintarCampana();
+        pintarAvisos();
+        return;
+      }
+
+      return navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.subscribe({
+          /* Obligatorio: promete que cada push va a mostrar algo. Un push
+             silencioso serviría para rastrear gente, así que los navegadores
+             no lo permiten. */
+          userVisibleOnly: true,
+          applicationServerKey: aBytes(VAPID)
+        });
+      }).then(function (s) {
+        suscripcion = s;
+        var j = s.toJSON();
+        return club.avisoAlta(s.endpoint, j.keys.p256dh, j.keys.auth, codigo);
+      }).then(function () {
+        $('avisosCaja').innerHTML =
+          '<p><b>Listo, te vamos a avisar</b></p>' +
+          '<p>Podés apagarlos cuando quieras, desde la misma campanita.</p>';
+        pintarCampana();
+      });
+    }).catch(function () {
+      $('avisosCaja').innerHTML =
+        '<p>No se pudieron activar. Probá de nuevo en un rato.</p>';
+      pintarCampana();
+    });
+  }
+
+  function desactivarAvisos() {
+    var s = suscripcion;
+    if (!s) { return; }
+    var btn = $('btnAvisosNo');
+    if (btn) { btn.disabled = true; }
+
+    /* Primero en el navegador y después en la base. Si el orden fuera al
+       revés y fallara lo segundo, el cliente seguiría recibiendo avisos
+       después de haberlos apagado, que es la peor forma de romper esto. */
+    s.unsubscribe().then(function () {
+      suscripcion = null;
+      return club.avisoBaja(s.endpoint);
+    }).catch(function () { /* la baja local ya ocurrió */ })
+      .then(function () {
+        $('avisosCaja').innerHTML = '<p>Listo, no te vamos a mandar más avisos.</p>';
+        pintarCampana();
+      });
+  }
+
   function comoAgregar() {
     var ua = navigator.userAgent || '';
     var ios = /iPad|iPhone|iPod/.test(ua) ||

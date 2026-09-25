@@ -45,6 +45,22 @@ var club = {
     });
   },
 
+  /** Activar los avisos en ESTE navegador. El código va si hay tarjeta
+      abierta; si no, se guarda igual — alguien puede querer avisos antes de
+      anotarse, y perder eso sería perder a un interesado. */
+  avisoAlta: function (endpoint, p256dh, auth, codigo) {
+    return llamar('club_push_alta', {
+      p_endpoint: endpoint, p_p256dh: p256dh, p_auth: auth,
+      p_codigo: codigo || null,
+      p_ua: (navigator.userAgent || '').slice(0, 300)
+    });
+  },
+
+  /** Desactivarlos. */
+  avisoBaja: function (endpoint) {
+    return llamar('club_push_baja', { p_endpoint: endpoint });
+  },
+
   /** La tarjeta, por su código y nada más. */
   tarjeta: function (codigo) {
     return llamar('club_tarjeta', { p_codigo: codigo });

@@ -29,7 +29,7 @@
    Al tocar cualquiera de estos archivos, subir CACHE. Ese cambio de nombre
    es lo que borra el caché viejo de los celulares.
    ═══════════════════════════════════════════════════════════════════════════ */
-const CACHE = 'vdh-club-v17';
+const CACHE = 'vdh-club-v18';
 
 const BASICOS = [
   './tarjeta.html',
@@ -57,6 +57,53 @@ self.addEventListener('activate', (evento) => {
       nombres.filter((n) => n.indexOf('vdh-club-') === 0 && n !== CACHE)
              .map((n) => caches.delete(n))
     )).then(() => self.clients.claim())
+  );
+});
+
+/* ── Las notificaciones ──
+   El 'push' llega con el navegador cerrado: lo despierta el sistema
+   operativo, no la página. Por eso vive acá y no en tarjeta.html.
+
+   Si el mensaje viniera roto igual se muestra algo: un push que llega y no
+   dibuja nada le deja al cliente una notificación fantasma —el teléfono
+   vibró y no hay nada— y encima algunos navegadores castigan al sitio que
+   recibe un push y no notifica. */
+self.addEventListener('push', (evento) => {
+  let d = {};
+  try { d = evento.data ? evento.data.json() : {}; } catch (e) { d = {}; }
+
+  const titulo = d.titulo || 'VDH Club';
+  evento.waitUntil(
+    self.registration.showNotification(titulo, {
+      body: d.cuerpo || '',
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+      /* Con tag, un aviso nuevo REEMPLAZA al anterior en vez de apilarse.
+         Nadie quiere despertar con seis notificaciones de la misma tienda. */
+      tag: 'vdh-club',
+      renotify: true,
+      data: { url: d.enlace || 'tarjeta.html' }
+    })
+  );
+});
+
+/* Al tocarla: si la tarjeta ya está abierta en alguna pestaña se trae ésa,
+   en vez de abrir una nueva encima. */
+self.addEventListener('notificationclick', (evento) => {
+  evento.notification.close();
+  const destino = new URL((evento.notification.data && evento.notification.data.url) || 'tarjeta.html',
+                          self.location.origin).href;
+
+  evento.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((pestanas) => {
+      for (const p of pestanas) {
+        if (p.url.indexOf(self.location.origin) === 0 && 'focus' in p) {
+          p.navigate(destino);
+          return p.focus();
+        }
+      }
+      return self.clients.openWindow(destino);
+    })
   );
 });
 
