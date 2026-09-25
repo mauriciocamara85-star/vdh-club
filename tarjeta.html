@@ -89,18 +89,55 @@
   }
   .campana { position: relative; }
 
-  .avisos-caja {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--r);
-    padding: 14px 16px;
-    margin: -8px 0 18px;
-    font-size: 13.5px; line-height: 1.5;
-    animation: aparecer .3s var(--curva) backwards;
+  /* ── El cartel de los avisos ──
+     Centrado y con el fondo apagado: es la decisión más importante que toma
+     el cliente en esta app —y la única que no se puede deshacer, porque el
+     "no" del navegador es definitivo—. Un panel chico abajo del encabezado
+     la trataba como un detalle. */
+  .tapa {
+    position: fixed; inset: 0; z-index: 90;
+    background: rgba(12, 13, 15, .55);
+    display: grid; place-items: center;
+    padding: 24px 20px;
+    animation: tapaEntra .2s ease-out;
   }
-  .avisos-caja p { margin: 0 0 10px; color: var(--txt-2); }
-  .avisos-caja p:last-child { margin-bottom: 0; }
-  .avisos-caja .btn { margin-top: 4px; }
+  @keyframes tapaEntra { from { opacity: 0; } }
+
+  .cartel {
+    width: 100%; max-width: 400px;
+    max-height: 86dvh; overflow-y: auto;
+    background: var(--hoja);
+    border-radius: var(--r);
+    padding: 26px 24px 24px;
+    box-shadow: 0 24px 60px -18px rgba(12, 13, 15, .5);
+    text-align: center;
+    animation: cartelEntra .26s cubic-bezier(.2, .8, .3, 1);
+  }
+  @keyframes cartelEntra { from { opacity: 0; transform: translateY(14px) scale(.97); } }
+
+  .cartel-icono {
+    width: 56px; height: 56px; margin: 0 auto 16px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--acc-soft);
+    color: var(--acc);
+  }
+  .cartel-icono svg { width: 27px; height: 27px; }
+  .cartel h2 { font: 700 21px/1.25 var(--display); letter-spacing: -.3px; margin-bottom: 10px; }
+  .cartel p { font-size: 14.5px; line-height: 1.55; color: var(--txt-2); margin-bottom: 12px; }
+  .cartel p:last-of-type { margin-bottom: 0; }
+  .cartel .btn { margin-top: 20px; }
+  /* "Ahora no" va sin relleno y en gris: tiene que estar disponible y no
+     tiene que competir. Esconderlo sería empujar, y el que se siente
+     empujado dice que no — y ese no es para siempre. */
+  .cartel .btn-no {
+    display: block; width: 100%; margin-top: 10px;
+    min-height: 48px;
+    border: 1.5px solid var(--linea); border-radius: var(--r-sm);
+    background: none; color: var(--txt-2);
+    font: 600 15px var(--sans); text-align: center;
+    cursor: pointer;
+  }
 
   /* ── El carnet ──
      El material del tablero: grafito a negro y un resplandor rojo a la
@@ -516,9 +553,13 @@
     <button type="button" class="campana" id="campana" hidden
             aria-label="Avisos"></button>
   </div>
-  <!-- El cartel que explica qué se va a mandar, abajo de la campana. Se
-       abre al tocarla y no antes. -->
-  <div class="avisos-caja" id="avisosCaja" hidden></div>
+  <!-- El cartel de los avisos. Se abre al tocar la campana y no antes.
+       Vive fuera de .hoja para poder taparla entera. -->
+  <div class="tapa" id="avisosTapa" hidden>
+    <div class="cartel" role="dialog" aria-modal="true" aria-labelledby="avisosTit">
+      <div id="avisosCaja"></div>
+    </div>
+  </div>
 
   <section class="vista" id="vTarjeta">
     <div id="todo" hidden></div>
@@ -1258,8 +1299,14 @@
 
   /* La mitad pública del par de llaves. No es un secreto: identifica a VDH
      ante los servidores de Google y Apple, y sin ella el navegador no sabe
-     a quién autorizar. La privada firma los envíos y vive en GitHub. */
-  var VAPID = 'BK-Ot9oHIw4peN2oYUsUxMvCSYfvHEOJg34vA5hzNb1KV8wPSZR3BPDU5RNqV259vf5smSte_HZj2VSJ71Uj1Og';
+     a quién autorizar. La privada firma los envíos y vive en GitHub.
+
+     Va como FUNCIÓN y no como var: alguien que abre la tarjeta sin tener
+     una sale por sinTarjeta() antes de llegar acá, y un var izado vale
+     undefined. Las funciones se izan enteras. */
+  function vapid() {
+    return 'BK-Ot9oHIw4peN2oYUsUxMvCSYfvHEOJg34vA5hzNb1KV8wPSZR3BPDU5RNqV259vf5smSte_HZj2VSJ71Uj1Og';
+  }
 
   var suscripcion = null;
 
@@ -1305,6 +1352,15 @@
     b.hidden = false;
     b.onclick = abrirAvisos;
 
+    var tapa = $('avisosTapa');
+    if (tapa && !tapa.dataset.enganchada) {
+      tapa.dataset.enganchada = '1';
+      tapa.onclick = function (ev) { if (ev.target === tapa) { cerrarAvisos(); } };
+      document.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Escape') { cerrarAvisos(); }
+      });
+    }
+
     if (!hayPush()) { pintarCampana(); return; }
 
     navigator.serviceWorker.ready
@@ -1327,13 +1383,26 @@
       '<path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
   }
 
-  /* Abre y cierra. Nada más: lo que se dibuja adentro es asunto de
-     pintarAvisos(), que también se llama sola cuando cambia el estado. */
+  /* Abre y cierra el cartel. Lo que va adentro es asunto de pintarAvisos(),
+     que también se llama sola cuando cambia el estado. */
   function abrirAvisos() {
-    var caja = $('avisosCaja');
-    if (!caja) { return; }
-    if (!caja.hidden) { caja.hidden = true; return; }
+    var tapa = $('avisosTapa');
+    if (!tapa) { return; }
+    if (!tapa.hidden) { cerrarAvisos(); return; }
     pintarAvisos();
+    tapa.hidden = false;
+  }
+
+  function cerrarAvisos() {
+    var tapa = $('avisosTapa');
+    if (tapa) { tapa.hidden = true; }
+  }
+
+  function campanaGrande() {
+    return '<div class="cartel-icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>' +
+      '<path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>';
   }
 
   function pintarAvisos() {
@@ -1341,44 +1410,52 @@
     if (!caja) { return; }
 
     var e = estadoAvisos();
-    var html = '';
+    var html = campanaGrande();
 
     if (e === 'ios') {
-      html = '<p><b>Avisos en tu iPhone</b></p>' +
-             '<p>Para recibirlos, primero agregá la tarjeta a tu pantalla de inicio. ' +
-             'Es la única forma que deja Apple.</p>' +
-             '<p>' + comoAgregar() + '</p>';
+      html += '<h2 id="avisosTit">Avisos en tu iPhone</h2>' +
+              '<p>Para recibirlos, primero agregá la tarjeta a tu pantalla de inicio. ' +
+              'Es la única forma que deja Apple.</p>' +
+              '<p>' + comoAgregar() + '</p>';
 
     } else if (e === 'no') {
-      html = '<p><b>Avisos</b></p>' +
-             '<p>Este navegador no puede recibirlos. Probá abriendo la tarjeta en Chrome.</p>';
+      html += '<h2 id="avisosTit">Avisos</h2>' +
+              '<p>Este navegador no puede recibirlos. Probá abriendo la tarjeta en Chrome.</p>';
 
     } else if (e === 'bloqueado') {
-      html = '<p><b>Los avisos están bloqueados</b></p>' +
-             '<p>Los bloqueaste para este sitio y desde acá no se puede volver a pedir. ' +
-             'Se cambia desde el navegador: tocá el candado al lado de la dirección ' +
-             '→ Notificaciones → Permitir.</p>';
+      html += '<h2 id="avisosTit">Los avisos están bloqueados</h2>' +
+              '<p>Los bloqueaste para este sitio, y desde acá no se puede volver a pedir.</p>' +
+              '<p>Se cambia desde el navegador: tocá el candado al lado de la dirección ' +
+              '→ Notificaciones → Permitir.</p>';
 
     } else if (e === 'si') {
-      html = '<p><b>Tenés los avisos activados</b></p>' +
-             '<p>Te vamos a avisar cuando entre ropa nueva o haya una promoción. Nada más.</p>' +
-             '<button type="button" class="btn btn-sec" id="btnAvisosNo">Desactivar</button>';
+      html += '<h2 id="avisosTit">Ya tenés los avisos activados</h2>' +
+              '<p>Te avisamos cuando entra ropa nueva o hay una promoción. Nada más.</p>' +
+              '<button type="button" class="btn-no" id="btnAvisosNo" ' +
+                      'style="margin-top:20px">Desactivar los avisos</button>';
 
     } else {
       /* La frase de acá es la que decide cuánta gente acepta. "Activar
          notificaciones" a secas lo acepta poca; decir QUÉ se manda, mucha
-         más. Y decir qué NO se manda todavía más. */
-      html = '<p><b>¿Querés que te avisemos?</b></p>' +
-             '<p>Te llega un aviso cuando entra ropa nueva o hay una promoción. ' +
-             'Nunca más de un par por mes, y lo podés apagar cuando quieras.</p>' +
-             '<button type="button" class="btn" id="btnAvisosSi">Activar avisos</button>';
+         más; y decir qué NO se manda, todavía más. */
+      html += '<h2 id="avisosTit">¿Querés que te avisemos?</h2>' +
+              '<p>Te llega un aviso cuando entra ropa nueva o hay una promoción ' +
+              'en cualquiera de nuestros locales.</p>' +
+              '<p>Nunca más de un par por mes, y lo podés apagar cuando quieras.</p>' +
+              '<button type="button" class="btn" id="btnAvisosSi">Activar los avisos</button>';
     }
 
-    caja.innerHTML = html;
-    caja.hidden = false;
+    /* "Ahora no" siempre, en todos los estados: el cartel tapa la pantalla y
+       tiene que haber una salida visible. Un cartel sin salida se cierra
+       igual —recargando— pero deja a alguien enojado del otro lado. */
+    html += '<button type="button" class="btn-no" id="btnAvisosCerrar">' +
+            (e === 'pedir' ? 'Ahora no' : 'Cerrar') + '</button>';
 
-    if ($('btnAvisosSi')) { $('btnAvisosSi').onclick = activarAvisos; }
-    if ($('btnAvisosNo')) { $('btnAvisosNo').onclick = desactivarAvisos; }
+    caja.innerHTML = html;
+
+    if ($('btnAvisosSi'))     { $('btnAvisosSi').onclick = activarAvisos; }
+    if ($('btnAvisosNo'))     { $('btnAvisosNo').onclick = desactivarAvisos; }
+    if ($('btnAvisosCerrar')) { $('btnAvisosCerrar').onclick = cerrarAvisos; }
   }
 
   function activarAvisos() {
@@ -1403,21 +1480,26 @@
              silencioso serviría para rastrear gente, así que los navegadores
              no lo permiten. */
           userVisibleOnly: true,
-          applicationServerKey: aBytes(VAPID)
+          applicationServerKey: aBytes(vapid())
         });
       }).then(function (s) {
         suscripcion = s;
         var j = s.toJSON();
         return club.avisoAlta(s.endpoint, j.keys.p256dh, j.keys.auth, codigo);
       }).then(function () {
-        $('avisosCaja').innerHTML =
-          '<p><b>Listo, te vamos a avisar</b></p>' +
-          '<p>Podés apagarlos cuando quieras, desde la misma campanita.</p>';
+        $('avisosCaja').innerHTML = campanaGrande() +
+          '<h2>Listo, te vamos a avisar</h2>' +
+          '<p>Podés apagarlos cuando quieras, desde la misma campanita.</p>' +
+          '<button type="button" class="btn" id="btnAvisosCerrar">Dale</button>';
+        $('btnAvisosCerrar').onclick = cerrarAvisos;
         pintarCampana();
       });
     }).catch(function () {
-      $('avisosCaja').innerHTML =
-        '<p>No se pudieron activar. Probá de nuevo en un rato.</p>';
+      $('avisosCaja').innerHTML = campanaGrande() +
+        '<h2>No se pudieron activar</h2>' +
+        '<p>Probá de nuevo en un rato.</p>' +
+        '<button type="button" class="btn-no" id="btnAvisosCerrar">Cerrar</button>';
+      $('btnAvisosCerrar').onclick = cerrarAvisos;
       pintarCampana();
     });
   }
@@ -1436,7 +1518,11 @@
       return club.avisoBaja(s.endpoint);
     }).catch(function () { /* la baja local ya ocurrió */ })
       .then(function () {
-        $('avisosCaja').innerHTML = '<p>Listo, no te vamos a mandar más avisos.</p>';
+        $('avisosCaja').innerHTML = campanaGrande() +
+          '<h2>Listo</h2>' +
+          '<p>No te vamos a mandar más avisos.</p>' +
+          '<button type="button" class="btn-no" id="btnAvisosCerrar">Cerrar</button>';
+        $('btnAvisosCerrar').onclick = cerrarAvisos;
         pintarCampana();
       });
   }
