@@ -742,11 +742,43 @@
      que se dice dónde tocar, que es lo único que Apple deja hacer. */
   var promptGuardado = null;
 
+  /* ── El navegador de Samsung ──
+     Samsung Internet no agrega un acceso directo: FABRICA UN APK y se lo pasa
+     al instalador de Android. Ese APK apunta a una versión vieja de Android y
+     Play Protect lo frena con un cartel que dice "Se bloqueó la app no
+     segura", con nuestro ícono al lado.
+
+     No hay nada acá que lo arregle: el APK lo genera Samsung y no elegimos a
+     qué versión apunta. Y es un navegador que importa —viene de fábrica en
+     los Samsung, que son muchos, y WhatsApp abre los enlaces con el navegador
+     de fábrica—, así que el camino más probable desde el QR pasa por acá.
+
+     Entonces no se ofrece instalar. Se ofrece abrirla en Chrome, donde se
+     instala limpio. */
+  function esSamsung() {
+    return /SamsungBrowser\//.test(navigator.userAgent || '');
+  }
+
+  /* El enlace que abre ESTA misma página en Chrome. La dirección lleva el
+     ?c= con el código —lo pone replaceState al arrancar—, y eso es lo que
+     hace que la tarjeta aparezca del otro lado: lo guardado en un navegador
+     no lo ve el otro, el código tiene que viajar en la dirección.
+
+     browser_fallback_url es para el teléfono que no tenga Chrome: en vez de
+     no hacer nada, recarga acá mismo. */
+  function enChrome() {
+    return 'intent://' + location.host + location.pathname + location.search +
+           '#Intent;scheme=https;package=com.android.chrome;' +
+           'S.browser_fallback_url=' + encodeURIComponent(location.href) + ';end';
+  }
+
   window.addEventListener('beforeinstallprompt', function (e) {
     /* Sin esto Chrome muestra su propio cartelito abajo, que en un celular
        tapa justo el código de barras. */
     e.preventDefault();
-    promptGuardado = e;
+    /* Samsung Internet también dispara este evento, y ahí el botón es
+       justamente el que termina en el cartel de Play Protect. */
+    if (!esSamsung()) { promptGuardado = e; }
     pintarInstalar();
   });
 
@@ -760,6 +792,23 @@
     if (!caja) return;
 
     if (estaInstalada()) { caja.innerHTML = ''; return; }
+
+    /* Primero lo que tranquiliza, y recién después lo opcional: la tarjeta
+       YA funciona. Instalarla es una comodidad, no un requisito, y el cliente
+       que llega desde el QR tiene que irse sabiendo eso aunque no instale
+       nada. */
+    if (esSamsung()) {
+      caja.innerHTML =
+        '<div class="caja">' +
+          '<h2>Tenela siempre a mano</h2>' +
+          '<p class="vacio">Tu tarjeta ya quedó guardada en este teléfono: cada vez ' +
+          'que abras este enlace se abre sola, con o sin señal.</p>' +
+          '<p class="vacio">Si querés el ícono en tu pantalla de inicio, abrila en ' +
+          'Chrome. Desde este navegador, Android muestra un aviso de seguridad.</p>' +
+          '<a class="btn" href="' + esc(enChrome()) + '">Abrir en Chrome</a>' +
+        '</div>';
+      return;
+    }
 
     caja.innerHTML =
       '<div class="caja">' +
