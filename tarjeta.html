@@ -120,6 +120,18 @@
   }
   @keyframes cartelEntra { from { opacity: 0; transform: translateY(14px) scale(.97); } }
 
+  .cartel { position: relative; }
+  .cartel-x {
+    position: absolute; top: 12px; right: 12px;
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    border: 0; border-radius: 50%;
+    background: none; color: var(--txt-3);
+    cursor: pointer;
+  }
+  .cartel-x svg { width: 18px; height: 18px; }
+  .cartel-x:hover { background: var(--bg); color: var(--txt); }
+
   .cartel-icono {
     width: 56px; height: 56px; margin: 0 auto 16px;
     display: grid; place-items: center;
@@ -562,6 +574,14 @@
        Vive fuera de .hoja para poder taparla entera. -->
   <div class="tapa" id="avisosTapa" hidden>
     <div class="cartel" role="dialog" aria-modal="true" aria-labelledby="avisosTit">
+      <!-- La X va acá, en el HTML, y NO la dibuja el script. Es la salida
+           del cartel, y la salida no puede depender de que el código que
+           arma el contenido haya funcionado. Si algo falla adentro, esto
+           sigue estando. -->
+      <button type="button" class="cartel-x" id="avisosX" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+             stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
       <div id="avisosCaja"></div>
     </div>
   </div>
@@ -1347,6 +1367,10 @@
   }
 
   function mirarAvisos() {
+    /* Primero de todo: las salidas del cartel se enganchan pase lo que pase
+       con el resto de esta funcion, que tiene varios returns. */
+    engancharSalidas();
+
     var b = $('campana');
     if (!b) { return; }
 
@@ -1356,15 +1380,6 @@
     if (!hayPush() && !esIOS()) { b.hidden = true; return; }
     b.hidden = false;
     b.onclick = abrirAvisos;
-
-    var tapa = $('avisosTapa');
-    if (tapa && !tapa.dataset.enganchada) {
-      tapa.dataset.enganchada = '1';
-      tapa.onclick = function (ev) { if (ev.target === tapa) { cerrarAvisos(); } };
-      document.addEventListener('keydown', function (ev) {
-        if (ev.key === 'Escape') { cerrarAvisos(); }
-      });
-    }
 
     if (!hayPush()) { pintarCampana(); return; }
 
@@ -1394,13 +1409,42 @@
     var tapa = $('avisosTapa');
     if (!tapa) { return; }
     if (!tapa.hidden) { cerrarAvisos(); return; }
+
     pintarAvisos();
+
+    /* Si quedó vacío, algo falló. Se muestra igual —esconderlo dejaría una
+       campana que no hace nada al tocarla, que es peor— pero con algo
+       adentro y con su salida. */
+    var caja = $('avisosCaja');
+    if (caja && !caja.innerHTML.trim()) {
+      caja.innerHTML =
+        '<h2>Avisos</h2>' +
+        '<p>No se pudo abrir esta pantalla. Cerrala y volvé a entrar a la tarjeta.</p>' +
+        '<button type="button" class="btn-no" id="btnAvisosCerrar">Cerrar</button>';
+      if ($('btnAvisosCerrar')) { $('btnAvisosCerrar').onclick = cerrarAvisos; }
+    }
+
     tapa.hidden = false;
   }
 
   function cerrarAvisos() {
     var tapa = $('avisosTapa');
     if (tapa) { tapa.hidden = true; }
+  }
+
+  /* Las tres salidas del cartel —la X, el fondo y la tecla Escape— se
+     enganchan UNA VEZ al cargar la página, fuera de cualquier rama que
+     pueda no ejecutarse. Antes vivían adentro de mirarAvisos(), que sale
+     temprano en varios casos; ahí la salida dependía de por dónde hubiera
+     pasado el código, que es exactamente lo que no puede pasar. */
+  function engancharSalidas() {
+    var tapa = $('avisosTapa');
+    if (!tapa) { return; }
+    tapa.onclick = function (ev) { if (ev.target === tapa) { cerrarAvisos(); } };
+    if ($('avisosX')) { $('avisosX').onclick = cerrarAvisos; }
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape') { cerrarAvisos(); }
+    });
   }
 
   function campanaGrande() {
@@ -1414,6 +1458,23 @@
     var caja = $('avisosCaja');
     if (!caja) { return; }
 
+    /* Adentro de un try: lo que se arma acá consulta el estado del navegador
+       —permisos, si está instalada, qué teléfono es— y cualquiera de esas
+       puede portarse distinto en un navegador que no probamos. Que falle es
+       aceptable; que falle EN SILENCIO y deje un cartel vacío tapando la
+       pantalla, no. */
+    try {
+      pintarAvisosAdentro(caja);
+    } catch (err) {
+      caja.innerHTML =
+        '<h2>Avisos</h2>' +
+        '<p>No se pudo abrir esta pantalla en este teléfono.</p>' +
+        '<button type="button" class="btn-no" id="btnAvisosCerrar">Cerrar</button>';
+      if ($('btnAvisosCerrar')) { $('btnAvisosCerrar').onclick = cerrarAvisos; }
+    }
+  }
+
+  function pintarAvisosAdentro(caja) {
     var e = estadoAvisos();
     var html = campanaGrande();
 
