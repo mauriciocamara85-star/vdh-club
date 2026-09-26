@@ -45,6 +45,12 @@ var club = {
     });
   },
 
+  /** Los avisos que mandó VDH, los últimos veinte. Sin PIN: son los
+      mismos mensajes que ya salieron a los celulares. */
+  avisosVer: function () {
+    return llamar('club_avisos_ver', {});
+  },
+
   /** Activar los avisos en ESTE navegador. El código va si hay tarjeta
       abierta; si no, se guarda igual — alguien puede querer avisos antes de
       anotarse, y perder eso sería perder a un interesado. */
