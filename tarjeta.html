@@ -168,14 +168,42 @@
   .buzon-prender .btn { margin-top: 0; min-height: 44px; line-height: 44px; font-size: 15px; }
 
   .buzon-lista { padding: 4px 0 8px; }
+  /* Cada aviso son dos capas: el fondo rojo con el tacho, quieto, y la cara
+     blanca que se corre con el dedo. Mover sólo la cara es lo que hace que
+     el tacho "aparezca desde abajo" en vez de entrar empujando. */
   .buzon-item {
-    padding: 12px 16px;
+    position: relative;
+    overflow: hidden;
     border-bottom: 1px solid var(--linea);
   }
   .buzon-item:last-child { border-bottom: 0; }
-  .buzon-item h3 { font: 700 14.5px/1.35 var(--sans); margin-bottom: 2px; }
-  .buzon-item p { font-size: 13.5px; line-height: 1.45; color: var(--txt-2); }
-  .buzon-item time { display: block; font-size: 11.5px; color: var(--txt-3); margin-top: 5px; }
+
+  .buzon-borrar {
+    position: absolute; inset: 0;
+    display: flex; align-items: center;
+    padding-left: 22px;
+    background: var(--acc);
+    color: #fff;
+  }
+  .buzon-borrar svg { width: 21px; height: 21px; }
+
+  .buzon-cara {
+    position: relative;
+    padding: 12px 16px;
+    background: var(--hoja);
+    /* touch-action deja que el navegador siga manejando el scroll vertical
+       y nos cede el horizontal. Sin esto, arrastrar de costado también
+       scrollea la lista y se pelean los dos gestos. */
+    touch-action: pan-y;
+  }
+  .buzon-cara h3 { font: 700 14.5px/1.35 var(--sans); margin-bottom: 2px; }
+  .buzon-cara p { font-size: 13.5px; line-height: 1.45; color: var(--txt-2); }
+  .buzon-cara time { display: block; font-size: 11.5px; color: var(--txt-3); margin-top: 5px; }
+
+  /* Sin transición mientras el dedo está apoyado: tiene que seguir la mano
+     exacta. La transición se prende recién al soltar. */
+  .buzon-cara.suelta { transition: transform .22s cubic-bezier(.2, .8, .3, 1); }
+  .buzon-item.yendose { transition: height .2s ease, opacity .2s ease; overflow: hidden; }
   .buzon-vacio { padding: 26px 16px 30px; text-align: center; color: var(--txt-3); font-size: 13.5px; }
 
   /* El puntito de "hay algo nuevo". Se apaga al abrir el buzón. */
@@ -1619,26 +1647,147 @@
       });
   }
 
-  function pintarLista(avisos) {
+  function pintarLista(todos) {
     var lista = $('buzonLista');
     if (!lista) { return; }
 
+    var fuera = borrados();
+    var avisos = (todos || []).filter(function (a) { return fuera.indexOf(a.id) < 0; });
+
     if (!avisos.length) {
-      lista.innerHTML = '<p class="buzon-vacio">Todavía no te mandamos ningún aviso.</p>';
+      /* Se distingue "nunca te mandamos nada" de "los borraste todos":
+         decirle lo primero a alguien que acaba de borrar tres es decirle
+         algo que él sabe que es falso. */
+      lista.innerHTML = '<p class="buzon-vacio">' +
+        ((todos && todos.length) ? 'Ya viste todos los avisos.'
+                                 : 'Todavía no te mandamos ningún aviso.') + '</p>';
       return;
     }
 
     lista.innerHTML = avisos.map(function (a) {
-      return '<div class="buzon-item">' +
-               '<h3>' + esc(a.titulo || '') + '</h3>' +
-               '<p>' + esc(a.cuerpo || '') + '</p>' +
-               '<time>' + esc(hace(a.cuando)) + '</time>' +
+      return '<div class="buzon-item" data-id="' + a.id + '">' +
+               '<div class="buzon-borrar">' +
+                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+                 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+                 '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>' +
+               '</div>' +
+               '<div class="buzon-cara">' +
+                 '<h3>' + esc(a.titulo || '') + '</h3>' +
+                 '<p>' + esc(a.cuerpo || '') + '</p>' +
+                 '<time>' + esc(hace(a.cuando)) + '</time>' +
+               '</div>' +
              '</div>';
     }).join('');
+
+    engancharDeslizar(lista);
 
     /* Abrirlo es haberlos visto. */
     marcarVisto(avisos[0].id);
     pintarCampana();
+  }
+
+  /* ── Deslizar para borrar ──
+     Hacia la derecha, de a uno. El borrado es POR TELÉFONO: club_avisos es
+     compartida —el mismo aviso le llegó a todos— así que borrarlo de verdad
+     se lo sacaría a los demás socios. Acá se guardan los ids descartados en
+     este celular y la lista los filtra.
+
+     El umbral es un tercio del ancho y no unos pocos píxeles: un aviso
+     borrado sin querer no se puede recuperar, y para deshacer haría falta
+     un cartel que en una lista de tres mensajes molesta más de lo que
+     salva. */
+  function engancharDeslizar(lista) {
+    Array.prototype.forEach.call(lista.querySelectorAll('.buzon-item'), function (item) {
+      var cara = item.querySelector('.buzon-cara');
+      if (!cara) { return; }
+
+      var x0 = 0, y0 = 0, dx = 0, arrastrando = false, decidido = false;
+
+      cara.addEventListener('touchstart', function (ev) {
+        var t = ev.touches[0];
+        x0 = t.clientX; y0 = t.clientY; dx = 0;
+        arrastrando = true; decidido = false;
+        cara.classList.remove('suelta');
+      }, { passive: true });
+
+      cara.addEventListener('touchmove', function (ev) {
+        if (!arrastrando) { return; }
+        var t = ev.touches[0];
+        var mx = t.clientX - x0, my = t.clientY - y0;
+
+        /* Hasta no saber si el gesto es horizontal o vertical no se toca
+           nada: si se mueve la cara con cualquier roce, scrollear la lista
+           se vuelve imposible. */
+        if (!decidido) {
+          if (Math.abs(mx) < 8 && Math.abs(my) < 8) { return; }
+          if (Math.abs(my) > Math.abs(mx)) { arrastrando = false; return; }
+          decidido = true;
+        }
+
+        /* Sólo hacia la derecha. Hacia la izquierda no arrastra: media
+           interacción es peor que ninguna. */
+        dx = Math.max(0, mx);
+        cara.style.transform = 'translateX(' + dx + 'px)';
+      }, { passive: true });
+
+      function soltar() {
+        if (!arrastrando) { return; }
+        arrastrando = false;
+        cara.classList.add('suelta');
+
+        if (dx > cara.offsetWidth / 3) {
+          borrarAviso(item);
+        } else {
+          cara.style.transform = '';
+        }
+        dx = 0;
+      }
+
+      cara.addEventListener('touchend', soltar, { passive: true });
+      cara.addEventListener('touchcancel', soltar, { passive: true });
+    });
+  }
+
+  function borrarAviso(item) {
+    var id = Number(item.dataset.id);
+    var cara = item.querySelector('.buzon-cara');
+
+    /* Sale del todo hacia la derecha y después la fila se cierra sola. Las
+       dos cosas por separado: si se colapsara la altura mientras todavía se
+       está yendo, el aviso de abajo salta hacia arriba a mitad de camino. */
+    if (cara) { cara.style.transform = 'translateX(110%)'; }
+
+    setTimeout(function () {
+      item.style.height = item.offsetHeight + 'px';
+      item.classList.add('yendose');
+      /* Un cuadro después: sin esto el navegador aplica el alto final junto
+         con el inicial y no hay animación, sólo un salto. */
+      requestAnimationFrame(function () {
+        item.style.height = '0px';
+        item.style.opacity = '0';
+      });
+      setTimeout(function () {
+        marcarBorrado(id);
+        avisosCargados = (avisosCargados || []).filter(function (a) { return a.id !== id; });
+        pintarLista(avisosCargados);
+        pintarCampana();
+      }, 210);
+    }, 200);
+  }
+
+  /* Los borrados de ESTE teléfono. */
+  var K_BORRADOS = 'vdh_club_avisos_borrados';
+  function borrados() {
+    try { return JSON.parse(localStorage.getItem(K_BORRADOS) || '[]'); } catch (e) { return []; }
+  }
+  function marcarBorrado(id) {
+    try {
+      var b = borrados();
+      if (b.indexOf(id) < 0) { b.push(id); }
+      /* Se recorta: la lista del servidor son veinte, así que acordarse de
+         más borrados es guardar basura para siempre. */
+      localStorage.setItem(K_BORRADOS, JSON.stringify(b.slice(-60)));
+    } catch (e) {}
   }
 
   /* El puntito de la campana: hay algo más nuevo que lo último que abrió.
@@ -1653,8 +1802,14 @@
   }
 
   function hayNuevos() {
-    return !!(avisosCargados && avisosCargados.length &&
-              avisosCargados[0].id > ultimoVisto());
+    if (!avisosCargados || !avisosCargados.length) { return false; }
+    var fuera = borrados();
+    var visto = ultimoVisto();
+    /* Un aviso borrado no vuelve a encender el puntito: borrarlo ES haberlo
+       visto. */
+    return avisosCargados.some(function (a) {
+      return a.id > visto && fuera.indexOf(a.id) < 0;
+    });
   }
 
   function activarAvisos() {
