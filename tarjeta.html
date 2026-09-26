@@ -85,6 +85,10 @@
     cursor: pointer;
     transition: background .18s ease, color .18s ease, border-color .18s ease;
   }
+  /* Mismo caso que .tapa: display:grid y se esconde con hidden. Acá casi no
+     se nota porque la campana casi siempre tiene que verse, pero en un
+     navegador que no puede notificar tiene que desaparecer de verdad. */
+  .campana[hidden] { display: none; }
   .campana:hover { border-color: var(--txt-3); }
   .campana svg { width: 20px; height: 20px; }
 
@@ -106,6 +110,17 @@
     padding: 24px 20px;
     animation: tapaEntra .2s ease-out;
   }
+  /* ⚠ ESTA LÍNEA NO ES OPCIONAL, y su ausencia costó una noche.
+
+     El atributo hidden del HTML esconde escribiendo display:none en la hoja
+     del NAVEGADOR. El display:grid de acá arriba le gana —las reglas del
+     autor pesan más— así que sin esto el hidden del marcado no hace nada y
+     la capa queda tapando la pantalla entera desde que carga la página.
+
+     Regla general para este archivo: todo lo que tenga un display propio y
+     se esconda con hidden necesita su [hidden]. Ver .vista[hidden] abajo,
+     que es el mismo caso y ya estaba resuelto. */
+  .tapa[hidden] { display: none; }
   @keyframes tapaEntra { from { opacity: 0; } }
 
   .cartel {
