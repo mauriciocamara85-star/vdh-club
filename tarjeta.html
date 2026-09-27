@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mi tarjeta · VDH Club</title>
+<title>VDH Club</title>
 <meta name="description" content="Tu tarjeta del Club VDH: mostrala en la caja.">
 <meta name="theme-color" content="#EDEEF0">
 <!-- Agregada a la pantalla de inicio, se abre sin la barra del navegador:
@@ -19,7 +19,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Mi tarjeta">
+<meta name="apple-mobile-web-app-title" content="VDH Club">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -406,6 +406,64 @@
   }
   .tab-centro svg { width: 25px; height: 25px; }
 
+  /* ── "Tu tarjeta, siempre a mano" ──
+     Un cartelito colgado arriba de la barra de pestañas. Los 88px de abajo
+     no son un número al azar y están MEDIDOS en una pantalla de 390x844: la
+     barra mide 68, el círculo rojo del medio le sobresale 12 y quedan 8 de
+     aire. Si algún día cambia la barra, este número cambia con ella —y se
+     vuelve a medir, que a ojo no se ve el pixel que falta. */
+  .instala {
+    position: fixed; z-index: 80;
+    left: 12px; right: 12px;
+    bottom: calc(env(safe-area-inset-bottom) + 88px);
+    max-width: 496px; margin: 0 auto;
+    display: grid; grid-template-columns: 46px 1fr; gap: 0 13px;
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--r-sm);
+    padding: 15px 16px 16px;
+    box-shadow: 0 16px 40px -12px rgba(12, 13, 15, .45);
+    animation: instalaEntra .3s cubic-bezier(.2, .8, .3, 1);
+  }
+  /* ⚠ Igual que .tapa: el display de arriba le gana al hidden del marcado.
+     Sin esta línea el cartel queda a la vista, vacío, desde que carga. */
+  .instala[hidden] { display: none; }
+  @keyframes instalaEntra { from { opacity: 0; transform: translateY(14px); } }
+
+  /* El ícono de la app, el mismo que va a quedar en la pantalla de inicio:
+     que vea de antemano lo que le va a aparecer. */
+  .instala-ico { width: 46px; height: 46px; border-radius: 11px; display: block; }
+  /* Aire a la derecha para la X, que está encima. */
+  .instala-txt { padding-right: 26px; }
+  .instala-txt b { display: block; font: 700 15.5px/1.25 var(--display); letter-spacing: -.2px; }
+  .instala-txt p { font-size: 13.5px; line-height: 1.45; color: var(--txt-2); margin-top: 4px; }
+  .instala-pie { grid-column: 1 / -1; }
+  .instala-pie .btn { margin-top: 13px; min-height: 46px; line-height: 46px; font-size: 15.5px; }
+  .instala-paso {
+    margin-top: 12px; padding: 11px 12px;
+    background: var(--bg); border-radius: 11px;
+    font-size: 13.5px; line-height: 1.65; color: var(--txt);
+  }
+  .instala-glifo { width: 16px; height: 16px; vertical-align: -3px; }
+  .instala-x {
+    position: absolute; top: 6px; right: 6px;
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
+    border: 0; background: none; border-radius: 50%;
+    color: var(--txt-3); cursor: pointer;
+  }
+  .instala-x svg { width: 16px; height: 16px; }
+
+  .fila-instalar {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 18px; min-height: 48px;
+    border: 1px solid var(--linea); border-radius: var(--r-sm);
+    background: var(--hoja);
+    font: 600 14.5px var(--sans); color: var(--txt-2);
+    cursor: pointer;
+  }
+  .fila-instalar svg { width: 17px; height: 17px; }
+
   /* ── Las vistas ── */
   .vista[hidden] { display: none; }
   .vista h1 {
@@ -719,6 +777,25 @@
   </section>
 </main>
 
+<!-- ── "Tu tarjeta, siempre a mano" ──
+     Cuelga arriba de la barra y NO tapa el carnet: lo que se ve al entrar
+     sigue siendo la tarjeta. Arranca oculto; lo prende el script y sólo si
+     corresponde. La X está acá, en el marcado, y no la dibuja el script:
+     la salida de un cartel no puede depender de que el código que arma el
+     contenido haya funcionado. -->
+<div class="instala" id="instala" hidden>
+  <button type="button" class="instala-x" id="instalaX" aria-label="Cerrar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+         stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <img class="instala-ico" src="icon-192.png" alt="" width="46" height="46">
+  <div class="instala-txt">
+    <b>Tu tarjeta, siempre a mano</b>
+    <p id="instalaP"></p>
+  </div>
+  <div class="instala-pie" id="instalaPie"></div>
+</div>
+
 <!-- ── Las pestañas ──
      La tarjeta va al medio y sobresale: es lo que se usa parado en la caja.
      El e-shop es un enlace de verdad y no una pestaña con contenido, así que
@@ -914,7 +991,10 @@
           '<p class="vacio">Mostrá tu tarjeta la próxima vez que compres y te ' +
           'sumamos la primera.</p></div>') +
 
-      (estaInstalada() ? '' : '<div id="instalar"></div>') +
+      /* Un renglón, no una tarjeta. El aviso de instalar aparece solo al
+         entrar y vive abajo, colgado de la barra; esto es nada más que
+         para el que lo cerró y después lo quiere. */
+      (estaInstalada() ? '' : filaInstalar()) +
 
       bloqueAyuda() +
 
@@ -924,7 +1004,8 @@
     $('todo').innerHTML = html;
     $('todo').hidden = false;
     $('cargando').hidden = true;
-    pintarInstalar();
+    engancharFilaInstalar();
+    ofrecerInstalar();
     precargarPromo();
   }
 
@@ -947,10 +1028,25 @@
       .catch(function () { /* sin promos, la tarjeta es la tarjeta */ });
   }
 
-  /* ── Tenela siempre a mano ──
-     Con Chrome hay botón: el navegador avisó que se puede instalar y lo
-     hace en el acto. Con iPhone no hay evento ni forma de ofrecerlo, así
-     que se dice dónde tocar, que es lo único que Apple deja hacer. */
+  /* ── "Tu tarjeta, siempre a mano" ──────────────────────────────────────
+     Era una tarjeta larga en el medio de Mi tarjeta —título, dos párrafos y
+     un botón— y estaba siempre, incluso para el que ya la había leído
+     veinte veces. Ahora es un cartelito que cuelga arriba de la barra,
+     aparece solo al entrar y se cierra para siempre con la X.
+
+     Tres reglas que no se negocian:
+
+       1. NO TAPA LA TARJETA. El cliente abrió esto para mostrar el código
+          de barras en la caja, con la fila atrás. El cartel vive abajo, no
+          tiene fondo que oscurezca nada y se cierra con un toque.
+
+       2. NO PROMETE LO QUE EL NAVEGADOR NO DEJA HACER. Hay botón sólo
+          donde hay instalación de verdad —el evento de Chrome— o donde el
+          botón hace algo real —abrir en Chrome—. En iPhone no existe
+          ninguna API para ofrecerlo: ahí se dice dónde tocar y nada más.
+
+       3. NO INSISTE. Se muestra una vez; si lo cierra, no vuelve.
+     ──────────────────────────────────────────────────────────────────── */
   var promptGuardado = null;
 
   /* ── El navegador de Samsung ──
@@ -990,60 +1086,228 @@
     /* Samsung Internet también dispara este evento, y ahí el botón es
        justamente el que termina en el cartel de Play Protect. */
     if (!esSamsung()) { promptGuardado = e; }
-    pintarInstalar();
+    /* Puede llegar DESPUÉS de que el cartel ya esté a la vista con el
+       camino a mano: se redibuja y el botón de verdad reemplaza al texto. */
+    var c = $('instala');
+    if (c && !c.hidden) { pintarInstalar(); }
   });
 
   window.addEventListener('appinstalled', function () {
     promptGuardado = null;
-    pintarInstalar();
+    cerrarInstalar(true);
+    var f = $('filaInstalar');
+    if (f) { f.hidden = true; }
   });
 
+  /* Cerrado a mano. Una vez, y no vuelve. */
+  var K_INSTALA = 'vdh_club_instalar_cerrado';
+  function instalarCerrado() {
+    try { return localStorage.getItem(K_INSTALA) === '1'; } catch (e) { return false; }
+  }
+
+  /* Sólo en teléfonos. En una computadora el cartel es ruido: nadie se
+     guarda una tarjeta de fidelidad en el escritorio, y la tarjeta se abre
+     ahí para mirarla —Mauricio mientras la armamos, un vendedor para
+     mostrarla—, no para instalarla. */
+  function esCelular() {
+    try { return window.matchMedia('(hover: none) and (pointer: coarse)').matches; }
+    catch (e) { return true; }
+  }
+
+  function esAndroid() { return /Android/.test(navigator.userAgent || ''); }
+
+  /* Los navegadores DE OTRA APP: WhatsApp, Instagram, Facebook. En Android
+     son un WebView —se identifica con "; wv)"— y un WebView no instala nada
+     ni tiene menú donde buscarlo. Importa porque el camino más común del
+     Club empieza justo ahí: el vendedor manda la tarjeta por WhatsApp. */
+  function esOtraApp() {
+    var ua = navigator.userAgent || '';
+    return /;\s*wv\)/.test(ua) || /\bFBAN\b|\bFBAV\b|Instagram|Line\//.test(ua);
+  }
+
+  /**
+   * Qué se le puede ofrecer a ESTE navegador. Cinco caminos y uno solo por
+   * teléfono.
+   *
+   *   directo    Chrome o Edge avisaron que se puede instalar. Botón, y se
+   *              instala en el acto.
+   *   chrome     Samsung Internet o el navegador de otra app: no se puede
+   *              instalar desde acá, pero abrirla en Chrome sí es una
+   *              acción real y de un toque.
+   *   safari     iPhone en Safari. No hay API: se dice dónde tocar.
+   *   ios-otra   iPhone dentro de otra app. "Agregar a inicio" no existe
+   *              ahí; primero hay que salir a Safari.
+   *   menu       cualquier otro. Es el único que NO se muestra solo.
+   */
+  function modoInstalar() {
+    /* El orden importa, y no es el evidente. Primero los teléfonos donde el
+       botón NO PUEDE funcionar, y el evento después:
+
+         · iPhone no tiene la API de instalar, en ninguna versión. Si algo
+           dispara el evento ahí es un Chromium con la identificación de un
+           iPhone —pasa, y pasó probando esto—, y un botón de instalar en un
+           iPhone es una promesa que no se cumple.
+
+         · Samsung Internet SÍ dispara el evento, y su instalación fabrica un
+           APK que Play Protect frena con un cartel de "app no segura".
+
+       Al revés, el evento ganaba y esos dos casos terminaban con un botón
+       que no instala nada. */
+    if (esIOS()) { return /Safari\//.test(navigator.userAgent || '') ? 'safari' : 'ios-otra'; }
+    if (esSamsung()) { return 'chrome'; }
+    if (promptGuardado) { return 'directo'; }
+    /* El navegador de otra app va DESPUÉS del evento: WhatsApp en Android a
+       veces abre en una pestaña de Chrome disfrazada, y ahí instalar se puede
+       de verdad. */
+    if (esAndroid() && esOtraApp()) { return 'chrome'; }
+    return 'menu';
+  }
+
+  var instalaTimer;
+
+  /**
+   * Al entrar. Espera a que la tarjeta esté a la vista y recién entonces
+   * aparece: primero lo que el cliente vino a buscar.
+   *
+   * La espera también le da tiempo al evento de Chrome, que no llega con la
+   * página sino un rato después. Sin ella, el teléfono que SÍ puede
+   * instalar vería un segundo las instrucciones del menú.
+   */
+  function ofrecerInstalar() {
+    if (estaInstalada() || instalarCerrado() || !esCelular() || instalaTimer) { return; }
+    instalaTimer = setTimeout(function () {
+      if (estaInstalada() || instalarCerrado()) { return; }
+      /* En Chrome de Android sin evento no se ofrece NADA. Las dos razones
+         posibles son que ya esté instalada —Chrome deja de disparar el
+         evento cuando lo está, y abierta en una pestaña display-mode no lo
+         delata— o que el navegador no la considere instalable. En las dos,
+         un cartel que manda a buscar en el menú molesta y no ayuda. El
+         renglón de abajo de la tarjeta sigue estando para el que lo
+         busque. */
+      if (modoInstalar() === 'menu') { return; }
+      abrirInstalar();
+    }, 1800);
+  }
+
+  function abrirInstalar() {
+    var c = $('instala');
+    if (!c) { return; }
+    /* La X se engancha acá y no al arrancar: es la salida del cartel y
+       tiene que quedar atada en el mismo momento en que el cartel aparece,
+       pase lo que pase con el resto. */
+    var x = $('instalaX');
+    if (x) { x.onclick = function () { cerrarInstalar(true); }; }
+    pintarInstalar();
+    c.hidden = false;
+  }
+
+  function cerrarInstalar(paraSiempre) {
+    var c = $('instala');
+    if (c) { c.hidden = true; }
+    if (paraSiempre) {
+      try { localStorage.setItem(K_INSTALA, '1'); } catch (e) {}
+    }
+  }
+
   function pintarInstalar() {
-    var caja = $('instalar');
-    if (!caja) return;
+    var p = $('instalaP');
+    var pie = $('instalaPie');
+    if (!p || !pie) { return; }
 
-    if (estaInstalada()) { caja.innerHTML = ''; return; }
+    var modo = modoInstalar();
 
-    /* Primero lo que tranquiliza, y recién después lo opcional: la tarjeta
-       YA funciona. Instalarla es una comodidad, no un requisito, y el cliente
-       que llega desde el QR tiene que irse sabiendo eso aunque no instale
-       nada. */
-    if (esSamsung()) {
-      caja.innerHTML =
-        '<div class="caja">' +
-          '<h2>Tenela siempre a mano</h2>' +
-          '<p class="vacio">Tu tarjeta ya quedó guardada en este teléfono: cada vez ' +
-          'que abras este enlace se abre sola, con o sin señal.</p>' +
-          '<p class="vacio">Si querés el ícono en tu pantalla de inicio, abrila en ' +
-          'Chrome. Desde este navegador, Android muestra un aviso de seguridad.</p>' +
-          '<a class="btn" href="' + esc(enChrome()) + '">Abrir en Chrome</a>' +
-        '</div>';
+    /* Nada de "anda sin señal" acá. El service worker guarda la página y la
+       tarjeta se acuerda de la última que vio, así que es probable que
+       funcione — pero probable no se promete en un cartel: si algún día
+       falla, el cliente queda parado en la caja creyendo lo que le dijimos.
+       Se promete cuando esté probado de punta a punta. */
+    p.innerHTML = 'Agregá VDH Club a la pantalla de inicio y abrila con un toque.' +
+      (modo === 'chrome'
+        ? (esSamsung()
+            ? ' Desde este navegador Android muestra un aviso de seguridad, así que se agrega desde Chrome.'
+            : ' La estás viendo dentro de otra app: se agrega desde Chrome.')
+        : '');
+
+    if (modo === 'directo') {
+      pie.innerHTML = '<button type="button" class="btn" id="instalaYa">Instalar VDH Club</button>';
+      $('instalaYa').onclick = instalarAhora;
       return;
     }
 
-    caja.innerHTML =
-      '<div class="caja">' +
-        '<h2>Tenela siempre a mano</h2>' +
-        '<p class="vacio">Agregala a la pantalla de tu celular: se abre como una ' +
-        'app, con tu tarjeta adentro, y anda aunque no tengas señal.</p>' +
-        (promptGuardado
-          ? '<button type="button" class="btn" id="btnInstalar">Agregar a mi celular</button>'
-          : '<p class="vacio">' + comoAgregar() + '</p>') +
-      '</div>';
-
-    if (promptGuardado && $('btnInstalar')) {
-      $('btnInstalar').onclick = function () {
-        var p = promptGuardado;
-        promptGuardado = null;
-        p.prompt();
-        /* Si dice que no, vuelve el cartel con las instrucciones a mano: el
-           evento no se puede volver a usar, pero el camino del menú sigue
-           estando. */
-        p.userChoice.then(function (r) {
-          if (!r || r.outcome !== 'accepted') pintarInstalar();
-        }).catch(function () { pintarInstalar(); });
-      };
+    if (modo === 'chrome') {
+      pie.innerHTML = '<a class="btn" id="instalaChrome" href="' + esc(enChrome()) + '">Abrir en Chrome</a>';
+      /* El que se va a Chrome no necesita volver a encontrar este cartel
+         acá: del otro lado le va a aparecer el botón que instala de
+         verdad. */
+      $('instalaChrome').onclick = function () { cerrarInstalar(true); };
+      return;
     }
+
+    pie.innerHTML = '<p class="instala-paso">' + pasoAMano(modo) + '</p>';
+  }
+
+  function instalarAhora() {
+    var p = promptGuardado;
+    if (!p) { pintarInstalar(); return; }
+    /* El evento se usa UNA vez. Se suelta antes de llamarlo para que un
+       segundo toque no intente lo mismo con un evento gastado. */
+    promptGuardado = null;
+    p.prompt();
+    /* Diga sí o diga no, el cartel se va. Repetirle el pedido a alguien que
+       acaba de decir que no es la forma más rápida de que no vuelva a
+       mirar; y si dijo sí, además llega appinstalled. */
+    p.userChoice.then(function () { cerrarInstalar(true); })
+                .catch(function () { cerrarInstalar(true); });
+  }
+
+  /* Los dos glifos que hacen la diferencia entre entender y no entender:
+     el cliente no busca la palabra "Compartir", busca el dibujito. */
+  function pasoAMano(modo) {
+    var compartir = '<svg class="instala-glifo" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+      'stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M12 3v11"/><path d="m8 7 4-4 4 4"/>' +
+      '<path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
+    var menu = '<svg class="instala-glifo" viewBox="0 0 24 24" fill="currentColor" ' +
+      'aria-hidden="true"><circle cx="12" cy="5" r="1.7"/>' +
+      '<circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>';
+
+    if (modo === 'safari') {
+      return 'Tocá ' + compartir + ' abajo y después <b>Agregar a inicio</b>.';
+    }
+    if (modo === 'ios-otra') {
+      /* El caso más común del Club y el peor de todos: el vendedor manda la
+         tarjeta por WhatsApp, el cliente la toca ahí y queda en el
+         navegador interno de WhatsApp, donde "Agregar a inicio" no existe.
+         O sea que el que más la necesita es el que no puede. Y no hay
+         ninguna API para sacarlo de ahí: lo único honesto es el camino. */
+      return 'Tocá <b>Abrir en Safari</b> (abajo a la derecha) y ahí: ' +
+             compartir + ' <b>Compartir</b> → <b>Agregar a inicio</b>.';
+    }
+    return 'Abrí el menú ' + menu + ' del navegador y tocá ' +
+           '<b>Agregar a la pantalla principal</b>.';
+  }
+
+  /* El renglón del final de la tarjeta: el mismo camino, para el que cerró
+     el cartel y después lo quiere. Un renglón, no una tarjeta — lo que se
+     saca de en medio de la pantalla no puede volver por la ventana. */
+  function filaInstalar() {
+    return '<button type="button" class="fila-instalar" id="filaInstalar">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<rect x="5" y="2" width="14" height="20" rx="2.5"/>' +
+      '<path d="M12 8.5v7M8.5 12h7"/></svg>' +
+      'Agregar a la pantalla de inicio</button>';
+  }
+
+  function engancharFilaInstalar() {
+    var f = $('filaInstalar');
+    if (!f) { return; }
+    f.onclick = function () {
+      /* A mano se muestra siempre, aunque lo haya cerrado antes: lo pidió
+         él. Y en una computadora también, por la misma razón. */
+      abrirInstalar();
+    };
   }
 
   /**
