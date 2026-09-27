@@ -29,7 +29,7 @@
    Al tocar cualquiera de estos archivos, subir CACHE. Ese cambio de nombre
    es lo que borra el caché viejo de los celulares.
    ═══════════════════════════════════════════════════════════════════════════ */
-const CACHE = 'vdh-club-v24';
+const CACHE = 'vdh-club-v25';
 
 const BASICOS = [
   './tarjeta.html',
@@ -82,6 +82,13 @@ self.addEventListener('push', (evento) => {
          Nadie quiere despertar con seis notificaciones de la misma tienda. */
       tag: 'vdh-club',
       renotify: true,
+      /* La foto de la promoción, adentro de la notificación. Android la
+         muestra grande abajo del texto; iOS la ignora y el aviso llega
+         igual, así que no hace falta preguntar por el sistema.
+
+         Va sólo si es https: una imagen por http la descarta el navegador
+         y la notificación queda sin nada donde esperaba algo. */
+      image: (d.imagen && /^https:\/\//.test(d.imagen)) ? d.imagen : undefined,
       data: { url: d.enlace || 'tarjeta.html' }
     })
   );
