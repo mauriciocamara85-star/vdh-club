@@ -287,63 +287,108 @@
   }
   .caja h2 { font: 700 16px var(--display); letter-spacing: -.2px; }
 
+  /* ── El saldo ──
+     El número grande es lo segundo que busca el cliente, después del código
+     de barras. Va en rojo y en la letra de títulos, como iba la cuenta de
+     sellos. */
   .cuenta { display: flex; align-items: baseline; gap: 9px; margin-top: 4px; }
-  .cuenta b { font: 700 clamp(34px, 11vw, 46px)/1 var(--display); color: var(--acc); letter-spacing: -1.5px; }
+  .cuenta b {
+    font: 700 clamp(38px, 12vw, 52px)/1 var(--display);
+    color: var(--acc); letter-spacing: -1.5px;
+    font-variant-numeric: tabular-nums;
+  }
   .cuenta span { font-size: 15px; color: var(--txt-2); }
-  .falta {
-    font: 600 17px/1.35 var(--sans);
-    color: var(--txt);
-    margin-top: 4px;
-  }
+  .falta { font: 600 16.5px/1.35 var(--sans); color: var(--txt); margin-top: 10px; }
   .falta b { color: var(--acc); font-weight: 700; }
+  .falta-sub { font-size: 14px; color: var(--txt-2); margin-top: 2px; line-height: 1.45; }
+  .falta-sub b { color: var(--txt); }
 
-  /* Los sellos, uno por compra. Se ven y se cuentan de un vistazo, que es
-     todo lo que el cliente quiere saber. */
-  /* ── Los sellos ──
-     En GRILLA y no en fila que se acomoda sola. Suelto, el ancho del teléfono
-     decidía el corte: diez sellos entraban de a siete y tres, y con ese
-     reparto el 5 y el 10 —que son los premios— caían en cualquier lado. En
-     filas del largo del primer premio, el 5 termina una fila y el 10 termina
-     la otra, y la relación se ve sin explicarla.
-
-     El largo lo pone pintar() según los hitos, en --por-fila. Si los premios
-     cambian a 4 y 8, las filas pasan a cuatro solas. */
-  .sellos {
-    display: grid;
-    grid-template-columns: repeat(var(--por-fila, 5), 1fr);
-    gap: 9px; margin-top: 16px;
-    justify-items: center;
+  .barra { height: 10px; border-radius: 999px; background: #ECEDF0; margin-top: 12px; overflow: hidden; }
+  .barra i {
+    display: block; height: 100%; border-radius: inherit;
+    background: linear-gradient(90deg, var(--acc), var(--acc-2));
   }
-  .sello {
-    width: 100%; max-width: 46px; aspect-ratio: 1; height: auto;
-    border-radius: 50%;
-    border: 2px dashed var(--linea);
+  /* La del nivel es otra cosa y se tiene que ver distinta: fina y negra.
+     Dos barras rojas iguales una abajo de la otra se leen como la misma. */
+  .barra-fina { height: 6px; margin-top: 10px; }
+  .barra-fina i { background: #2A2D31; }
+
+  /* ── El nivel ──
+     Tres chapas que se distinguen sin leer: gris, dorada y negra. La negra
+     es la de arriba de todo y es la misma idea que el ícono de la app.
+     Van sobre el carnet (oscuro) y sobre la hoja (blanca), así que cada una
+     tiene que leerse en los dos fondos. */
+  .chip-nivel {
+    flex: none; display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 10px; border-radius: 999px;
+    font: 700 11px/1 var(--sans); letter-spacing: .6px; text-transform: uppercase;
+  }
+  .chip-nivel svg { width: 12px; height: 12px; }
+  .nv-plata   { background: #DADDE2; color: #2A2D31; }
+  .nv-oro     { background: #F1D27A; color: #3A2A00; }
+  .nv-platino { background: #0B0C0E; color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6); }
+
+  .carnet-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+
+  .nivel { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--linea); }
+  .nivel-cab { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .nivel-multi { font-size: 13px; color: var(--txt-2); font-weight: 600; text-align: right; }
+  .nivel-txt { font-size: 14px; color: var(--txt-2); margin-top: 8px; line-height: 1.45; }
+  .nivel-txt b { color: var(--txt); }
+  .nota { font-size: 12.5px; color: var(--txt-3); margin-top: 14px; }
+
+  /* ── Los premios ──
+     Sin botón de canjear, a propósito: el canje lo hace el vendedor desde la
+     caja, que es donde se entrega la prenda. Un botón acá que no hace nada
+     —o que "reserva" algo que después no está en el local— es peor que
+     decir dónde se pide. */
+  .caja-sub { font-size: 13.5px; color: var(--txt-3); margin-top: 2px; }
+  .premios { margin-top: 14px; display: grid; gap: 10px; }
+  /* En grilla: el nombre y el estado comparten el primer renglón, y lo que
+     explica el premio va abajo a todo lo ancho. En fila, el estado de la
+     derecha le comía el ancho al texto y "1.500 puntos · vale $12.000" se
+     partía en tres renglones en un teléfono común. */
+  .premio {
+    display: grid; grid-template-columns: 40px 1fr auto;
+    column-gap: 12px; row-gap: 2px; align-items: center;
+    padding: 12px 13px;
+    border: 1px solid var(--linea); border-radius: var(--r-sm);
+  }
+  .premio-ico {
+    grid-row: 1 / span 2; align-self: start;
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--bg); color: var(--txt-3);
     display: grid; place-items: center;
-    font: 700 12px var(--display); color: var(--txt-3);
   }
-  .sello.lleno { border: 0; background: var(--acc); color: #fff; }
-  .sello.premio { border-color: var(--acc); color: var(--acc); border-style: solid; }
-  .sello svg { width: 16px; height: 16px; }
+  .premio-ico svg { width: 20px; height: 20px; }
+  .premio-nom { font-size: 15px; min-width: 0; }
+  .premio-sub { grid-column: 2 / -1; font-size: 12.5px; color: var(--txt-3); line-height: 1.45; }
+  .premio-est {
+    display: flex; align-items: center; gap: 4px;
+    font: 700 12.5px var(--sans); color: var(--txt-3); white-space: nowrap;
+  }
+  .premio-est svg { width: 13px; height: 13px; }
+  .premio.listo { border-color: #A7D9BF; background: var(--ok-soft); }
+  .premio.listo .premio-ico { background: #CDEBDC; color: var(--ok); }
+  .premio.listo .premio-est { color: var(--ok); }
+  /* Ya se lo llevó las veces que se puede por año. Apagado pero legible:
+     tiene que entender por qué no se lo dan, no que desapareció. */
+  .premio.agotado { opacity: .62; }
 
-  .hitos { margin-top: 20px; display: grid; gap: 11px; }
-  .hito {
-    display: flex; align-items: center; gap: 12px;
-    padding: 13px 14px;
-    border: 1px solid var(--linea);
-    border-radius: var(--r-sm);
-    font-size: 14.5px;
+  /* ── Los movimientos ──
+     Lo que entró y lo que salió, con el signo y en color: verde lo que suma,
+     gris lo que resta. El gris y no el rojo para lo que resta, porque un
+     canje no es una mala noticia — es el premio. */
+  .mov {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid var(--linea);
   }
-  .hito-n {
-    width: 38px; height: 38px; flex: none; border-radius: 12px;
-    background: var(--acc-soft); color: var(--acc);
-    display: grid; place-items: center; font: 700 15px var(--display);
-  }
-  .hito b { display: block; font-size: 15px; }
-  .hito small { display: block; font-size: 13px; color: var(--txt-3); }
-  .hito.listo { border-color: #A7D9BF; background: var(--ok-soft); }
-  .hito.listo .hito-n { background: #CDEBDC; color: var(--ok); }
-  .hito.listo small { color: var(--ok); font-weight: 600; }
-  .hito.usado { opacity: .6; }
+  .mov:last-child { border-bottom: 0; }
+  .mov b { display: block; font-size: 14px; font-weight: 600; }
+  .mov span { display: block; font-size: 12.5px; color: var(--txt-3); }
+  .mov em { flex: none; font: 700 15px var(--display); font-style: normal; font-variant-numeric: tabular-nums; }
+  .mov em.mas { color: var(--ok); }
+  .mov em.menos { color: var(--txt-3); }
 
   .lista { margin-top: 18px; }
   .fila { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--linea); font-size: 14px; }
@@ -917,79 +962,136 @@
   }
 
   function pintar(t) {
-    var meta = t.meta || 0;
-    var hitos = t.hitos || [];
+    var puntos  = t.puntos || 0;
+    var premios = t.premios || [];
+    var nv      = t.nivel || { nombre: 'Plata', multiplica: 1 };
+    var multi   = Number(nv.multiplica) || 1;
 
-    /* Los sellos: uno por compra hasta la meta. Los que caen justo en un
-       premio se marcan distinto, así se ve dónde está la próxima parada sin
-       tener que leer nada. */
-    var enPremio = {};
-    hitos.forEach(function (h) { enPremio[h.sellos] = true; });
-    /* El largo de la fila sale del PRIMER premio: si el primero es a los 5,
-       filas de cinco. Entre 3 y 6 para que no queden ni apretadas ni de a
-       dos; fuera de ese rango, cinco, que es lo que venía. */
-    var porFila = (hitos.length && hitos[0].sellos >= 3 && hitos[0].sellos <= 6)
-      ? hitos[0].sellos : 5;
-    var bolitas = '';
-    for (var i = 1; i <= meta; i++) {
-      var lleno = i <= t.sellos;
-      bolitas += '<div class="sello' + (lleno ? ' lleno' : '') +
-                 (!lleno && enPremio[i] ? ' premio' : '') + '">' +
-                 (lleno
-                   ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>'
-                   : i) + '</div>';
+    /* Lo que le importa al cliente, en este orden: qué se puede llevar YA,
+       y si no, cuánto le falta para lo más cercano. */
+    var listos = premios.filter(function (p) { return p.alcanzado; });
+    var proximo = null;
+    premios.forEach(function (p) { if (!proximo && !p.alcanzado) proximo = p; });
+
+    var avance = proximo ? Math.min(100, Math.round(puntos * 100 / proximo.puntos)) : 100;
+
+    /* Sin artículos delante del premio ("el perfume", "la remera"): el
+       nombre lo escribe Mauricio en la base y el género no se sabe desde
+       acá. "Te faltan 200 para tu próximo premio" y el nombre abajo se lee
+       bien con cualquier premio que se cargue mañana. */
+    var mensaje = '';
+    if (listos.length) {
+      var mejor = listos[listos.length - 1];
+      mensaje = '<p class="falta">Ya podés llevarte <b>' + esc(mejor.nombre) + '</b></p>' +
+        '<p class="falta-sub">Pedilo en cualquier local.' +
+        (proximo ? ' Con ' + miles(proximo.falta) + ' puntos más llegás a <b>' +
+                   esc(proximo.nombre) + '</b>.' : '') + '</p>';
+    } else if (proximo) {
+      mensaje = '<p class="falta">Te faltan <b>' + miles(proximo.falta) +
+                '</b> para tu próximo premio</p>' +
+                '<p class="falta-sub">' + esc(proximo.nombre) +
+                (proximo.valor ? ' · vale $' + miles(proximo.valor) : '') + '</p>';
     }
 
-    var falta = 0;
-    var proximo = null;
-    hitos.forEach(function (h) {
-      if (!proximo && t.sellos < h.sellos) { proximo = h; falta = h.sellos - t.sellos; }
-    });
+    /* El nivel. Sin la palabra "XP": para el cliente son puntos, y lo que
+       tiene que entender es que comprando más en el año sube. Canjear no lo
+       baja — eso lo cuenta la pregunta de abajo, no hace falta acá. */
+    var tramo = (nv.hasta_xp && nv.hasta_xp > (nv.desde_xp || 0))
+      ? Math.max(0, Math.min(100, Math.round(((t.xp || 0) - (nv.desde_xp || 0)) * 100 /
+                                             (nv.hasta_xp - (nv.desde_xp || 0)))))
+      : 100;
+    var nivelHtml =
+      '<div class="nivel">' +
+        '<div class="nivel-cab">' + chipNivel(nv.nombre) +
+          '<span class="nivel-multi">' +
+            (multi > 1 ? 'Sumás ' + coma(multi) + ' puntos por cada $100'
+                       : '1 punto por cada $100') +
+          '</span></div>' +
+        (nv.sigue
+          ? '<div class="barra barra-fina"><i style="width:' + tramo + '%"></i></div>' +
+            '<p class="nivel-txt">Sumá <b>' + miles(nv.falta_xp) + '</b> puntos más en el año ' +
+            'y pasás a <b>' + esc(nv.sigue) + '</b>.</p>'
+          : '<p class="nivel-txt">Estás en el nivel más alto del Club.</p>') +
+      '</div>';
+
+    var candado = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+    var regalo = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
+      '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>' +
+      '<path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
+
+    var catalogo = premios.map(function (p) {
+      /* Tres estados y cada uno dice algo distinto: se lo pueden dar hoy,
+         le faltan puntos, o ya se lo llevó las veces que se puede en el año.
+         El tercero es el que evita que llegue al local y se lo nieguen. */
+      var estado = p.agotado ? 'Ya lo canjeaste'
+                 : p.alcanzado ? 'Te alcanza'
+                 : candado + 'Faltan ' + miles(p.falta);
+      return '<div class="premio' + (p.alcanzado ? ' listo' : '') +
+                                   (p.agotado ? ' agotado' : '') + '">' +
+        '<div class="premio-ico">' + regalo + '</div>' +
+        '<b class="premio-nom">' + esc(p.nombre) + '</b>' +
+        '<div class="premio-est">' + estado + '</div>' +
+        '<div class="premio-sub">' + miles(p.puntos) + ' puntos' +
+          (p.valor ? ' · vale $' + miles(p.valor) : '') +
+          (p.detalle ? '<br>' + esc(p.detalle) : '') +
+          /* El porqué va abajo, a todo lo ancho: a la derecha no entra. */
+          (p.agotado ? '<br>Ya llegaste al límite de este año.' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    var movs = (t.ultimas || []).map(function (m) {
+      var titulo;
+      if (m.tipo === 'compra') { titulo = 'Compra en ' + nombreLocal(m.local); }
+      else if (m.tipo === 'canje') { titulo = 'Te llevaste: ' + (m.obs || 'un premio'); }
+      else if (m.concepto === 'bienvenida') { titulo = 'Regalo de bienvenida'; }
+      else if (m.concepto === 'vencimiento') { titulo = 'Puntos vencidos'; }
+      else { titulo = m.obs || 'Ajuste'; }
+      var n = Number(m.puntos) || 0;
+      return '<div class="mov"><div><b>' + esc(titulo) + '</b>' +
+               '<span>' + fecha(m.cuando) + '</span></div>' +
+             '<em class="' + (n >= 0 ? 'mas' : 'menos') + '">' +
+               (n > 0 ? '+' : n < 0 ? '−' : '') + miles(Math.abs(n)) + '</em></div>';
+    }).join('');
 
     var html =
       '<div class="carnet">' +
-        '<div class="carnet-nom">' + esc(t.nombre) + '</div>' +
-        '<div class="carnet-desde">Socio desde ' + fecha(t.desde) + '</div>' +
+        '<div class="carnet-cab"><div>' +
+          '<div class="carnet-nom">' + esc(t.nombre) + '</div>' +
+          '<div class="carnet-desde">Socio desde ' + fecha(t.desde) + '</div>' +
+        '</div>' + chipNivel(nv.nombre) + '</div>' +
         '<div class="barras">' + codigoDeBarras(t.codigo, 84) +
           '<b class="numero">' + codigoBonito(t.codigo) + '</b>' +
         '</div>' +
         '<div class="carnet-pie">Mostralo en la caja cuando comprés</div>' +
       '</div>' +
 
-
-
       '<div class="caja">' +
-        '<h2>Tu avance</h2>' +
-        '<div class="cuenta"><b>' + t.sellos + '</b><span>de ' + meta + ' compras</span></div>' +
-        /* Lo que le falta para el próximo premio, en su propio renglón y
-           grande. Iba pegado a "de 10 compras" en gris chico, y era lo único
-           de la pantalla que le dice al cliente para qué está juntando. */
-        (proximo
-          ? '<p class="falta">Te falta' + (falta === 1 ? '' : 'n') + ' <b>' + falta +
-            '</b> para tu ' + esc(proximo.premio.toLowerCase()) + '</p>'
-          : '<p class="falta">Ya alcanzaste todos los premios</p>') +
-        '<div class="sellos" style="--por-fila:' + porFila + '">' + bolitas + '</div>' +
-        '<div class="hitos">' + hitos.map(function (h) {
-          var clase = h.canjeado ? ' usado' : (h.alcanzado ? ' listo' : '');
-          var pie = h.canjeado ? 'Ya te lo llevaste'
-                  : h.alcanzado ? 'Pedilo en cualquier local'
-                  : 'A las ' + h.sellos + ' compras';
-          return '<div class="hito' + clase + '">' +
-                   '<div class="hito-n">' + h.sellos + '</div>' +
-                   '<div><b>' + esc(h.premio) + '</b><small>' + pie + '</small></div>' +
-                 '</div>';
-        }).join('') + '</div>' +
+        '<h2>Tus puntos</h2>' +
+        '<div class="cuenta"><b>' + miles(puntos) + '</b><span>puntos</span></div>' +
+        mensaje +
+        (premios.length ? '<div class="barra"><i style="width:' + avance + '%"></i></div>' : '') +
+        nivelHtml +
+        '<p class="nota">Tus puntos no vencen mientras sigas comprando.</p>' +
       '</div>' +
 
-      (t.ultimas && t.ultimas.length
-        ? '<div class="caja"><h2>Tus últimas compras</h2><div class="lista">' +
-            t.ultimas.map(function (u) {
-              return '<div class="fila"><b>' + esc(nombreLocal(u.local)) + '</b>' +
-                     '<span>' + fecha(u.cuando) + '</span></div>';
-            }).join('') + '</div></div>'
-        : '<div class="caja"><h2>Todavía no tenés compras</h2>' +
-          '<p class="vacio">Mostrá tu tarjeta la próxima vez que compres y te ' +
-          'sumamos la primera.</p></div>') +
+      (premios.length
+        ? '<div class="caja"><h2>Premios</h2>' +
+            '<p class="caja-sub">Se piden en la caja de cualquier local.</p>' +
+            '<div class="premios">' + catalogo + '</div></div>'
+        : '') +
+
+      '<div class="caja"><h2>Tus movimientos</h2>' +
+        (movs ? '<div class="lista">' + movs + '</div>' : '') +
+        (t.compras
+          ? ''
+          : '<p class="vacio"' + (movs ? ' style="margin-top:14px"' : '') + '>Mostrá tu ' +
+            'tarjeta la próxima vez que compres y empezás a sumar: cada $100 es un punto.</p>') +
+      '</div>' +
 
       /* Un renglón, no una tarjeta. El aviso de instalar aparece solo al
          entrar y vive abajo, colgado de la barra; esto es nada más que
@@ -1022,6 +1124,20 @@
    * El viaje se hace igual y en silencio: deja la promo cargada, así tocar
    * Promos es instantáneo. Si falla, la tarjeta ni se entera.
    */
+  /* 12.300 y no 12300: los miles con punto, como se escriben acá. */
+  function miles(n) { return Math.round(Number(n) || 0).toLocaleString('es-AR'); }
+
+  /* 1,2 y no 1.2. */
+  function coma(n) { return String(n).replace('.', ','); }
+
+  function chipNivel(nombre) {
+    var n = String(nombre || 'Plata');
+    var clase = 'nv-' + n.toLowerCase().normalize('NFD').replace(/[^a-z]/g, '');
+    var estrella = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<path d="m12 2 3 6.6 7 .8-5.2 4.8 1.5 7L12 17.8 5.7 21.2l1.5-7L2 9.4l7-.8Z"/></svg>';
+    return '<span class="chip-nivel ' + clase + '">' + estrella + esc(n) + '</span>';
+  }
+
   function precargarPromo() {
     club.promos()
       .then(function (l) { promoCargada = l || []; })
@@ -1386,24 +1502,31 @@
   var WSP_CONSULTAS = '2235845942';
 
   var PREGUNTAS = [
-    ['¿Cómo sumo sellos?',
-     'Cada compra suma un sello, sin monto mínimo. Mostrá tu tarjeta en la caja ' +
-     'antes de pagar y el vendedor la escanea.'],
-    /* club_sumar_compra: un sello por compra, sin mirar el importe. */
+    ['¿Cómo sumo puntos?',
+     'Cada $100 que gastás es 1 punto. Mostrá tu tarjeta en la caja antes de ' +
+     'pagar y el vendedor la escanea.'],
+    /* club_reglas.pesos_por_punto = 100. Si cambia, cambia este texto. */
+
+    ['¿Cómo me llevo un premio?',
+     'Cuando te alcancen los puntos, pedilo en la caja de cualquier local. El ' +
+     'vendedor te lo entrega y lo descuenta de tu tarjeta.'],
+    /* club_canjear_premio. El cliente no canjea desde el teléfono. */
 
     ['¿Sirve en todos los locales?',
-     'Sí, en los 14. Podés juntar sellos en uno y llevarte el premio en otro: la ' +
-     'tarjeta es la misma en toda la cadena.'],
+     'Sí, en los 14. Podés sumar en uno y llevarte el premio en otro: la tarjeta ' +
+     'es la misma en toda la cadena.'],
     /* La tarjeta es compartida entre los 14 — ver club.sql. */
 
-    ['¿Los sellos vencen?',
-     'No. Lo que juntaste se queda ahí, sin fecha límite.'],
-    /* club_reglas.vence_dias está en null. */
+    ['¿Qué son Plata, Oro y Platino?',
+     'Tu nivel, según lo que compraste en el último año. En Oro sumás 1,2 puntos ' +
+     'por cada $100 y en Platino 1,5. Llevarte un premio no te baja de nivel.'],
+    /* club_niveles. El nivel sale del XP —lo ganado en 12 meses—, no del
+       saldo: por eso canjear no lo toca. */
 
-    ['Si me llevo el premio de las 5 compras, ¿vuelvo a cero?',
-     'No. El contador sigue subiendo: llevarte el perfume a las 5 no te aleja de ' +
-     'la remera de las 10.'],
-    /* La regla que más condiciona el modelo: un canje NO resta sellos. */
+    ['¿Los puntos vencen?',
+     'Sólo si pasan 12 meses sin que compres. Mientras sigas comprando, no ' +
+     'vencen nunca.'],
+    /* club_reglas.vence_meses = 12, y club_vencer() los vence todos juntos. */
 
     ['Perdí mi tarjeta, ¿qué hago?',
      'Abrí esta misma página y poné el WhatsApp con el que te anotaste: se abre ' +
@@ -1411,7 +1534,7 @@
     /* club_recuperar. */
 
     ['¿Se la puedo prestar a alguien?',
-     'La tarjeta es tuya y los sellos también. Quien tenga tu código puede ver tu ' +
+     'La tarjeta es tuya y los puntos también. Quien tenga tu código puede ver tu ' +
      'tarjeta, así que mejor no lo compartas.']
     /* Honesto: el código ES la credencial, no hay nada que lo impida. */
   ];
@@ -1551,7 +1674,7 @@
             'cualquier local para aprovechar' + (lista.length > 1 ? 'las' : 'la') + '.</p>'
           : '<div class="caja"><h2>No hay promociones activas</h2>' +
             '<p class="vacio">Cuando haya una, te la mostramos acá. Mientras tanto, tus ' +
-            'compras siguen sumando sellos.</p></div>') +
+            'compras siguen sumando puntos.</p></div>') +
         irALaTarjeta;
 
       if ($('promoVerTarjeta')) {
