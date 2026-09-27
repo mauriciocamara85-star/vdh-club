@@ -29,7 +29,7 @@
    Al tocar cualquiera de estos archivos, subir CACHE. Ese cambio de nombre
    es lo que borra el caché viejo de los celulares.
    ═══════════════════════════════════════════════════════════════════════════ */
-const CACHE = 'vdh-club-v25';
+const CACHE = 'vdh-club-v26';
 
 const BASICOS = [
   './tarjeta.html',
@@ -38,6 +38,8 @@ const BASICOS = [
   './locales.js',
   './codigo.js',
   './tarjeta.webmanifest',
+  './badge-96.png',
+  './apple-touch-icon.png',
   'icon-192.png',
   'icon-512.png'
 ];
@@ -77,7 +79,11 @@ self.addEventListener('push', (evento) => {
     self.registration.showNotification(titulo, {
       body: d.cuerpo || '',
       icon: 'icon-192.png',
-      badge: 'icon-192.png',
+      /* El badge es el iconito de la barra de estado, y Android lo dibuja
+         usando SOLO la transparencia: lo opaco se pinta de blanco y el
+         resto desaparece. Con el icono entero quedaba un cuadrado liso;
+         badge-96 tiene nada mas que las letras recortadas. */
+      badge: 'badge-96.png',
       /* Con tag, un aviso nuevo REEMPLAZA al anterior en vez de apilarse.
          Nadie quiere despertar con seis notificaciones de la misma tienda. */
       tag: 'vdh-club',
