@@ -303,6 +303,22 @@
   .falta-sub { font-size: 14px; color: var(--txt-2); margin-top: 2px; line-height: 1.45; }
   .falta-sub b { color: var(--txt); }
 
+  /* ── Hoy suma más ──
+     Lleno y en rojo: es lo único de la tarjeta que VENCE. Los puntos dobles
+     del Hot Sale se terminan el domingo, la semana del cumple también, y es
+     la razón para venir esta semana y no la que viene. Va abajo del saldo y
+     no arriba del carnet: el código de barras sigue siendo lo primero. */
+  .hoy-bonus {
+    display: flex; gap: 12px; align-items: center;
+    margin-top: 14px; padding: 12px 14px;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, var(--acc), var(--acc-2));
+    color: #fff;
+  }
+  .hoy-bonus svg { width: 24px; height: 24px; flex: none; }
+  .hoy-bonus b { display: block; font: 700 15px/1.3 var(--sans); }
+  .hoy-bonus span { display: block; font-size: 13px; line-height: 1.4; opacity: .94; margin-top: 2px; }
+
   .barra { height: 10px; border-radius: 999px; background: #ECEDF0; margin-top: 12px; overflow: hidden; }
   .barra i {
     display: block; height: 100%; border-radius: inherit;
@@ -971,9 +987,14 @@
        y si no, cuánto le falta para lo más cercano. */
     var listos = premios.filter(function (p) { return p.alcanzado; });
     var proximo = null;
-    premios.forEach(function (p) { if (!proximo && !p.alcanzado) proximo = p; });
+    /* El próximo es el primero que le FALTA, no el primero que no le dan: el
+       que ya canjeó este año tampoco "le alcanza", y sin este filtro la
+       tarjeta decía "con 0 puntos más llegás al accesorio". */
+    premios.forEach(function (p) { if (!proximo && !p.alcanzado && !p.agotado) proximo = p; });
 
     var avance = proximo ? Math.min(100, Math.round(puntos * 100 / proximo.puntos)) : 100;
+
+    var bonus = cartelHoy(t);
 
     /* Sin artículos delante del premio ("el perfume", "la remera"): el
        nombre lo escribe Mauricio en la base y el género no se sabe desde
@@ -1073,6 +1094,7 @@
       '<div class="caja">' +
         '<h2>Tus puntos</h2>' +
         '<div class="cuenta"><b>' + miles(puntos) + '</b><span>puntos</span></div>' +
+        bonus +
         mensaje +
         (premios.length ? '<div class="barra"><i style="width:' + avance + '%"></i></div>' : '') +
         nivelHtml +
@@ -1124,6 +1146,61 @@
    * El viaje se hace igual y en silencio: deja la promo cargada, así tocar
    * Promos es instantáneo. Si falla, la tarjeta ni se entera.
    */
+  /**
+   * El cartel de "hoy suma más", o nada.
+   *
+   * Cuatro casos, y el saludo gana siempre: si hoy es su cumpleaños, el
+   * título es "¡Feliz cumple!" aunque el doble venga por el Hot Sale. Lo que
+   * suma y hasta cuándo va abajo, dicho con palabras: "el doble" se entiende
+   * de un vistazo, "2x" hay que pensarlo.
+   */
+  function cartelHoy(t) {
+    var hoy = t.hoy || {};
+    var extra = Number(hoy.extra) || 1;
+    if (extra <= 1 && !hoy.es_cumple) { return ''; }
+
+    var cuanto = extra === 2 ? 'el doble' : extra === 3 ? 'el triple' : coma(extra) + ' veces más';
+    var hastaCuando = !hoy.hasta ? ''
+      : hoy.hasta === hoyISO() ? ', solo por hoy'
+      : ', hasta el ' + fecha(hoy.hasta);
+    var nombre = esc(String(t.nombre || '').split(' ')[0]);
+
+    var titulo, texto;
+    if (hoy.es_cumple) {
+      titulo = '¡Feliz cumple, ' + nombre + '!';
+      texto = extra <= 1 ? 'Que lo pases lindo.'
+            : hoy.cumple ? 'Toda tu semana de cumple tus compras suman ' + cuanto + hastaCuando + '.'
+            : 'Y hoy tus compras suman ' + cuanto + ' por ' + esc(hoy.motivo) + hastaCuando + '.';
+    } else if (hoy.cumple) {
+      titulo = 'Es tu semana de cumple';
+      texto = 'Tus compras suman ' + cuanto + hastaCuando + '.';
+    } else {
+      titulo = 'Tus compras suman ' + cuanto;
+      texto = esc(hoy.motivo || 'Puntos extra') + hastaCuando + '.';
+    }
+
+    var icono = (hoy.es_cumple || hoy.cumple)
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
+        '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>' +
+        '<path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>';
+
+    return '<div class="hoy-bonus">' + icono + '<div><b>' + titulo + '</b>' +
+           '<span>' + texto + '</span></div></div>';
+  }
+
+  /* Hoy como "2026-09-27", en la hora del teléfono. Es con lo que se compara
+     el "hasta" que manda la base, que ya viene en días de Argentina. */
+  function hoyISO() {
+    var d = new Date();
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
+           ('0' + d.getDate()).slice(-2);
+  }
+
   /* 12.300 y no 12300: los miles con punto, como se escriben acá. */
   function miles(n) { return Math.round(Number(n) || 0).toLocaleString('es-AR'); }
 
