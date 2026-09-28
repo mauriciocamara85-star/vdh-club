@@ -994,7 +994,7 @@
 
     var avance = proximo ? Math.min(100, Math.round(puntos * 100 / proximo.puntos)) : 100;
 
-    var bonus = cartelHoy(t);
+    var bonus = cartelCumple(t) + cartelHoy(t);
 
     /* Sin artículos delante del premio ("el perfume", "la remera"): el
        nombre lo escribe Mauricio en la base y el género no se sabe desde
@@ -1068,6 +1068,7 @@
     var movs = (t.ultimas || []).map(function (m) {
       var titulo;
       if (m.tipo === 'compra') { titulo = 'Compra en ' + nombreLocal(m.local); }
+      else if (m.concepto === 'regalo_cumple') { titulo = 'Regalo de cumple: ' + (m.obs || ''); }
       else if (m.tipo === 'canje') { titulo = 'Te llevaste: ' + (m.obs || 'un premio'); }
       else if (m.concepto === 'bienvenida') { titulo = 'Regalo de bienvenida'; }
       else if (m.concepto === 'vencimiento') { titulo = 'Puntos vencidos'; }
@@ -1076,7 +1077,7 @@
       return '<div class="mov"><div><b>' + esc(titulo) + '</b>' +
                '<span>' + fecha(m.cuando) + '</span></div>' +
              '<em class="' + (n >= 0 ? 'mas' : 'menos') + '">' +
-               (n > 0 ? '+' : n < 0 ? '−' : '') + miles(Math.abs(n)) + '</em></div>';
+               (n === 0 ? '' : (n > 0 ? '+' : '−') + miles(Math.abs(n))) + '</em></div>';
     }).join('');
 
     var html =
@@ -1147,6 +1148,32 @@
    * Promos es instantáneo. Si falla, la tarjeta ni se entera.
    */
   /**
+   * El regalo de cumpleaños, o nada.
+   *
+   * Aparece desde 7 días antes del cumple hasta el día mismo, que es cuando
+   * vale el regalo. El saludo cambia el día del cumple; el resto de la
+   * semana es "se viene". Y el día del cumple dice que es el último día,
+   * porque lo es.
+   */
+  function cartelCumple(t) {
+    var c = t.cumple || {};
+    if (!c.vale) { return ''; }
+    var nombre = esc(String(t.nombre || '').split(' ')[0]);
+    var titulo = c.es_hoy ? '¡Feliz cumple, ' + nombre + '!' : 'Se viene tu cumple, ' + nombre;
+    var texto = c.usado
+      ? 'Ya usaste tu regalo. ¡Que lo disfrutes!'
+      : 'Tu regalo: ' + esc(c.texto) + '. Pedilo en la caja de cualquier local' +
+        (c.es_hoy ? ', hoy es el último día.' : ' hasta el ' + fecha(c.hasta) + '.');
+    var regalo = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
+      '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>' +
+      '<path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
+    return '<div class="hoy-bonus">' + regalo + '<div><b>' + titulo + '</b>' +
+           '<span>' + texto + '</span></div></div>';
+  }
+
+  /**
    * El cartel de "hoy suma más", o nada.
    *
    * Cuatro casos, y el saludo gana siempre: si hoy es su cumpleaños, el
@@ -1155,9 +1182,11 @@
    * de un vistazo, "2x" hay que pensarlo.
    */
   function cartelHoy(t) {
+    /* Sólo los puntos extra. El saludo de cumpleaños lo da cartelCumple(),
+       que es donde está el regalo; acá se repetiría. */
     var hoy = t.hoy || {};
     var extra = Number(hoy.extra) || 1;
-    if (extra <= 1 && !hoy.es_cumple) { return ''; }
+    if (extra <= 1) { return ''; }
 
     var cuanto = extra === 2 ? 'el doble' : extra === 3 ? 'el triple' : coma(extra) + ' veces más';
     var hastaCuando = !hoy.hasta ? ''
@@ -1166,12 +1195,7 @@
     var nombre = esc(String(t.nombre || '').split(' ')[0]);
 
     var titulo, texto;
-    if (hoy.es_cumple) {
-      titulo = '¡Feliz cumple, ' + nombre + '!';
-      texto = extra <= 1 ? 'Que lo pases lindo.'
-            : hoy.cumple ? 'Toda tu semana de cumple tus compras suman ' + cuanto + hastaCuando + '.'
-            : 'Y hoy tus compras suman ' + cuanto + ' por ' + esc(hoy.motivo) + hastaCuando + '.';
-    } else if (hoy.cumple) {
+    if (hoy.cumple) {
       titulo = 'Es tu semana de cumple';
       texto = 'Tus compras suman ' + cuanto + hastaCuando + '.';
     } else {
@@ -1179,7 +1203,7 @@
       texto = esc(hoy.motivo || 'Puntos extra') + hastaCuando + '.';
     }
 
-    var icono = (hoy.es_cumple || hoy.cumple)
+    var icono = hoy.cumple
       ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
         'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
         '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
