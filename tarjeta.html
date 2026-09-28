@@ -729,6 +729,27 @@
     padding-bottom: 14px;
   }
 
+  /* ── La ayuda, como en la app de King ──
+     Dos renglones y nada más: "¿Te quedaron dudas?" y "¿Necesitás ayuda?".
+     Las siete preguntas abiertas de entrada eran una pared que empujaba la
+     tarjeta hacia arriba; ahora están a un toque, para el que las busca. */
+  .ayuda { padding: 6px 20px; }
+  .ayuda-fila {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    width: 100%; padding: 14px 0;
+    border: 0; background: none; text-align: left; cursor: pointer;
+    color: var(--txt); text-decoration: none; font: inherit;
+  }
+  .ayuda-fila + .ayuda-fila, .ayuda-lista + .ayuda-fila { border-top: 1px solid var(--linea); }
+  .ayuda-fila b { display: block; font: 700 16.5px/1.3 var(--display); letter-spacing: -.2px; }
+  .ayuda-fila span { display: block; font-size: 14.5px; color: var(--txt-2); margin-top: 2px; }
+  .ayuda-fila svg { width: 20px; height: 20px; flex: none; color: var(--txt-3); transition: transform .2s ease; }
+  .ayuda-fila[aria-expanded="true"] svg { transform: rotate(90deg); }
+  .ayuda-lista { padding-bottom: 6px; }
+  /* ⚠ Por las dudas, como las otras capas del archivo: si algún día esto
+     recibe un display, el hidden del marcado deja de esconderla. */
+  .ayuda-lista[hidden] { display: none; }
+
   .btn-wsp {
     display: flex; align-items: center; justify-content: center; gap: 9px;
     width: 100%; margin-top: 16px;
@@ -1057,7 +1078,7 @@
 
     var avance = proximo ? Math.min(100, Math.round(puntos * 100 / proximo.puntos)) : 100;
 
-    var bonus = cartelCumple(t) + cartelHoy(t);
+    var bonus = cartelNivel(t) + cartelCumple(t) + cartelHoy(t);
 
     /* Sin artículos delante del premio ("el perfume", "la remera"): el
        nombre lo escribe Mauricio en la base y el género no se sabe desde
@@ -1196,6 +1217,13 @@
     $('cargando').hidden = true;
     socioCodigo = t;
     if ($('btnCodigo')) { $('btnCodigo').onclick = abrirCodigo; }
+    if ($('btnDudas')) {
+      $('btnDudas').onclick = function () {
+        var abierta = $('btnDudas').getAttribute('aria-expanded') === 'true';
+        $('btnDudas').setAttribute('aria-expanded', abierta ? 'false' : 'true');
+        $('listaDudas').hidden = abierta;
+      };
+    }
     engancharFilaInstalar();
     ofrecerInstalar();
     precargarPromo();
@@ -1214,6 +1242,31 @@
    * El viaje se hace igual y en silencio: deja la promo cargada, así tocar
    * Promos es instantáneo. Si falla, la tarjeta ni se entera.
    */
+  /**
+   * "¡Pasaste a Oro!", durante una semana después de subir, o nada.
+   *
+   * Sale del movimiento del regalo (concepto 'bono_nivel'), no de comparar
+   * niveles: así dice exactamente lo que le regalaron, y deja de aparecer
+   * solo a los siete días.
+   */
+  function cartelNivel(t) {
+    var m = null;
+    (t.ultimas || []).forEach(function (x) {
+      if (!m && x.concepto === 'bono_nivel') { m = x; }
+    });
+    if (!m || (Date.now() - new Date(m.cuando).getTime()) > 7 * 864e5) { return ''; }
+    var nivel = String(m.obs || '').replace(/^Llegaste a /, '');
+    var multi = Number(t.nivel && t.nivel.multiplica) || 1;
+    var trofeo = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/>' +
+      '<path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>';
+    return '<div class="hoy-bonus">' + trofeo + '<div><b>¡Pasaste a ' + esc(nivel) + '!</b>' +
+           '<span>Te regalamos ' + miles(m.puntos) + ' puntos' +
+           (multi > 1 ? '. Ahora sumás ' + coma(multi) + ' puntos por cada $100.' : '.') +
+           '</span></div></div>';
+  }
+
   /**
    * El regalo de cumpleaños, o nada.
    *
@@ -1715,14 +1768,25 @@
       'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
       '<path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1 1 21 11.5Z"/></svg>';
 
-    return '<div class="caja">' +
-      '<h2>Dudas</h2>' +
-      PREGUNTAS.map(function (p) {
-        return '<details class="faq"><summary>' + esc(p[0]) + '</summary>' +
-               '<p>' + esc(p[1]) + '</p></details>';
-      }).join('') +
-      '<a class="btn-wsp" target="_blank" rel="noopener" href="' + esc(wsp) + '">' +
-        icono + 'Escribinos por WhatsApp</a>' +
+    var flecha = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+
+    /* Cerradas, como en la app de King: el renglón se toca y abajo aparecen
+       las preguntas. El WhatsApp pasa a ser un renglón más y no un botón
+       verde enorme: sigue estando, pero no grita. */
+    return '<div class="caja ayuda">' +
+      '<button type="button" class="ayuda-fila" id="btnDudas" aria-expanded="false" aria-controls="listaDudas">' +
+        '<div><b>¿Te quedaron dudas?</b><span>Preguntas frecuentes</span></div>' + flecha +
+      '</button>' +
+      '<div class="ayuda-lista" id="listaDudas" hidden>' +
+        PREGUNTAS.map(function (p) {
+          return '<details class="faq"><summary>' + esc(p[0]) + '</summary>' +
+                 '<p>' + esc(p[1]) + '</p></details>';
+        }).join('') +
+      '</div>' +
+      '<a class="ayuda-fila" target="_blank" rel="noopener" href="' + esc(wsp) + '">' +
+        '<div><b>¿Necesitás ayuda?</b><span>Escribinos por WhatsApp</span></div>' + flecha +
+      '</a>' +
     '</div>';
   }
 
