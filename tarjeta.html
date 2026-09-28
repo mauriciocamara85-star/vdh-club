@@ -49,23 +49,27 @@
      --txt-2 9,9:1 y --txt-3, el más flojo, 7,1:1 — sólo para etiquetas. */
   :root {
     color-scheme: light;
-    --bg:      #F5F3EE;
+    /* 29/09/2026, mirándola en su celular: quedaba pálida, todo en beige y
+       gris claro. El fondo pasó a un blanco cálido más limpio, los cantos y
+       las pistas a un gris neutro, y el verde (profundo, no oliva) es el
+       único color: progreso, "te alcanza" y las acciones de los premios. */
+    --bg:      #F7F6F3;
     --hoja:    #FFFFFF;
     --txt:     #1C1C1A;
     --txt-2:   #46433E;
     --txt-3:   #5A5750;
     /* El canto de las tarjetas blancas: sobre el blanco cálido, sin él se
        funden con el brillo bajo. */
-    --linea:   #DDD5C6;
+    --linea:   #E0DCD4;
     --acc:     #1C1C1A;
     --acc-2:   #2E2D2A;
-    --acc-soft:#ECE5D8;
+    --acc-soft:#EFEDE8;
     --acc-txt: #1C1C1A;
-    --ok:      #465022;
-    --ok-soft: #EEF0E3;
-    --ok-borde:#D5DABF;
-    --ok-ico:  #DDE2C8;
-    --pista:   #ECE5D8;
+    --ok:      #1E5A3E;
+    --ok-soft: #EAF3EE;
+    --ok-borde:#C4DCCD;
+    --ok-ico:  #D3E6DA;
+    --pista:   #E9E6E0;
     --pista-2: #1C1C1A;
     /* El fondo de las fotos de producto. No se llama --foto: ése lo usan
        las promos para pasar la dirección de su imagen. */
@@ -115,9 +119,9 @@
   .campana {
     position: relative;
     flex-shrink: 0;
-    width: 40px; height: 40px;
+    width: 38px; height: 38px;
     display: grid; place-items: center;
-    border: 1.5px solid var(--linea);
+    border: 1px solid var(--linea);
     border-radius: 50%;
     background: var(--hoja);
     color: var(--txt);
@@ -132,10 +136,11 @@
   .cab-botones { display: flex; gap: 8px; align-items: center; }
   .campana svg { width: 20px; height: 20px; }
 
+  /* Prendida, la campana se llena; el círculo sigue blanco. Era un círculo
+     negro y en el celular le competía a la tarjeta (29/09/2026): prendida
+     o apagada es un detalle, no lo primero que se mira. */
   .campana.si {
-    background: var(--txt);
-    border-color: var(--txt);
-    color: var(--hoja);
+    color: var(--txt);
   }
 
   /* ── El cartel de los avisos ──
@@ -310,9 +315,32 @@
     animation: brillo 1.1s ease .2s 1 both;
   }
   @keyframes brillo { to { transform: translateX(60%); } }
-  .carnet.nv-plata   { background: linear-gradient(135deg, #F2F3F5 0%, #C7CBD1 52%, #E6E8EB 100%); color: #1C1C1A; }
-  .carnet.nv-oro     { background: linear-gradient(135deg, #F2E1B3 0%, #CFA95A 52%, #E9CF95 100%); color: #1F180A; }
-  .carnet.nv-platino { background: linear-gradient(135deg, #34332F 0%, #1A1A18 55%, #43413C 100%); color: #F1EEE7; }
+  /* Los tres metales. La plata era casi blanca y en el celular se fundía
+     con el fondo (29/09/2026): ahora es acero medio, con una luz arriba a
+     la izquierda y una banda clara en diagonal, como el dorado. Un canto
+     de luz adentro y la sombra de abajo le dan el espesor de una tarjeta. */
+  .carnet.nv-plata {
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 55%),
+      linear-gradient(135deg, #C9CDD3 0%, #979DA6 34%, #C3C7CD 52%, #8B919A 78%, #A9AEB6 100%);
+    color: #121417;
+  }
+  .carnet.nv-oro {
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, .45) 0%, rgba(255, 255, 255, 0) 55%),
+      linear-gradient(135deg, #EED79E 0%, #C99A3E 36%, #E6C47A 54%, #B8872E 80%, #D9B263 100%);
+    color: #1A1406;
+  }
+  .carnet.nv-platino {
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 55%),
+      linear-gradient(135deg, #3A3935 0%, #1A1A18 55%, #46443F 100%);
+    color: #F1EEE7;
+  }
+  .carnet.nv-plata, .carnet.nv-oro, .carnet.nv-platino {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), inset 0 -1px 0 rgba(0, 0, 0, .12),
+                0 2px 4px rgba(28, 28, 26, .10), 0 16px 32px -14px rgba(28, 28, 26, .45);
+  }
   .carnet-arriba { display: flex; justify-content: space-between; align-items: flex-start; }
   .carnet-vdh { display: block; font: 700 30px/1 var(--sans); letter-spacing: .04em; }
   .carnet-club { display: block; margin-top: 6px; font: 600 11px/1 var(--sans); letter-spacing: .3em; text-transform: uppercase; }
@@ -457,7 +485,9 @@
   .barra { height: 10px; border-radius: 999px; background: var(--pista); margin-top: 12px; overflow: hidden; }
   .barra i {
     display: block; height: 100%; border-radius: inherit;
-    background: linear-gradient(90deg, var(--acc), var(--acc-2));
+    /* Verde: el avance es una buena noticia, y el verde es el color de lo
+       que suma en toda la tarjeta. */
+    background: var(--ok);
   }
   /* La del nivel es otra cosa y se tiene que ver distinta: fina y negra.
      Dos barras rojas iguales una abajo de la otra se leen como la misma. */
@@ -1550,7 +1580,7 @@
         '<span class="carnet-arriba"><span><span class="carnet-vdh">VDH</span><span class="carnet-club">Club</span></span>' +
           '<span class="carnet-nivel">' + esc(nv.nombre) + '</span></span>' +
         '<span class="carnet-abajo"><span><span class="carnet-nom">' + esc(t.nombre) + '</span>' +
-          '<span class="carnet-desde">En el Club desde ' + mesAnio(t.desde) + '</span></span>' +
+          '<span class="carnet-desde">Socio desde ' + mesAnio(t.desde) + '</span></span>' +
           '<span class="carnet-num">•••• ' + esc(cod.slice(-4)) + '</span></span>' +
       '</button>' +
       botonCodigo() +
@@ -1715,9 +1745,14 @@
   }
 
   /* "agosto de 2026". */
+  /* "sep. 2026", corto para que entre en un renglón: con "septiembre de
+     2026" el año quedaba solo abajo. A mano y no con toLocaleDateString,
+     que según el teléfono escribe "sept." o "sep" sin punto. */
   function mesAnio(iso) {
-    try { return new Date(iso).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }); }
-    catch (e) { return ''; }
+    var d = new Date(iso);
+    if (isNaN(d)) { return ''; }
+    return ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'][d.getMonth()] +
+           '. ' + d.getFullYear();
   }
 
   /* El saldo cuenta hasta su número al entrar. Sin esto en quien pidió
