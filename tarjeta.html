@@ -277,6 +277,53 @@
   }
   .carnet-pie { font-size: 12.5px; opacity: .85; margin-top: 11px; text-align: center; }
 
+  /* ── El botón del código ──
+     Blanco sobre el carnet negro: es lo único que se toca en la caja y
+     tiene que encontrarse sin buscarlo. Grande, al alcance del pulgar. */
+  .btn-codigo {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; margin-top: 14px; min-height: 52px;
+    border: 0; border-radius: var(--r-sm);
+    background: #fff; color: #16181B;
+    font: 700 16px var(--sans); cursor: pointer;
+    box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .6);
+  }
+  .btn-codigo svg { width: 22px; height: 22px; }
+
+  /* ── El código, a pantalla completa ──
+     BLANCO de lado a lado y no una tarjeta flotando sobre la pantalla: la
+     pistola lee por contraste, y un código grande sobre blanco, sin nada
+     alrededor, es lo más fácil de leer que se le puede poner adelante. Por
+     encima de todo, barra y avisos incluidos. */
+  .hoja-codigo {
+    position: fixed; inset: 0; z-index: 100;
+    background: #fff; color: #16181B;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: calc(env(safe-area-inset-top) + 24px) 16px calc(env(safe-area-inset-bottom) + 24px);
+    text-align: center;
+    animation: tapaEntra .18s ease-out;
+  }
+  /* ⚠ Igual que .tapa: el display de arriba le gana al hidden del HTML. Sin
+     esta línea la hoja blanca tapa la tarjeta desde que carga la página. */
+  .hoja-codigo[hidden] { display: none; }
+  .hc-nombre { font: 700 22px/1.2 var(--display); letter-spacing: -.4px; }
+  .hc-nivel { margin-top: 8px; }
+  /* El código ocupa el ancho: más ancho = barras más gruesas = lee mejor. */
+  .hc-barras { width: 100%; max-width: 560px; margin-top: 28px; }
+  .hc-numero {
+    display: block; margin-top: 12px;
+    font: 700 clamp(24px, 7.5vw, 34px)/1 var(--display);
+    letter-spacing: 2px; font-variant-numeric: tabular-nums;
+  }
+  .hc-pie { margin-top: 22px; font-size: 14.5px; color: var(--txt-2); }
+  .hc-x {
+    position: absolute; top: calc(env(safe-area-inset-top) + 12px); right: 12px;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid var(--linea); background: #fff; color: #16181B;
+    display: grid; place-items: center; cursor: pointer;
+  }
+  .hc-x svg { width: 20px; height: 20px; }
+
   /* ── El avance ── */
   .caja {
     background: var(--hoja);
@@ -838,6 +885,22 @@
   </section>
 </main>
 
+<!-- ── El código, a pantalla completa ──
+     Se abre con "Mostrar mi código" o con el botón rojo del medio de la
+     barra. La X va en el marcado y no la dibuja el script: la salida de algo
+     que tapa toda la pantalla no puede depender de que el resto funcione. -->
+<div class="hoja-codigo" id="hojaCodigo" hidden role="dialog" aria-modal="true" aria-label="Tu código">
+  <button type="button" class="hc-x" id="hcX" aria-label="Cerrar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+         stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <div class="hc-nombre" id="hcNombre"></div>
+  <div class="hc-nivel" id="hcNivel"></div>
+  <div class="hc-barras" id="hcBarras"></div>
+  <b class="hc-numero" id="hcNumero"></b>
+  <p class="hc-pie">Mostralo en la caja antes de pagar</p>
+</div>
+
 <!-- ── "Tu tarjeta, siempre a mano" ──
      Cuelga arriba de la barra y NO tapa el carnet: lo que se ve al entrar
      sigue siendo la tarjeta. Arranca oculto; lo prende el script y sólo si
@@ -1086,10 +1149,12 @@
           '<div class="carnet-nom">' + esc(t.nombre) + '</div>' +
           '<div class="carnet-desde">Socio desde ' + fecha(t.desde) + '</div>' +
         '</div>' + chipNivel(nv.nombre) + '</div>' +
-        '<div class="barras">' + codigoDeBarras(t.codigo, 84) +
-          '<b class="numero">' + codigoBonito(t.codigo) + '</b>' +
-        '</div>' +
-        '<div class="carnet-pie">Mostralo en la caja cuando comprés</div>' +
+        /* El código ya no vive acá: está a un toque, a pantalla completa. Así
+           lo primero que se ve al abrir son los puntos y los premios. */
+        '<button type="button" class="btn-codigo" id="btnCodigo">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+          'stroke-linecap="round" aria-hidden="true"><path d="M4 5v14M7 5v14M10 5v14M14 5v14' +
+          'M16 5v14M20 5v14"/></svg>Mostrar mi código</button>' +
       '</div>' +
 
       '<div class="caja">' +
@@ -1129,6 +1194,8 @@
     $('todo').innerHTML = html;
     $('todo').hidden = false;
     $('cargando').hidden = true;
+    socioCodigo = t;
+    if ($('btnCodigo')) { $('btnCodigo').onclick = abrirCodigo; }
     engancharFilaInstalar();
     ofrecerInstalar();
     precargarPromo();
@@ -1709,12 +1776,89 @@
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
-    b.onclick = function () { irA(b.dataset.vista, true); };
+    b.onclick = function () {
+      /* El botón rojo del medio, estando ya en la tarjeta, abre el código.
+         Es el que el cliente va a tocar por reflejo parado en la caja. */
+      if (b.dataset.vista === 'tarjeta' && $('vTarjeta') && !$('vTarjeta').hidden && socioCodigo) {
+        abrirCodigo();
+        return;
+      }
+      irA(b.dataset.vista, true);
+    };
   });
 
   window.addEventListener('popstate', function (e) {
+    /* "Atrás" con el código abierto lo cierra, en vez de salirse de la app
+       o cambiar de pestaña por debajo. */
+    var hoja = $('hojaCodigo');
+    if (hoja && !hoja.hidden) { cerrarCodigo(true); return; }
     irA((e.state && e.state.v) || (location.hash || '').replace('#', '') || 'tarjeta', false);
   });
+
+  /* ═══ El código, a pantalla completa ══════════════════════════════════ */
+
+  /* El socio que está pintado. Lo pone pintar(). Va como var suelta y se
+     lee sólo desde funciones que corren después de pintar(), así que el
+     izado no la deja en undefined cuando importa. */
+  var socioCodigo = null;
+  var trabaPantalla = null;
+
+  function abrirCodigo() {
+    var hoja = $('hojaCodigo');
+    var t = socioCodigo;
+    if (!hoja || !t) { return; }
+    $('hcNombre').textContent = t.nombre || '';
+    $('hcNivel').innerHTML = chipNivel((t.nivel && t.nivel.nombre) || 'Plata');
+    /* Se dibuja al abrir y no al cargar: si la tarjeta se actualizó por
+       detrás, el código es el de ahora. */
+    /* 150 de alto: una pistola que llega torcida lee mejor barras largas. */
+    $('hcBarras').innerHTML = codigoDeBarras(t.codigo, 150);
+    $('hcNumero').textContent = codigoBonito(t.codigo);
+    hoja.hidden = false;
+
+    /* Una entrada en el historial, así el "atrás" del celular la cierra. */
+    try { history.pushState({ v: 'tarjeta', codigo: true }, '', location.pathname + location.search); }
+    catch (e) { /* en file:// no hay historial; se cierra con la X */ }
+
+    /* Que la pantalla no se apague mientras el vendedor escanea. No todos
+       los navegadores lo permiten; si no, se apaga cuando se apagaría igual.
+       El brillo no se puede subir desde una página: ninguno lo deja. */
+    try {
+      if (navigator.wakeLock && navigator.wakeLock.request) {
+        navigator.wakeLock.request('screen')
+          .then(function (w) { trabaPantalla = w; })
+          .catch(function () {});
+      }
+    } catch (e) {}
+  }
+
+  /* desdeAtras: la cerró el botón "atrás", que ya sacó su entrada del
+     historial. Si la cerró la X, hay que sacarla a mano — si no, el próximo
+     "atrás" no haría nada visible y parecería roto. */
+  function cerrarCodigo(desdeAtras) {
+    var hoja = $('hojaCodigo');
+    if (!hoja || hoja.hidden) { return; }
+    hoja.hidden = true;
+    try { if (trabaPantalla) { trabaPantalla.release(); } } catch (e) {}
+    trabaPantalla = null;
+    if (!desdeAtras && history.state && history.state.codigo) {
+      try { history.back(); } catch (e) {}
+    }
+  }
+
+  /* Las salidas se enganchan una vez, al cargar, fuera de cualquier rama:
+     la X, tocar el blanco fuera del código, y Escape en una computadora. */
+  (function () {
+    var hoja = $('hojaCodigo');
+    if (!hoja) { return; }
+    if ($('hcX')) { $('hcX').onclick = function () { cerrarCodigo(false); }; }
+    hoja.onclick = function (ev) {
+      if (ev.target === hoja) { cerrarCodigo(false); }
+    };
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape') { cerrarCodigo(false); }
+    });
+  })();
 
   /* ── Promociones, a pantalla completa ──
      Sale de la misma función que el cartel de la tarjeta, así que la fecha
