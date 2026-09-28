@@ -5,7 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>VDH Club</title>
 <meta name="description" content="Sumate al Club VDH: sumá puntos en cada compra y canjealos por productos VDH.">
-<meta name="theme-color" content="#EDEEF0">
+<meta name="theme-color" content="#0A0B0D">
+<!-- El mismo tema que la tarjeta, decidido antes de pintar. No hay botón
+     acá: el alta se hace una vez, y el tema se cambia desde la tarjeta. Lo
+     que se elija allá vale para las dos. Oscuro si nunca se eligió. -->
+<script>
+  (function () {
+    var t = 'dark';
+    try { t = localStorage.getItem('vdh_club_tema') === 'light' ? 'light' : 'dark'; } catch (e) {}
+    document.documentElement.setAttribute('data-tema', t);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) { m.setAttribute('content', t === 'light' ? '#EDEEF0' : '#0A0B0D'); }
+  })();
+</script>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,6 +54,31 @@
     --r-sm:    14px;
     --sans:    'DM Sans', system-ui, -apple-system, sans-serif;
     --display: 'Space Grotesk', var(--sans);
+
+    /* Los mismos que la tarjeta: ver tarjeta.html. */
+    --acc-txt:  #B51222;
+    --campo:    #FFFFFF;
+    --mal-bg:   #FDF2F3;
+    --mal-borde:#F3CFD3;
+  }
+
+  /* El modo oscuro, con los mismos colores y el mismo contraste medido que
+     la tarjeta (el texto más flojo, 7,8 a 1 contra la hoja). */
+  :root[data-tema="dark"] {
+    color-scheme: dark;
+    --bg:      #0A0B0D;
+    --hoja:    #16181C;
+    --txt:     #F3F4F6;
+    --txt-2:   #C4C8CE;
+    --txt-3:   #A7ACB4;
+    --linea:   #2B2E34;
+    --acc-txt: #FF7A84;
+    --acc-soft: rgba(255, 122, 132, .14);
+    --ok:      #4ADE93;
+    --mal:     #FF8A93;
+    --campo:   #0F1114;
+    --mal-bg:  rgba(255, 138, 147, .10);
+    --mal-borde: rgba(255, 138, 147, .40);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
@@ -75,10 +112,15 @@
   .bajada { font-size: 16.5px; color: var(--txt-2); margin: 12px 0 6px; }
   .donde {
     display: inline-block; margin-top: 14px;
-    background: var(--acc-soft); color: var(--acc);
+    background: var(--acc-soft); color: var(--acc-txt);
     border-radius: 999px; padding: 6px 14px;
     font-size: 13.5px; font-weight: 600;
   }
+  /* ⚠ La misma trampa del panel de avisos de la tarjeta: el display de
+     arriba le gana al hidden del marcado, y sin esta línea, entrando sin
+     local, quedaba una pastilla vacía abajo del texto. En claro casi no se
+     veía; en oscuro sí. */
+  .donde[hidden] { display: none; }
 
   .caja {
     background: var(--hoja);
@@ -96,7 +138,7 @@
      otros. Pasó al sumar el mail. */
   input[type=text], input[type=tel], input[type=date], input[type=email] {
     width: 100%;
-    background: #fff;
+    background: var(--campo);
     border: 1.5px solid var(--linea);
     border-radius: var(--r-sm);
     /* 16px exactos: con menos, iOS hace zoom solo al tocar el campo. */
@@ -105,7 +147,7 @@
     padding: 14px 15px;
     outline: none;
   }
-  input:focus { border-color: var(--acc); box-shadow: 0 0 0 4px rgba(181, 18, 34, .14); }
+  input:focus { border-color: var(--acc-txt); box-shadow: 0 0 0 4px rgba(181, 18, 34, .14); }
   .campo + .campo { margin-top: 15px; }
 
   /* La casilla de promociones. Grande y con el texto entero al lado: un
@@ -116,7 +158,7 @@
     border-top: 1px solid var(--linea);
     font-size: 14.5px; color: var(--txt-2); line-height: 1.5;
   }
-  .acepta input { width: 22px; height: 22px; flex: none; margin-top: 1px; accent-color: var(--acc); }
+  .acepta input { width: 22px; height: 22px; flex: none; margin-top: 1px; accent-color: var(--acc-txt); }
 
   .btn {
     width: 100%; margin-top: 22px;
@@ -132,16 +174,16 @@
   .btn:active { transform: scale(.99); }
 
   .msg { margin-top: 16px; font-size: 14.5px; line-height: 1.5; border-radius: var(--r-sm); padding: 14px 15px; }
-  .msg.mal { background: #FDF2F3; color: var(--mal); border: 1px solid #F3CFD3; }
+  .msg.mal { background: var(--mal-bg); color: var(--mal); border: 1px solid var(--mal-borde); }
 
   .letra-chica { font-size: 12.5px; color: var(--txt-3); margin-top: 20px; line-height: 1.6; text-align: center; }
-  .letra-chica a { color: var(--acc); }
+  .letra-chica a { color: var(--acc-txt); }
 
   .pasos { margin-top: 26px; display: grid; gap: 14px; }
   .paso { display: flex; gap: 13px; align-items: flex-start; }
   .paso b {
     width: 27px; height: 27px; flex: none; border-radius: 9px;
-    background: var(--acc-soft); color: var(--acc);
+    background: var(--acc-soft); color: var(--acc-txt);
     display: grid; place-items: center;
     font: 700 14px var(--display);
   }

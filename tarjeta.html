@@ -5,7 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>VDH Club</title>
 <meta name="description" content="Tu tarjeta del Club VDH: mostrala en la caja.">
-<meta name="theme-color" content="#EDEEF0">
+<meta name="theme-color" content="#0A0B0D">
+<!-- El tema se decide ACÁ, antes de que el navegador pinte nada. Si se
+     decidiera más abajo, quien eligió el oscuro vería un fogonazo blanco
+     cada vez que abre la tarjeta.
+
+     Oscuro por defecto y la elección queda guardada, como en las otras apps
+     de VDH. No sigue al tema del teléfono: el oscuro es el de la marca. -->
+<script>
+  (function () {
+    var t = 'dark';
+    try { t = localStorage.getItem('vdh_club_tema') === 'light' ? 'light' : 'dark'; } catch (e) {}
+    document.documentElement.setAttribute('data-tema', t);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) { m.setAttribute('content', t === 'light' ? '#EDEEF0' : '#0A0B0D'); }
+  })();
+</script>
 <!-- Agregada a la pantalla de inicio, se abre sin la barra del navegador:
      es lo que hace que se sienta la tarjeta y no una página guardada.
 
@@ -46,6 +61,50 @@
     --r-sm:    14px;
     --sans:    'DM Sans', system-ui, -apple-system, sans-serif;
     --display: 'Space Grotesk', var(--sans);
+
+    /* El rojo como TEXTO va aparte del rojo de relleno. En claro son el
+       mismo; en oscuro, el rojo de VDH sobre negro no se lee (2,6 a 1) y
+       para letras hace falta uno más claro. Los botones rojos siguen con el
+       de la marca. */
+    --acc-txt:  #B51222;
+    --pista:    #ECEDF0;
+    --pista-2:  #2A2D31;
+    --ok-borde: #A7D9BF;
+    --ok-ico:   #CDEBDC;
+    --mal-bg:   #FDF2F3;
+    --mal-txt:  #A00F1E;
+    --mal-borde:#F3CFD3;
+    --carnet-borde: transparent;
+  }
+
+  /* ── El modo oscuro ──
+     Medido contra la tarjeta, que es donde vive casi todo el texto: el más
+     flojo (--txt-3) da 7,8 a 1, el rojo de texto 7,1, el verde 10,3. La
+     tarjeta y el fondo se parecen (1,1 a 1) y lo que las separa es el
+     borde, como en las otras apps.
+
+     El código de barras NO cambia: su hoja sigue blanca. La pistola lee por
+     contraste y negro sobre blanco es lo que mejor lee. */
+  :root[data-tema="dark"] {
+    color-scheme: dark;
+    --bg:      #0A0B0D;
+    --hoja:    #16181C;
+    --txt:     #F3F4F6;
+    --txt-2:   #C4C8CE;
+    --txt-3:   #A7ACB4;
+    --linea:   #2B2E34;
+    --acc-txt: #FF7A84;
+    --acc-soft: rgba(255, 122, 132, .14);
+    --ok:      #4ADE93;
+    --ok-soft: rgba(74, 222, 147, .12);
+    --ok-borde: rgba(74, 222, 147, .45);
+    --ok-ico:  rgba(74, 222, 147, .18);
+    --pista:   #2A2D33;
+    --pista-2: #E6E8EB;
+    --mal-bg:  rgba(255, 138, 147, .10);
+    --mal-txt: #FF8A93;
+    --mal-borde: rgba(255, 138, 147, .40);
+    --carnet-borde: rgba(255, 255, 255, .09);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
@@ -90,6 +149,7 @@
      navegador que no puede notificar tiene que desaparecer de verdad. */
   .campana[hidden] { display: none; }
   .campana:hover { border-color: var(--txt-3); }
+  .cab-botones { display: flex; gap: 8px; align-items: center; }
   .campana svg { width: 20px; height: 20px; }
 
   .campana.si {
@@ -254,6 +314,9 @@
     padding: 16px;
     color: #fff;
     box-shadow: 0 16px 34px -18px rgba(22, 24, 27, .85);
+    /* En oscuro el carnet se apoya sobre un fondo casi del mismo negro: el
+       borde es lo que lo despega. En claro no hace falta. */
+    border: 1px solid var(--carnet-borde);
   }
   .carnet-nom { font: 700 20px/1.2 var(--display); letter-spacing: -.4px; }
   .carnet-desde { font-size: 12px; opacity: .8; margin-top: 2px; }
@@ -280,12 +343,23 @@
   /* ── El botón del código ──
      Blanco sobre el carnet negro: es lo único que se toca en la caja y
      tiene que encontrarse sin buscarlo. Grande, al alcance del pulgar. */
+  .carnet-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .carnet-botones > :only-child { grid-column: 1 / -1; }
+  /* El de los premios, de vidrio sobre el carnet: está, pero el blanco
+     lleno queda para el código, que es el que se usa en la caja. */
+  .btn-premios {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    min-height: 68px; border-radius: var(--r-sm);
+    border: 1px solid rgba(255, 255, 255, .32); background: rgba(255, 255, 255, .08);
+    color: #fff; font: 700 14.5px var(--sans); cursor: pointer;
+  }
+  .btn-premios svg { width: 22px; height: 22px; }
   .btn-codigo {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; margin-top: 14px; min-height: 52px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; min-height: 68px;
     border: 0; border-radius: var(--r-sm);
     background: #fff; color: #16181B;
-    font: 700 16px var(--sans); cursor: pointer;
+    font: 700 14.5px var(--sans); cursor: pointer;
     box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .6);
   }
   .btn-codigo svg { width: 22px; height: 22px; }
@@ -341,12 +415,12 @@
   .cuenta { display: flex; align-items: baseline; gap: 9px; margin-top: 4px; }
   .cuenta b {
     font: 700 clamp(38px, 12vw, 52px)/1 var(--display);
-    color: var(--acc); letter-spacing: -1.5px;
+    color: var(--acc-txt); letter-spacing: -1.5px;
     font-variant-numeric: tabular-nums;
   }
   .cuenta span { font-size: 15px; color: var(--txt-2); }
   .falta { font: 600 16.5px/1.35 var(--sans); color: var(--txt); margin-top: 10px; }
-  .falta b { color: var(--acc); font-weight: 700; }
+  .falta b { color: var(--acc-txt); font-weight: 700; }
   .falta-sub { font-size: 14px; color: var(--txt-2); margin-top: 2px; line-height: 1.45; }
   .falta-sub b { color: var(--txt); }
 
@@ -378,7 +452,7 @@
     padding: 13px 14px; border-radius: var(--r-sm);
     background: var(--hoja); border: 1px solid var(--linea);
   }
-  .extra svg { width: 22px; height: 22px; flex: none; color: var(--acc); }
+  .extra svg { width: 22px; height: 22px; flex: none; color: var(--acc-txt); }
   .extra b { display: block; font: 700 15px/1.3 var(--sans); }
   .extra span { display: block; font-size: 13px; color: var(--txt-2); margin-top: 1px; }
   .extra.ya { background: linear-gradient(135deg, var(--acc), var(--acc-2)); border-color: transparent; color: #fff; }
@@ -387,7 +461,7 @@
   .hoy-bonus b { display: block; font: 700 15px/1.3 var(--sans); }
   .hoy-bonus span { display: block; font-size: 13px; line-height: 1.4; opacity: .94; margin-top: 2px; }
 
-  .barra { height: 10px; border-radius: 999px; background: #ECEDF0; margin-top: 12px; overflow: hidden; }
+  .barra { height: 10px; border-radius: 999px; background: var(--pista); margin-top: 12px; overflow: hidden; }
   .barra i {
     display: block; height: 100%; border-radius: inherit;
     background: linear-gradient(90deg, var(--acc), var(--acc-2));
@@ -395,7 +469,7 @@
   /* La del nivel es otra cosa y se tiene que ver distinta: fina y negra.
      Dos barras rojas iguales una abajo de la otra se leen como la misma. */
   .barra-fina { height: 6px; margin-top: 10px; }
-  .barra-fina i { background: #2A2D31; }
+  .barra-fina i { background: var(--pista-2); }
 
   /* ── El nivel ──
      Tres chapas que se distinguen sin leer: gris, dorada y negra. La negra
@@ -419,6 +493,31 @@
   .nivel-multi { font-size: 13px; color: var(--txt-2); font-weight: 600; text-align: right; }
   .nivel-txt { font-size: 14px; color: var(--txt-2); margin-top: 8px; line-height: 1.45; }
   .nivel-txt b { color: var(--txt); }
+  /* ── La tarjeta del nivel ── */
+  .nivel-top { display: flex; align-items: center; gap: 14px; }
+  .trofeo {
+    width: 54px; height: 54px; flex: none; border-radius: 16px;
+    display: grid; place-items: center;
+  }
+  .trofeo svg { width: 28px; height: 28px; }
+  /* Tres metales que se reconocen sin leer. Más específicos que las chapas
+     .nv-* del carnet, que comparten el nombre. */
+  .trofeo.nv-plata   { background: linear-gradient(145deg, #EEF0F3, #A9AFB8); color: #2A2D31; }
+  .trofeo.nv-oro     { background: linear-gradient(145deg, #F8DE8E, #C6921A); color: #3A2A00; }
+  .trofeo.nv-platino { background: linear-gradient(145deg, #34373E, #0B0C0E); color: #fff;
+                       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5); }
+  .nivel-rotulo { display: block; font: 700 11.5px var(--sans); letter-spacing: .7px; text-transform: uppercase; color: var(--txt-3); }
+  .nivel-nom { display: block; font: 700 26px/1.1 var(--display); letter-spacing: -.5px; }
+  .beneficios { list-style: none; margin-top: 14px; display: grid; gap: 8px; }
+  .beneficios li { display: flex; align-items: center; gap: 10px; font-size: 14.5px; color: var(--txt-2); }
+  .beneficios li b { color: var(--txt); }
+  .beneficios svg { width: 18px; height: 18px; flex: none; color: var(--acc-txt); }
+  .nivel-pie {
+    display: flex; justify-content: space-between; margin-top: 16px;
+    font: 600 13px var(--sans); color: var(--txt-2); font-variant-numeric: tabular-nums;
+  }
+  .nivel-pie + .barra-fina { margin-top: 6px; }
+
   .nota { font-size: 12.5px; color: var(--txt-3); margin-top: 14px; }
 
   /* ── Los premios ──
@@ -452,8 +551,8 @@
     font: 700 12.5px var(--sans); color: var(--txt-3); white-space: nowrap;
   }
   .premio-est svg { width: 13px; height: 13px; }
-  .premio.listo { border-color: #A7D9BF; background: var(--ok-soft); }
-  .premio.listo .premio-ico { background: #CDEBDC; color: var(--ok); }
+  .premio.listo { border-color: var(--ok-borde); background: var(--ok-soft); }
+  .premio.listo .premio-ico { background: var(--ok-ico); color: var(--ok); }
   .premio.listo .premio-est { color: var(--ok); }
   /* Ya se lo llevó las veces que se puede por año. Apagado pero legible:
      tiene que entender por qué no se lo dan, no que desapareció. */
@@ -481,7 +580,7 @@
 
   .vacio { font-size: 14.5px; color: var(--txt-2); line-height: 1.55; }
   .letra-chica { font-size: 12.5px; color: var(--txt-3); margin-top: 22px; text-align: center; line-height: 1.6; }
-  .letra-chica a { color: var(--acc); }
+  .letra-chica a { color: var(--acc-txt); }
   .cargando { text-align: center; padding: 60px 0; color: var(--txt-3); }
 
   /* ── Las pestañas ──────────────────────────────────────────────────────
@@ -518,7 +617,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   .tab svg { width: 22px; height: 22px; }
-  .tab[aria-current="page"] { color: var(--acc); }
+  .tab[aria-current="page"] { color: var(--acc-txt); }
 
   /* La del medio: un círculo rojo que sobresale de la barra. El margen
      negativo la levanta sin sacarla de la grilla, así las otras tres siguen
@@ -658,7 +757,7 @@
   .promo-cond summary {
     display: inline-flex; align-items: center; gap: 6px;
     font: 700 14px var(--sans);
-    color: var(--acc);
+    color: var(--acc-txt);
     cursor: pointer; list-style: none;
   }
   .promo-cond summary::-webkit-details-marker { display: none; }
@@ -723,7 +822,7 @@
     font: 700 15px var(--sans);
     cursor: pointer;
   }
-  .local-cerca svg { width: 18px; height: 18px; color: var(--acc); }
+  .local-cerca svg { width: 18px; height: 18px; color: var(--acc-txt); }
   .local-cerca[disabled] { opacity: .6; }
 
   /* ── Dudas ──
@@ -742,7 +841,7 @@
   .faq summary::-webkit-details-marker { display: none; }
   .faq summary::after {
     content: "+"; flex: none;
-    font: 400 20px/1 var(--sans); color: var(--acc);
+    font: 400 20px/1 var(--sans); color: var(--acc-txt);
   }
   .faq[open] summary::after { content: "–"; }
   .faq p {
@@ -787,7 +886,7 @@
   .local-dist {
     display: inline-block;
     margin-left: 8px;
-    background: var(--acc-soft); color: var(--acc);
+    background: var(--acc-soft); color: var(--acc-txt);
     border-radius: 999px; padding: 3px 9px;
     font: 700 12.5px var(--sans);
     vertical-align: middle;
@@ -815,7 +914,7 @@
     border-radius: 999px;
     padding: 9px 16px;
     font: 700 14px var(--sans);
-    color: var(--acc);
+    color: var(--acc-txt);
     text-decoration: none;
   }
   .local-ir svg { width: 16px; height: 16px; }
@@ -852,9 +951,9 @@
     padding: 14px 15px;
     outline: none;
   }
-  input:focus { border-color: var(--acc); box-shadow: 0 0 0 4px rgba(181, 18, 34, .14); }
+  input:focus { border-color: var(--acc-txt); box-shadow: 0 0 0 4px rgba(181, 18, 34, .14); }
   .msg { margin-top: 14px; font-size: 14.5px; line-height: 1.5; border-radius: var(--r-sm); padding: 13px 14px; }
-  .msg.mal { background: #FDF2F3; color: #A00F1E; border: 1px solid #F3CFD3; }
+  .msg.mal { background: var(--mal-bg); color: var(--mal-txt); border: 1px solid var(--mal-borde); }
 </style>
 </head>
 <body>
@@ -868,8 +967,13 @@
     <!-- La campanita. Arranca oculta y sólo aparece si el navegador puede
          hacer notificaciones: un botón que no hace nada es peor que no
          tenerlo. -->
-    <button type="button" class="campana" id="campana" hidden
-            aria-label="Avisos"></button>
+    <div class="cab-botones">
+      <!-- Sol en oscuro (para pasar a claro), luna en claro. Mismo círculo
+           que la campana, para que se lean como una familia. -->
+      <button type="button" class="campana" id="btnTema" aria-label="Pasar a modo claro"></button>
+      <button type="button" class="campana" id="campana" hidden
+              aria-label="Avisos"></button>
+    </div>
   </div>
   <!-- El cartel de los avisos. Se abre al tocar la campana y no antes.
        Vive fuera de .hoja para poder taparla entera. -->
@@ -1017,6 +1121,10 @@
   var codigo = m ? m[1] : codigoGuardado();
   if (m) guardarCodigo(m[1]);
 
+  /* El botón del tema, antes que nada: tiene que andar también en la
+     pantalla de "no encontramos tu tarjeta". */
+  engancharTema();
+
   mirarAvisos();
 
   if (!codigo) { sinTarjeta(); return; }
@@ -1126,17 +1234,45 @@
       ? Math.max(0, Math.min(100, Math.round(((t.xp || 0) - (nv.desde_xp || 0)) * 100 /
                                              (nv.hasta_xp - (nv.desde_xp || 0)))))
       : 100;
+    /* La tarjeta del nivel, como en la app de Fidelity: el trofeo, qué da
+       este nivel y cuánto falta para el siguiente, con lo que da el
+       siguiente. Antes era un renglón con la chapa y "1 punto por cada
+       $100", y el cliente no tenía cómo saber qué ganaba subiendo. */
+    var claseNv = 'nv-' + String(nv.nombre || 'Plata').toLowerCase().normalize('NFD').replace(/[^a-z]/g, '');
+    var sigueMulti = Number(nv.sigue_multiplica) || 0;
+    var trofeo = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/>' +
+      '<path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>';
+    var icoMas = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+      'stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+    var icoRegalo = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
+      '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/></svg>';
+    var siguiente = [];
+    if (sigueMulti > 1) { siguiente.push(coma(sigueMulti) + ' puntos por cada $100'); }
+    if (Number(nv.sigue_bono) > 0) { siguiente.push(miles(nv.sigue_bono) + ' de regalo al llegar'); }
     var nivelHtml =
-      '<div class="nivel">' +
-        '<div class="nivel-cab">' + chipNivel(nv.nombre) +
-          '<span class="nivel-multi">' +
-            (multi > 1 ? 'Sumás ' + coma(multi) + ' puntos por cada $100'
-                       : '1 punto por cada $100') +
-          '</span></div>' +
+      '<div class="caja nivel-caja">' +
+        '<div class="nivel-top">' +
+          '<div class="trofeo ' + claseNv + '">' + trofeo + '</div>' +
+          '<div><small class="nivel-rotulo">Tu nivel</small><b class="nivel-nom">' + esc(nv.nombre) + '</b></div>' +
+        '</div>' +
+        '<ul class="beneficios">' +
+          '<li>' + icoMas + '<span>' +
+            (multi > 1 ? 'Sumás <b>' + coma(multi) + ' puntos</b> por cada $100' : '<b>1 punto</b> por cada $100') +
+          '</span></li>' +
+          (nv.regalo_cumple
+            ? '<li>' + icoRegalo + '<span>En tu cumple: <b>' + esc(nv.regalo_cumple) + '</b></span></li>'
+            : '') +
+        '</ul>' +
         (nv.sigue
-          ? '<div class="barra barra-fina"><i style="width:' + tramo + '%"></i></div>' +
-            '<p class="nivel-txt">Sumá <b>' + miles(nv.falta_xp) + '</b> puntos más en el año ' +
-            'y pasás a <b>' + esc(nv.sigue) + '</b>.</p>'
+          ? '<div class="nivel-pie"><span>Para ' + esc(nv.sigue) + '</span>' +
+              '<span>' + miles(t.xp) + ' / ' + miles(nv.hasta_xp) + '</span></div>' +
+            '<div class="barra barra-fina"><i style="width:' + tramo + '%"></i></div>' +
+            '<p class="nivel-txt">Sumá <b>' + miles(nv.falta_xp) + '</b> puntos más en el año y pasás a <b>' +
+              esc(nv.sigue) + '</b>' + (siguiente.length ? ': ' + siguiente.join(' y ') : '') + '.</p>'
           : '<p class="nivel-txt">Estás en el nivel más alto del Club.</p>') +
       '</div>';
 
@@ -1193,10 +1329,19 @@
         '</div>' + chipNivel(nv.nombre) + '</div>' +
         /* El código ya no vive acá: está a un toque, a pantalla completa. Así
            lo primero que se ve al abrir son los puntos y los premios. */
-        '<button type="button" class="btn-codigo" id="btnCodigo">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
-          'stroke-linecap="round" aria-hidden="true"><path d="M4 5v14M7 5v14M10 5v14M14 5v14' +
-          'M16 5v14M20 5v14"/></svg>Mostrar mi código</button>' +
+        /* Los dos botones que más se tocan, lado a lado, como en la app
+           de Fidelity: el código para la caja, los premios para ver qué se
+           puede llevar. El ícono arriba del texto para que entren los dos
+           en un teléfono de 360. */
+        '<div class="carnet-botones">' +
+          '<button type="button" class="btn-codigo" id="btnCodigo">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+            'stroke-linecap="round" aria-hidden="true"><path d="M4 5v14M7 5v14M10 5v14M14 5v14' +
+            'M16 5v14M20 5v14"/></svg>Mostrar código</button>' +
+          (premios.length
+            ? '<button type="button" class="btn-premios" id="btnPremios">' + regalo + 'Ver premios</button>'
+            : '') +
+        '</div>' +
       '</div>' +
 
       '<div class="caja">' +
@@ -1205,12 +1350,13 @@
         bonus +
         mensaje +
         (premios.length ? '<div class="barra"><i style="width:' + avance + '%"></i></div>' : '') +
-        nivelHtml +
         '<p class="nota">Tus puntos no vencen mientras sigas comprando.</p>' +
       '</div>' +
 
+      nivelHtml +
+
       (premios.length
-        ? '<div class="caja"><h2>Premios</h2>' +
+        ? '<div class="caja" id="cajaPremios"><h2>Premios</h2>' +
             '<p class="caja-sub">Se piden en la caja de cualquier local.</p>' +
             '<div class="premios">' + catalogo + '</div></div>'
         : '') +
@@ -1238,6 +1384,12 @@
     $('cargando').hidden = true;
     socioCodigo = t;
     if ($('btnCodigo')) { $('btnCodigo').onclick = abrirCodigo; }
+    if ($('btnPremios')) {
+      $('btnPremios').onclick = function () {
+        var c = $('cajaPremios');
+        if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      };
+    }
     if ($('btnDudas')) {
       $('btnDudas').onclick = function () {
         var abierta = $('btnDudas').getAttribute('aria-expanded') === 'true';
@@ -1883,6 +2035,32 @@
     if (hoja && !hoja.hidden) { cerrarCodigo(true); return; }
     irA((e.state && e.state.v) || (location.hash || '').replace('#', '') || 'tarjeta', false);
   });
+
+  /* ═══ El tema ═══════════════════════════════════════════════════════════ */
+  function engancharTema() {
+    var b = $('btnTema');
+    if (!b) { return; }
+    var SOL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/>' +
+      '<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+    var LUNA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>';
+    var pintarBoton = function () {
+      var oscuro = document.documentElement.getAttribute('data-tema') !== 'light';
+      b.innerHTML = oscuro ? SOL : LUNA;
+      b.setAttribute('aria-label', oscuro ? 'Pasar a modo claro' : 'Pasar a modo oscuro');
+    };
+    b.onclick = function () {
+      var nuevo = document.documentElement.getAttribute('data-tema') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-tema', nuevo);
+      try { localStorage.setItem('vdh_club_tema', nuevo); } catch (e) {}
+      var m = document.querySelector('meta[name="theme-color"]');
+      if (m) { m.setAttribute('content', nuevo === 'light' ? '#EDEEF0' : '#0A0B0D'); }
+      pintarBoton();
+    };
+    pintarBoton();
+  }
 
   /* ═══ El código, a pantalla completa ══════════════════════════════════ */
 
