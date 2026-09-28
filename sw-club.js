@@ -29,7 +29,7 @@
    Al tocar cualquiera de estos archivos, subir CACHE. Ese cambio de nombre
    es lo que borra el caché viejo de los celulares.
    ═══════════════════════════════════════════════════════════════════════════ */
-const CACHE = 'vdh-club-v34';
+const CACHE = 'vdh-club-v35';
 
 const BASICOS = [
   './tarjeta.html',
@@ -106,6 +106,15 @@ self.addEventListener('notificationclick', (evento) => {
   evento.notification.close();
   const destino = new URL((evento.notification.data && evento.notification.data.url) || 'tarjeta.html',
                           self.location.origin).href;
+
+  /* Un enlace de AFUERA —la reseña en Google, una promo en la tienda— se
+     abre en una ventana nueva. Si se navegara la ventana de la tarjeta,
+     el cliente quedaría adentro de Google sin forma de volver a su
+     tarjeta más que cerrando y abriendo la app. */
+  if (new URL(destino).origin !== self.location.origin) {
+    evento.waitUntil(self.clients.openWindow(destino));
+    return;
+  }
 
   evento.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((pestanas) => {

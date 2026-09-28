@@ -493,6 +493,21 @@
   .nivel-multi { font-size: 13px; color: var(--txt-2); font-weight: 600; text-align: right; }
   .nivel-txt { font-size: 14px; color: var(--txt-2); margin-top: 8px; line-height: 1.45; }
   .nivel-txt b { color: var(--txt); }
+  /* ── El pedido de reseña ──
+     Las cinco estrellas en el color de Google para que se reconozca de qué
+     se trata sin leer; el resto, con los colores de siempre. */
+  .resena-caja { text-align: center; }
+  .resena-caja[hidden] { display: none; }
+  .resena-estrellas { display: flex; justify-content: center; gap: 4px; color: #FBBC04; margin-bottom: 10px; }
+  .resena-estrellas svg { width: 22px; height: 22px; }
+  .resena-caja h2 { margin-bottom: 6px; }
+  .resena-caja .btn { margin-top: 16px; }
+  .resena-no {
+    display: block; width: 100%; margin-top: 8px; padding: 10px;
+    border: 0; background: none; cursor: pointer;
+    font: 600 14px var(--sans); color: var(--txt-3);
+  }
+
   /* ── La tarjeta del nivel ── */
   .nivel-top { display: flex; align-items: center; gap: 14px; }
   .trofeo {
@@ -921,9 +936,15 @@
 
   /* El mismo botón que la página de alta: esta pantalla no tenía ninguno
      porque hasta ahora no había nada que apretar. */
+  /* Centrado con flex y no con line-height: el \`font:\` de abajo, por ser
+     abreviado, devuelve el line-height a "normal". En un <button> no se
+     notaba —el navegador lo centra solo— pero en un <a class="btn"> el
+     texto quedaba pegado arriba ("Dejar mi reseña", "Anotarme en el
+     Club"). */
   .btn {
-    display: block; width: 100%; margin-top: 20px;
-    min-height: 54px; line-height: 54px;
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; margin-top: 20px;
+    min-height: 54px;
     border: 0; border-radius: var(--r-sm);
     background: linear-gradient(135deg, var(--acc), var(--acc-2));
     color: #fff;
@@ -1355,6 +1376,8 @@
 
       nivelHtml +
 
+      cajaResena(t) +
+
       (premios.length
         ? '<div class="caja" id="cajaPremios"><h2>Premios</h2>' +
             '<p class="caja-sub">Se piden en la caja de cualquier local.</p>' +
@@ -1384,6 +1407,16 @@
     $('cargando').hidden = true;
     socioCodigo = t;
     if ($('btnCodigo')) { $('btnCodigo').onclick = abrirCodigo; }
+    if ($('cajaResena')) {
+      var cerrarResena = function () {
+        try { localStorage.setItem($('cajaResena').dataset.clave, '1'); } catch (e) {}
+        $('cajaResena').hidden = true;
+      };
+      $('btnResenaNo').onclick = cerrarResena;
+      /* Tocó el botón: la reseña se abre en otra pestaña y la caja se va,
+         porque ya fue. */
+      $('btnResena').addEventListener('click', function () { setTimeout(cerrarResena, 300); });
+    }
     if ($('btnPremios')) {
       $('btnPremios').onclick = function () {
         var c = $('cajaPremios');
@@ -1415,6 +1448,30 @@
    * El viaje se hace igual y en silencio: deja la promo cargada, así tocar
    * Promos es instantáneo. Si falla, la tarjeta ni se entera.
    */
+  /**
+   * "¿Qué tal tu compra en Flores?", durante los 7 días siguientes a una
+   * compra en un local que tiene cargado su enlace de reseñas.
+   *
+   * Sin nada a cambio y el mismo texto para todos: son las dos reglas de
+   * Google. Se puede cerrar ("Ahora no") y no vuelve para esa compra; si
+   * toca el botón, tampoco, porque ya fue.
+   */
+  function cajaResena(t) {
+    var r = t.resena;
+    if (!r || !r.url) { return ''; }
+    var clave = 'vdh_club_resena_' + r.local + '_' + String(r.cuando || '').slice(0, 10);
+    try { if (localStorage.getItem(clave)) { return ''; } } catch (e) {}
+    var estrella = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+      '<path d="m12 2 3 6.6 7 .8-5.2 4.8 1.5 7L12 17.8 5.7 21.2l1.5-7L2 9.4l7-.8Z"/></svg>';
+    return '<div class="caja resena-caja" id="cajaResena" data-clave="' + esc(clave) + '">' +
+      '<div class="resena-estrellas">' + estrella + estrella + estrella + estrella + estrella + '</div>' +
+      '<h2>¿Qué tal tu compra en ' + esc(r.nombre) + '?</h2>' +
+      '<p class="vacio">Contanos en Google cómo te atendieron. Nos ayuda a que más gente nos encuentre.</p>' +
+      '<a class="btn" id="btnResena" target="_blank" rel="noopener" href="' + esc(r.url) + '">Dejar mi reseña</a>' +
+      '<button type="button" class="resena-no" id="btnResenaNo">Ahora no</button>' +
+    '</div>';
+  }
+
   /**
    * "¡Pasaste a Oro!", durante una semana después de subir, o nada.
    *
