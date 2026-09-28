@@ -5,24 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>VDH Club</title>
 <meta name="description" content="Sumate al Club VDH: sumá puntos en cada compra y canjealos por productos VDH.">
-<meta name="theme-color" content="#0A0B0D">
-<!-- El mismo tema que la tarjeta, decidido antes de pintar. No hay botón
-     acá: el alta se hace una vez, y el tema se cambia desde la tarjeta. Lo
-     que se elija allá vale para las dos. Oscuro si nunca se eligió. -->
-<script>
-  (function () {
-    var t = 'dark';
-    try { t = localStorage.getItem('vdh_club_tema') === 'light' ? 'light' : 'dark'; } catch (e) {}
-    document.documentElement.setAttribute('data-tema', t);
-    var m = document.querySelector('meta[name="theme-color"]');
-    if (m) { m.setAttribute('content', t === 'light' ? '#EDEEF0' : '#0A0B0D'); }
-  })();
-</script>
+<!-- Claro y con la paleta de la tarjeta desde el rediseño del 28/09/2026. -->
+<meta name="theme-color" content="#F5F3EE">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* ── VDH Club · la cara de afuera ────────────────────────────────────────
      Esta página NO se parece a la app, y es a propósito. La app es una
@@ -30,55 +19,38 @@
      Esto lo abre un cliente parado en el local o en la calle, con el sol de
      frente y una mano sola.
 
-     Por eso: fondo claro, una columna, todo grande y un solo camino. Lo que
-     se mantiene es la marca —el rojo VDH, las tipografías, las esquinas
-     redondas— para que se note que es de la misma casa.
+     Por eso: fondo claro, una columna, todo grande y un solo camino. Desde
+     el rediseño del 28/09/2026 tiene la paleta y la letra de la tarjeta —el
+     blanco cálido, el carbón y Poppins, que son los de vdh.com.ar— para que
+     anotarse y ver la tarjeta se sientan la misma cosa.
 
      Y se queda en CLARO siempre, sin toggle: esto lo abre alguien parado en
      la vereda con el sol de frente, una vez en la vida. Un interruptor de
      tema ahí es una decisión más que tomar para nada. El oscuro es de la
      herramienta de trabajo, que se mira ocho horas bajo techo. */
+  /* Los mismos que la tarjeta: ver tarjeta.html. El rojo queda sólo para
+     los errores, que es un color de aviso y no de marca. */
   :root {
-    --bg:      #EDEEF0;
+    color-scheme: light;
+    --bg:      #F5F3EE;
     --hoja:    #FFFFFF;
-    --txt:     #16181B;
-    --txt-2:   #4A4F55;
-    --txt-3:   #55595F;
-    --linea:   #DCDEE3;
-    --acc:     #B51222;
-    --acc-2:   #8E0E1B;
-    --acc-soft:#FBEAEC;
-    --ok:      #0F7444;
+    --txt:     #1C1C1A;
+    --txt-2:   #46433E;
+    --txt-3:   #5A5750;
+    --linea:   #DDD5C6;
+    --acc:     #1C1C1A;
+    --acc-2:   #2E2D2A;
+    --acc-soft:#ECE5D8;
+    --ok:      #465022;
     --mal:     #A00F1E;
-    --r:       20px;
+    --r:       18px;
     --r-sm:    14px;
-    --sans:    'DM Sans', system-ui, -apple-system, sans-serif;
-    --display: 'Space Grotesk', var(--sans);
-
-    /* Los mismos que la tarjeta: ver tarjeta.html. */
-    --acc-txt:  #B51222;
+    --sans:    'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --display: var(--sans);
+    --acc-txt:  #1C1C1A;
     --campo:    #FFFFFF;
     --mal-bg:   #FDF2F3;
     --mal-borde:#F3CFD3;
-  }
-
-  /* El modo oscuro, con los mismos colores y el mismo contraste medido que
-     la tarjeta (el texto más flojo, 7,8 a 1 contra la hoja). */
-  :root[data-tema="dark"] {
-    color-scheme: dark;
-    --bg:      #0A0B0D;
-    --hoja:    #16181C;
-    --txt:     #F3F4F6;
-    --txt-2:   #C4C8CE;
-    --txt-3:   #A7ACB4;
-    --linea:   #2B2E34;
-    --acc-txt: #FF7A84;
-    --acc-soft: rgba(255, 122, 132, .14);
-    --ok:      #4ADE93;
-    --mal:     #FF8A93;
-    --campo:   #0F1114;
-    --mal-bg:  rgba(255, 138, 147, .10);
-    --mal-borde: rgba(255, 138, 147, .40);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
@@ -102,7 +74,7 @@
     width: 46px; height: 46px; border-radius: 15px; flex: none;
     background: linear-gradient(160deg, var(--acc-2), var(--acc));
     display: grid; place-items: center; color: #fff;
-    box-shadow: 0 8px 22px -8px rgba(181, 18, 34, .55);
+    box-shadow: 0 8px 22px -8px rgba(28, 28, 26, .35);
   }
   .marca-ico svg { width: 24px; height: 24px; }
   .marca b { display: block; font: 700 19px/1.1 var(--display); letter-spacing: -.3px; }
@@ -147,7 +119,7 @@
     padding: 14px 15px;
     outline: none;
   }
-  input:focus { border-color: var(--acc-txt); box-shadow: 0 0 0 4px rgba(181, 18, 34, .14); }
+  input:focus { border-color: var(--acc-txt); box-shadow: 0 0 0 4px rgba(28, 28, 26, .10); }
   .campo + .campo { margin-top: 15px; }
 
   /* La casilla de promociones. Grande y con el texto entero al lado: un
@@ -168,7 +140,7 @@
     color: #fff;
     font: 700 17px var(--sans);
     cursor: pointer;
-    box-shadow: 0 10px 24px -10px rgba(181, 18, 34, .65);
+    box-shadow: 0 10px 24px -10px rgba(28, 28, 26, .40);
   }
   .btn:disabled { opacity: .55; }
   .btn:active { transform: scale(.99); }
