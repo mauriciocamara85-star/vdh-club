@@ -97,6 +97,12 @@ var club = {
   /** Todas las promociones vigentes hoy, la más nueva primero. */
   promos: function () {
     return llamar('club_promos_ver', {});
+  },
+
+  /** Los puntos extra en curso y los de la próxima semana: hora feliz,
+      martes de puntos dobles, Hot Sale. Sin nada privado adentro. */
+  puntosExtra: function () {
+    return llamar('club_multi_publicos', {});
   }
 };
 

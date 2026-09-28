@@ -363,6 +363,27 @@
     color: #fff;
   }
   .hoy-bonus svg { width: 24px; height: 24px; flex: none; }
+
+  /* ── Los puntos extra, en Promos ──
+     Arriba de las promociones: son lo que más rápido cambia (una hora
+     feliz dura dos horas) y lo único que suma sin pedir nada. La que vale
+     AHORA va en rojo lleno; las que vienen, en blanco con borde. */
+  .extras { display: grid; gap: 10px; margin-bottom: 18px; }
+  .extras-tit {
+    font: 700 12px var(--sans); letter-spacing: .6px; text-transform: uppercase;
+    color: var(--txt-3); margin-bottom: 2px;
+  }
+  .extra {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px; border-radius: var(--r-sm);
+    background: var(--hoja); border: 1px solid var(--linea);
+  }
+  .extra svg { width: 22px; height: 22px; flex: none; color: var(--acc); }
+  .extra b { display: block; font: 700 15px/1.3 var(--sans); }
+  .extra span { display: block; font-size: 13px; color: var(--txt-2); margin-top: 1px; }
+  .extra.ya { background: linear-gradient(135deg, var(--acc), var(--acc-2)); border-color: transparent; color: #fff; }
+  .extra.ya svg { color: #fff; }
+  .extra.ya span { color: #fff; opacity: .92; }
   .hoy-bonus b { display: block; font: 700 15px/1.3 var(--sans); }
   .hoy-bonus span { display: block; font-size: 13px; line-height: 1.4; opacity: .94; margin-top: 2px; }
 
@@ -1308,8 +1329,12 @@
     var extra = Number(hoy.extra) || 1;
     if (extra <= 1) { return ''; }
 
-    var cuanto = extra === 2 ? 'el doble' : extra === 3 ? 'el triple' : coma(extra) + ' veces más';
-    var hastaCuando = !hoy.hasta ? ''
+    /* "1,5 veces más" se lee como 2,5: para los que no son redondos, el
+       porcentaje de más. */
+    var cuanto = extra === 2 ? 'el doble' : extra === 3 ? 'el triple'
+               : 'un ' + Math.round((extra - 1) * 100) + '% más';
+    var hastaCuando = hoy.hora_hasta ? ', hasta las ' + hoy.hora_hasta + ' h'
+      : !hoy.hasta ? ''
       : hoy.hasta === hoyISO() ? ', solo por hoy'
       : ', hasta el ' + fecha(hoy.hasta);
     var nombre = esc(String(t.nombre || '').split(' ')[0]);
@@ -1930,6 +1955,27 @@
      arreglarla. */
   var promoCargada = null;
 
+  var extrasCargados = [];
+
+  /* "El doble", "1,5 veces": dicho con palabras. */
+  function cuantoExtra(f) {
+    f = Number(f);
+    return f === 2 ? 'el doble' : f === 3 ? 'el triple' : 'un ' + Math.round((f - 1) * 100) + '% más';
+  }
+
+  function extrasHtml() {
+    if (!extrasCargados.length) { return ''; }
+    var rayo = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>';
+    return '<div class="extras"><div class="extras-tit">Puntos extra</div>' +
+      extrasCargados.map(function (x) {
+        return '<div class="extra' + (x.ahora ? ' ya' : '') + '">' + rayo +
+          '<div><b>' + esc(x.nombre) + (x.ahora ? ' · ahora' : '') + '</b>' +
+          '<span>Tus compras suman ' + cuantoExtra(x.factor) + ' de puntos ' + esc(x.cuando) + '</span></div>' +
+        '</div>';
+      }).join('') + '</div>';
+  }
+
   /** Una promoción: la tarjeta grande y, si las tiene, sus condiciones. */
   function unaPromo(p) {
     /* La dirección de la foto va en una variable CSS y no pegada en el
@@ -1976,11 +2022,14 @@
       'Ver mi tarjeta</button>';
 
     var pintar = function (lista) {
-      caja.innerHTML =
+      caja.innerHTML = extrasHtml() +
         ((lista && lista.length)
           ? '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>' +
             '<p class="vacio" style="margin-top:20px">Mostrá tu tarjeta en la caja de ' +
             'cualquier local para aprovechar' + (lista.length > 1 ? 'las' : 'la') + '.</p>'
+          /* Con puntos extra arriba, "no hay promociones" se contradice con
+             lo que el cliente acaba de leer: el cartel vacío no va. */
+          : extrasCargados.length ? ''
           : '<div class="caja"><h2>No hay promociones activas</h2>' +
             '<p class="vacio">Cuando haya una, te la mostramos acá. Mientras tanto, tus ' +
             'compras siguen sumando puntos.</p></div>') +
@@ -1990,6 +2039,13 @@
         $('promoVerTarjeta').onclick = function () { irA('tarjeta', true); };
       }
     };
+
+    /* Los puntos extra se piden cada vez que se entra: una hora feliz
+       empieza y termina en el día, y la lista de hace una hora puede estar
+       vieja. Si fallan, las promociones se ven igual. */
+    club.puntosExtra()
+      .then(function (x) { extrasCargados = x || []; if (promoCargada) { pintar(promoCargada); } })
+      .catch(function () {});
 
     if (promoCargada) { pintar(promoCargada); return; }
     caja.innerHTML = '<p class="vacio">Buscando…</p>';
