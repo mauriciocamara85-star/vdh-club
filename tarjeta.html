@@ -1252,9 +1252,12 @@
     /* El nivel. Sin la palabra "XP": para el cliente son puntos, y lo que
        tiene que entender es que comprando más en el año sube. Canjear no lo
        baja — eso lo cuenta la pregunta de abajo, no hace falta acá. */
-    var tramo = (nv.hasta_xp && nv.hasta_xp > (nv.desde_xp || 0))
-      ? Math.max(0, Math.min(100, Math.round(((t.xp || 0) - (nv.desde_xp || 0)) * 100 /
-                                             (nv.hasta_xp - (nv.desde_xp || 0)))))
+    /* La barra mide lo mismo que el número que tiene al lado: "4.400 de
+       10.000" es 44 %. Antes medía el tramo entre Oro y Platino (400 de
+       6.000, 7 %) y el cliente veía una barra casi vacía debajo de un
+       número casi a la mitad. */
+    var tramo = nv.hasta_xp
+      ? Math.max(0, Math.min(100, Math.round((t.xp || 0) * 100 / nv.hasta_xp)))
       : 100;
     /* La tarjeta del nivel, como en la app de Fidelity: el trofeo, qué da
        este nivel y cuánto falta para el siguiente, con lo que da el
