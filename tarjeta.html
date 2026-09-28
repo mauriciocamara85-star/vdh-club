@@ -528,9 +528,10 @@
   .beneficios li b { color: var(--txt); }
   .beneficios svg { width: 18px; height: 18px; flex: none; color: var(--acc-txt); }
   .nivel-pie {
-    display: flex; justify-content: space-between; margin-top: 16px;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 16px;
     font: 600 13px var(--sans); color: var(--txt-2); font-variant-numeric: tabular-nums;
   }
+  .nivel-pie span:last-child { white-space: nowrap; }
   .nivel-pie + .barra-fina { margin-top: 6px; }
 
   .nota { font-size: 12.5px; color: var(--txt-3); margin-top: 14px; }
@@ -1289,11 +1290,16 @@
             : '') +
         '</ul>' +
         (nv.sigue
-          ? '<div class="nivel-pie"><span>Para ' + esc(nv.sigue) + '</span>' +
-              '<span>' + miles(t.xp) + ' / ' + miles(nv.hasta_xp) + '</span></div>' +
+          /* Dos números en la misma pantalla ("501 puntos" arriba, "1 / 4.000"
+             acá) y el cliente no sabía cuál era cuál. Los de arriba se
+             gastan; estos son sólo de compras —los regalos no cuentan— y
+             canjear no los baja. Cada uno con su nombre. */
+          ? '<div class="nivel-pie"><span>Tus compras del último año</span>' +
+              '<span>' + miles(t.xp) + ' de ' + miles(nv.hasta_xp) + '</span></div>' +
             '<div class="barra barra-fina"><i style="width:' + tramo + '%"></i></div>' +
-            '<p class="nivel-txt">Sumá <b>' + miles(nv.falta_xp) + '</b> puntos más en el año y pasás a <b>' +
-              esc(nv.sigue) + '</b>' + (siguiente.length ? ': ' + siguiente.join(' y ') : '') + '.</p>'
+            '<p class="nivel-txt">Te faltan <b>' + miles(nv.falta_xp) + '</b> puntos de compras para pasar a <b>' +
+              esc(nv.sigue) + '</b>' + (siguiente.length ? ': ' + siguiente.join(' y ') : '') + '. ' +
+              'Los regalos no cuentan para el nivel, y canjear no te lo baja.</p>'
           : '<p class="nivel-txt">Estás en el nivel más alto del Club.</p>') +
       '</div>';
 
@@ -1366,7 +1372,7 @@
       '</div>' +
 
       '<div class="caja">' +
-        '<h2>Tus puntos</h2>' +
+        '<h2>Puntos para canjear</h2>' +
         '<div class="cuenta"><b>' + miles(puntos) + '</b><span>puntos</span></div>' +
         bonus +
         mensaje +
