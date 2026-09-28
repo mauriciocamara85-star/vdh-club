@@ -1005,7 +1005,8 @@
     display: grid; grid-template-columns: 96px 1fr; gap: 14px 16px; align-items: center;
     background: var(--ok-soft); border: 1px solid var(--ok-borde); border-radius: var(--r); padding: 14px;
   }
-  .listo.falta { background: var(--hoja); border-color: var(--linea); }
+  /* "aun" y no "falta": .falta es una regla vieja (letra 600) y la heredaba todo el bloque. */
+  .listo.aun { background: var(--hoja); border-color: var(--linea); }
   .listo .miniatura { width: 96px; height: 96px; }
   .listo .btn, .listo .barra { grid-column: 1 / -1; margin-top: 0; }
   .listo-nom { font: 600 16.5px/1.25 var(--sans); margin: 6px 0 2px; }
@@ -1597,7 +1598,7 @@
       '</div>';
     }
     var av = Math.min(100, Math.round((p.puntos - p.falta) * 100 / p.puntos));
-    return '<div class="listo falta">' + fotoPremio(p, 'miniatura') +
+    return '<div class="listo aun">' + fotoPremio(p, 'miniatura') +
       '<div>' + estadoPremio(p) +
         '<div class="listo-nom">' + esc(p.nombre) + '</div>' +
         '<div class="listo-sub">Te faltan ' + miles(p.falta) + ' puntos.' +
