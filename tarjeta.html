@@ -231,6 +231,8 @@
     color: #fff;
   }
   .buzon-borrar svg { width: 21px; height: 21px; }
+  /* Deslizado hacia la izquierda, el tacho aparece a la derecha. */
+  .buzon-item.a-izq .buzon-borrar { justify-content: flex-end; padding-left: 0; padding-right: 22px; }
 
   .buzon-cara {
     position: relative;
@@ -481,6 +483,17 @@
   .extra.ya span { color: #fff; opacity: .92; }
   .hoy-bonus b { display: block; font: 700 15px/1.3 var(--sans); }
   .hoy-bonus span { display: block; font-size: 13px; line-height: 1.4; opacity: .94; margin-top: 2px; }
+  /* Se saca deslizando (como el buzón: el navegador se queda con el scroll
+     vertical y nos da el horizontal) o con la X. */
+  .hoy-bonus[data-cartel] { touch-action: pan-y; padding-right: 6px; }
+  .hoy-bonus > div { flex: 1; min-width: 0; }
+  .hoy-bonus.suelta { transition: transform .22s cubic-bezier(.2, .8, .3, 1), opacity .22s ease; }
+  .hoy-bonus.yendose { transition: height .2s ease, padding .2s ease, margin .2s ease; overflow: hidden; }
+  .bonus-x { flex: none; align-self: flex-start; width: 36px; height: 36px; margin: -6px 0 -6px 0;
+             display: grid; place-content: center; border: 0; border-radius: 50%; background: none;
+             color: #fff; opacity: .8; cursor: pointer; }
+  .bonus-x:hover, .bonus-x:focus-visible { opacity: 1; background: rgba(255, 255, 255, .12); }
+  .hoy-bonus .bonus-x svg { width: 18px; height: 18px; }
 
   .barra { height: 10px; border-radius: 999px; background: var(--pista); margin-top: 12px; overflow: hidden; }
   .barra i {
@@ -724,6 +737,9 @@
     cursor: pointer;
   }
   .fila-instalar svg { width: 17px; height: 17px; }
+  /* Sin esto el display:flex de arriba le gana a hidden y el renglón no se
+     esconde nunca, ni cuando ya está instalada. */
+  .fila-instalar[hidden] { display: none; }
 
   /* ── Las vistas ── */
   .vista[hidden] { display: none; }
@@ -780,7 +796,8 @@
      se sostiene: con una foto cada una, scrollear se parece a mirar un feed
      de prendas y no a leer carteles. */
   .promos-lista { display: grid; gap: 22px; }
-  .promo-nove { margin-bottom: 32px; }
+  .promo-nove { margin-top: 32px; }
+  .promo-nove:first-child { margin-top: 0; }
 
   /* Las condiciones —qué productos participan, si combina con otros
      descuentos, en qué locales vale— van en un <details> y no en otra
@@ -1197,6 +1214,18 @@
   .aviso-vence { background: var(--mal-bg); border: 1px solid var(--mal-borde); color: var(--mal-txt);
                  border-radius: var(--r-sm); padding: 12px 14px; font: 500 14px/1.45 var(--sans); }
   .aviso-vence.tranqui { background: var(--hoja); border-color: var(--linea); color: var(--txt-2); }
+  /* La vigencia de los puntos, separada de las tarjetas de los niveles. */
+  .niv-vigencia { margin-top: 14px; }
+  /* "Cómo se mantiene mi nivel": un enlace chico que se despliega. */
+  .niv-regla { margin: -4px 2px 0; }
+  .niv-regla summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none;
+                       font: 500 14px var(--sans); color: var(--txt); text-decoration: underline;
+                       text-underline-offset: 3px; text-decoration-color: var(--txt-3); padding: 4px 0; }
+  .niv-regla summary::-webkit-details-marker { display: none; }
+  .niv-regla summary::after { content: ""; width: 7px; height: 7px; border: solid currentColor; border-width: 0 1.8px 1.8px 0;
+                              transform: rotate(45deg) translateY(-2px); transition: transform .15s ease; }
+  .niv-regla[open] summary::after { transform: rotate(-135deg) translateY(-1px); }
+  .niv-regla p { font-size: 14px; line-height: 1.55; color: var(--txt-2); margin-top: 6px; }
 
   /* El puntito de "hay algo nuevo" en la pestaña Promos. */
   .tab-punto { position: absolute; top: 6px; left: calc(50% + 8px); width: 9px; height: 9px; border-radius: 50%;
@@ -1712,6 +1741,7 @@
     $('todo').hidden = false;
     $('cargando').hidden = true;
     $('inicioTodo').innerHTML = inicio;
+    engancharCarteles();
 
     if ($('cajaResena')) {
       var cerrarResena = function () {
@@ -2007,13 +2037,24 @@
         '</ul></div>';
     }).join('');
 
+    /* Qué pasa con el nivel cuando pasa el año, a un toque y cerrado: el
+       que no pregunta no lo lee. Sólo lo que no dice ya el subtítulo de
+       arriba (12 meses, canjear no baja); la pregunta frecuente lo tiene
+       entero. */
+    var regla = '<details class="niv-regla"><summary>Cómo se mantiene mi nivel</summary>' +
+      '<p>Cuando una compra cumple un año deja de contar. Si no seguís comprando, podés bajar de nivel.</p></details>';
+
+    /* La vigencia, aparte y con su título (29/09/2026): abajo de las
+       tarjetas de los niveles, "vencen el…" se leía como el vencimiento
+       del nivel Oro. Vencen los puntos para canjear, no el nivel. */
     var faltan = t.vence_puntos ? diasHasta(t.vence_puntos) : null;
     var vence = t.vence_puntos
-      ? '<p class="aviso-vence' + (faltan > 60 ? ' tranqui' : '') + '">Tus puntos para canjear vencen el <b>' +
-          fechaConAnio(t.vence_puntos) + '</b> si no comprás antes. Cada compra los renueva por 12 meses.</p>'
+      ? '<div class="niv-vigencia"><div class="sec-cab"><h2>Vigencia de tus puntos para canjear</h2></div>' +
+          '<p class="aviso-vence' + (faltan > 60 ? ' tranqui' : '') + '">Vencen el <b>' +
+          fechaConAnio(t.vence_puntos) + '</b> si no comprás antes. Cada compra los renueva por 12 meses.</p></div>'
       : '';
 
-    $('nivelesCuerpo').innerHTML = '<div class="niveles">' + avance + tarjetas + vence + '</div>';
+    $('nivelesCuerpo').innerHTML = '<div class="niveles">' + avance + regla + tarjetas + vence + '</div>';
   }
 
   /* Los que se pintaron, para que la hoja de canje sepa de cuál se habla. */
@@ -2274,6 +2315,7 @@
       case 'ticket':  return a + '<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2.2a1.8 1.8 0 0 0 0 3.6V16a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2.2a1.8 1.8 0 0 0 0-3.6Z"/>' +
                                  '<path d="M14 6v2M14 11v2M14 16v2"/></svg>';
       case 'check':   return a + '<path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+      case 'cruz':    return a + '<path d="M18 6 6 18M6 6l12 12"/></svg>';
       default:        return a + '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
                                  '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>' +
                                  '<path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
@@ -2359,8 +2401,9 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-premio], #btnDudas, #canjeX, #canjeVelo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar]');
+             ev.target.closest('[data-codigo], [data-premio], #btnDudas, #canjeX, #canjeVelo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
     if (!el) { return; }
+    if (el.hasAttribute('data-cartel-x')) { sacarCartel(el.closest('[data-cartel]'), 1); return; }
     if (el.hasAttribute('data-atajo')) { atajo(el.getAttribute('data-atajo')); return; }
     if (el.hasAttribute('data-mision')) { hacerMision(el.getAttribute('data-mision')); return; }
     if (el.hasAttribute('data-copiar')) { copiarCupon(el); return; }
@@ -2438,10 +2481,55 @@
       'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
       '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/>' +
       '<path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>';
-    return '<div class="hoy-bonus">' + trofeo + '<div><b>¡Pasaste a ' + esc(nivel) + '!</b>' +
-           '<span>Te regalamos ' + miles(m.puntos) + ' puntos' +
-           (multi > 1 ? '. Ahora sumás ' + coma(multi) + ' puntos por cada $100.' : '.') +
-           '</span></div></div>';
+    return cartel('nivel:' + m.cuando, trofeo, '¡Pasaste a ' + esc(nivel) + '!',
+           'Te regalamos ' + miles(m.puntos) + ' puntos' +
+           (multi > 1 ? '. Ahora sumás ' + coma(multi) + ' puntos por cada $100.' : '.'));
+  }
+
+  /* ── Los carteles de Inicio se sacan ──
+     Deslizando hacia cualquier lado, como una notificación, o con la X
+     (29/09/2026, Mauricio). "¡Pasaste a Oro!" dice algo una vez y después
+     sólo ocupa lugar. Sacado, no vuelve en este teléfono; la clave dice
+     cuál era, así que el que viene después —otro nivel, el cumple del año
+     que viene— aparece igual. Las claves de localStorage van escritas
+     adentro de las funciones: Inicio se pinta al arrancar, antes de que un
+     var de acá abajo tenga su valor. */
+  function cartelesSacados() {
+    try { return JSON.parse(localStorage.getItem('vdh_club_carteles_sacados') || '[]'); } catch (e) { return []; }
+  }
+  function cartel(clave, ico, titulo, texto) {
+    if (cartelesSacados().indexOf(clave) >= 0) { return ''; }
+    return '<div class="hoy-bonus" data-cartel="' + esc(clave) + '">' + ico +
+      '<div><b>' + titulo + '</b><span>' + texto + '</span></div>' +
+      '<button type="button" class="bonus-x" data-cartel-x aria-label="Cerrar">' + icono('cruz') + '</button></div>';
+  }
+  function engancharCarteles() {
+    Array.prototype.forEach.call(document.querySelectorAll('#inicioTodo [data-cartel]'), function (c) {
+      deslizable(c, function (lado) { sacarCartel(c, lado); });
+    });
+  }
+  function sacarCartel(c, lado) {
+    if (!c || c.classList.contains('yendose')) { return; }
+    try {
+      var s = cartelesSacados(), clave = c.getAttribute('data-cartel');
+      if (s.indexOf(clave) < 0) { s.push(clave); }
+      localStorage.setItem('vdh_club_carteles_sacados', JSON.stringify(s.slice(-40)));
+    } catch (e) {}
+    c.classList.add('suelta');
+    c.style.transform = 'translateX(' + (lado < 0 ? '-110%' : '110%') + ')';
+    c.style.opacity = '0';
+    /* Primero se va de costado y después se cierra el hueco, con el
+       espacio de la pila incluido: si no, lo de abajo sube de un salto. */
+    setTimeout(function () {
+      var hueco = parseFloat(getComputedStyle(c.parentNode).rowGap) || 0;
+      c.style.height = c.offsetHeight + 'px';
+      c.classList.add('yendose');
+      requestAnimationFrame(function () {
+        c.style.height = '0px'; c.style.paddingTop = '0px'; c.style.paddingBottom = '0px';
+        c.style.marginBottom = (-hueco) + 'px';
+      });
+      setTimeout(function () { if (c.parentNode) { c.parentNode.removeChild(c); } }, 230);
+    }, 200);
   }
 
   /**
@@ -2466,8 +2554,9 @@
       '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
       '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>' +
       '<path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
-    return '<div class="hoy-bonus">' + regalo + '<div><b>' + titulo + '</b>' +
-           '<span>' + texto + '</span></div></div>';
+    /* El día del cumple es otro cartel ("¡Feliz cumple!"): aparece aunque
+       se haya sacado el de "se viene". */
+    return cartel('cumple:' + (c.hasta || '') + (c.es_hoy ? ':hoy' : ''), regalo, titulo, texto);
   }
 
   /**
@@ -2514,8 +2603,8 @@
         'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
         '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>';
 
-    return '<div class="hoy-bonus">' + icono + '<div><b>' + titulo + '</b>' +
-           '<span>' + texto + '</span></div></div>';
+    return cartel('hoy:' + (hoy.motivo || '') + ':' + (hoy.hasta || hoyISO()) + (hoy.cumple ? ':cumple' : ''),
+                  icono, titulo, texto);
   }
 
   /* Hoy como "2026-09-27", en la hora del teléfono. Es con lo que se compara
@@ -2608,6 +2697,10 @@
        camino a mano: se redibuja y el botón de verdad reemplaza al texto. */
     var c = $('instala');
     if (c && !c.hidden) { pintarInstalar(); }
+    /* Y si el renglón estaba escondido porque la misión ya se cumplió, este
+       aviso dice que en ESTE teléfono no está: vuelve. */
+    var f = $('filaInstalar');
+    if (f) { f.hidden = !quiereInstalar(); }
   });
 
   window.addEventListener('appinstalled', function () {
@@ -2694,7 +2787,7 @@
   function ofrecerInstalar() {
     if (estaInstalada() || instalarCerrado() || !esCelular() || instalaTimer) { return; }
     instalaTimer = setTimeout(function () {
-      if (estaInstalada() || instalarCerrado()) { return; }
+      if (!quiereInstalar() || instalarCerrado()) { return; }
       /* En Chrome de Android sin evento no se ofrece NADA. Las dos razones
          posibles son que ya esté instalada —Chrome deja de disparar el
          evento cuando lo está, y abierta en una pestaña display-mode no lo
@@ -2806,11 +2899,28 @@
            '<b>Agregar a la pantalla principal</b>.';
   }
 
+  /* ¿Hace falta ofrecerle instalar en ESTE teléfono? (29/09/2026: el
+     historial decía "Misión: Agregá la app" y Mi tarjeta seguía ofreciendo
+     "Agregar a la pantalla de inicio".)
+
+     Abierta como app, no. Si Chrome avisó que se puede instalar, sí: Chrome
+     deja de avisar cuando ya está instalada, así que su aviso quiere decir
+     que en este teléfono no está. Si no avisó y la misión de instalar ya se
+     cumplió, no: ya la agregó, y lo más probable es que la esté viendo en
+     el navegador desde un enlace. En el iPhone no hay aviso, así que ahí
+     decide la misión. */
+  function quiereInstalar() {
+    if (estaInstalada()) { return false; }
+    if (promptGuardado) { return true; }
+    var t = socioCodigo || {};
+    return !(t.misiones || []).some(function (m) { return m.clave === 'instalar' && m.hecha; });
+  }
+
   /* El renglón del final de la tarjeta: el mismo camino, para el que cerró
      el cartel y después lo quiere. Un renglón, no una tarjeta — lo que se
      saca de en medio de la pantalla no puede volver por la ventana. */
   function filaInstalar() {
-    return '<button type="button" class="fila-instalar" id="filaInstalar">' +
+    return '<button type="button" class="fila-instalar" id="filaInstalar"' + (quiereInstalar() ? '' : ' hidden') + '>' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
       'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
       '<rect x="5" y="2" width="14" height="20" rx="2.5"/>' +
@@ -2903,6 +3013,17 @@
      se abre la app del cliente con el mensaje empezado. */
   var WSP_CONSULTAS = '2235845942';
 
+  /* Cómo se mantiene el nivel, para las preguntas (Niveles lo dice en dos
+     partes: el subtítulo y "Cómo se mantiene mi nivel"). Sale de club_niveles: el nivel mide lo comprado en una ventana móvil de
+     12 meses (XP), así que puede bajar; el saldo no cuenta, por eso canjear
+     no lo toca. Función y no var: Niveles puede pintarse al arrancar, antes
+     de que un var de acá abajo tenga su valor. */
+  function reglaNivel() {
+    return 'Tu nivel cuenta lo que compraste en los últimos 12 meses. Cuando una compra ' +
+      'cumple un año deja de contar: si no seguís comprando, podés bajar. Llevarte ' +
+      'un premio no te baja nunca.';
+  }
+
   var PREGUNTAS = [
     ['¿Cómo sumo puntos?',
      'Cada $100 que gastás es 1 punto. Mostrá tu tarjeta en la caja antes de ' +
@@ -2924,6 +3045,8 @@
      'por cada $100 y en Platino 1,5. Llevarte un premio no te baja de nivel.'],
     /* club_niveles. El nivel sale del XP —lo ganado en 12 meses—, no del
        saldo: por eso canjear no lo toca. */
+
+    ['¿Puedo bajar de nivel?', reglaNivel()],
 
     ['¿Los puntos vencen?',
      'Sólo si pasan 12 meses sin que compres. Mientras sigas comprando, no ' +
@@ -3357,16 +3480,14 @@
       'Ver mi tarjeta</button>';
 
     var pintar = function (lista) {
-      /* La novedad, arriba de todo (29/09/2026): se mudó de Inicio a Promos,
-         donde tiene lugar para la foto grande. */
-      /* Con aire abajo y, si hay promociones, su propio título: pegada a la
-         primera promo, la foto de la novedad parecía parte de la misma
-         (lo vio Mauricio en el celular, 29/09/2026). */
+      /* Primero las ofertas y la novedad DESPUÉS, con su título y aire
+         arriba (29/09/2026, Mauricio: con la novedad arriba, "Nueva
+         colección" ocupaba casi toda la primera pantalla y la promo quedaba
+         abajo, que es a lo que se entra acá). */
       var nove = novedadHtml(socioCodigo && socioCodigo.novedad);
-      caja.innerHTML = (nove ? '<div class="promo-nove">' + nove + '</div>' : '') + extrasHtml() +
+      caja.innerHTML = extrasHtml() +
         ((lista && lista.length)
-          ? (nove ? '<div class="sec-cab"><h2>Promociones de hoy</h2></div>' : '') +
-            '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>' +
+          ? '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>' +
             '<p class="vacio" style="margin-top:20px">Mostrá tu tarjeta en la caja de ' +
             'cualquier local para aprovechar' + (lista.length > 1 ? 'las' : 'la') + '.</p>'
           /* Con puntos extra arriba, "no hay promociones" se contradice con
@@ -3375,6 +3496,7 @@
           : '<div class="caja"><h2>No hay promociones activas</h2>' +
             '<p class="vacio">Cuando haya una, te la mostramos acá. Mientras tanto, tus ' +
             'compras siguen sumando puntos.</p></div>') +
+        (nove ? '<div class="promo-nove">' + nove + '</div>' : '') +
         irALaTarjeta;
 
       if ($('promoVerTarjeta')) {
@@ -3810,76 +3932,84 @@
     pintarCampana();
   }
 
-  /* ── Deslizar para borrar ──
-     Hacia la derecha, de a uno. El borrado es POR TELÉFONO: club_avisos es
+  /* ── Deslizar para sacar, hacia cualquier lado ──
+     Como las notificaciones del teléfono (29/09/2026, Mauricio: "deslizando
+     para cualquier lado se borra"). Lo usan los avisos de la campanita y
+     los carteles de Inicio. alSacar(lado) recibe 1 si se fue a la derecha y
+     -1 si a la izquierda; alMover(dx), si está, se entera de cada paso.
+
+     El umbral es un tercio del ancho y no unos pocos píxeles: lo que se
+     saca sin querer no vuelve, y para deshacer haría falta un cartel que
+     molesta más de lo que salva. */
+  function deslizable(cara, alSacar, alMover) {
+    var x0 = 0, y0 = 0, dx = 0, arrastrando = false, decidido = false;
+
+    cara.addEventListener('touchstart', function (ev) {
+      var t = ev.touches[0];
+      x0 = t.clientX; y0 = t.clientY; dx = 0;
+      arrastrando = true; decidido = false;
+      cara.classList.remove('suelta');
+    }, { passive: true });
+
+    cara.addEventListener('touchmove', function (ev) {
+      if (!arrastrando) { return; }
+      var t = ev.touches[0];
+      var mx = t.clientX - x0, my = t.clientY - y0;
+
+      /* Hasta no saber si el gesto es horizontal o vertical no se toca
+         nada: si se mueve con cualquier roce, scrollear se vuelve
+         imposible. */
+      if (!decidido) {
+        if (Math.abs(mx) < 8 && Math.abs(my) < 8) { return; }
+        if (Math.abs(my) > Math.abs(mx)) { arrastrando = false; return; }
+        decidido = true;
+      }
+
+      dx = mx;
+      cara.style.transform = 'translateX(' + dx + 'px)';
+      if (alMover) { alMover(dx); }
+    }, { passive: true });
+
+    function soltar() {
+      if (!arrastrando) { return; }
+      arrastrando = false;
+      cara.classList.add('suelta');
+
+      if (Math.abs(dx) > cara.offsetWidth / 3) {
+        alSacar(dx > 0 ? 1 : -1);
+      } else {
+        cara.style.transform = '';
+      }
+      dx = 0;
+    }
+
+    cara.addEventListener('touchend', soltar, { passive: true });
+    cara.addEventListener('touchcancel', soltar, { passive: true });
+  }
+
+  /* Los avisos de la campanita. El borrado es POR TELÉFONO: club_avisos es
      compartida —el mismo aviso le llegó a todos— así que borrarlo de verdad
      se lo sacaría a los demás socios. Acá se guardan los ids descartados en
-     este celular y la lista los filtra.
-
-     El umbral es un tercio del ancho y no unos pocos píxeles: un aviso
-     borrado sin querer no se puede recuperar, y para deshacer haría falta
-     un cartel que en una lista de tres mensajes molesta más de lo que
-     salva. */
+     este celular y la lista los filtra. */
   function engancharDeslizar(lista) {
     Array.prototype.forEach.call(lista.querySelectorAll('.buzon-item'), function (item) {
       var cara = item.querySelector('.buzon-cara');
       if (!cara) { return; }
-
-      var x0 = 0, y0 = 0, dx = 0, arrastrando = false, decidido = false;
-
-      cara.addEventListener('touchstart', function (ev) {
-        var t = ev.touches[0];
-        x0 = t.clientX; y0 = t.clientY; dx = 0;
-        arrastrando = true; decidido = false;
-        cara.classList.remove('suelta');
-      }, { passive: true });
-
-      cara.addEventListener('touchmove', function (ev) {
-        if (!arrastrando) { return; }
-        var t = ev.touches[0];
-        var mx = t.clientX - x0, my = t.clientY - y0;
-
-        /* Hasta no saber si el gesto es horizontal o vertical no se toca
-           nada: si se mueve la cara con cualquier roce, scrollear la lista
-           se vuelve imposible. */
-        if (!decidido) {
-          if (Math.abs(mx) < 8 && Math.abs(my) < 8) { return; }
-          if (Math.abs(my) > Math.abs(mx)) { arrastrando = false; return; }
-          decidido = true;
-        }
-
-        /* Sólo hacia la derecha. Hacia la izquierda no arrastra: media
-           interacción es peor que ninguna. */
-        dx = Math.max(0, mx);
-        cara.style.transform = 'translateX(' + dx + 'px)';
-      }, { passive: true });
-
-      function soltar() {
-        if (!arrastrando) { return; }
-        arrastrando = false;
-        cara.classList.add('suelta');
-
-        if (dx > cara.offsetWidth / 3) {
-          borrarAviso(item);
-        } else {
-          cara.style.transform = '';
-        }
-        dx = 0;
-      }
-
-      cara.addEventListener('touchend', soltar, { passive: true });
-      cara.addEventListener('touchcancel', soltar, { passive: true });
+      deslizable(cara,
+        function (lado) { borrarAviso(item, lado); },
+        /* El tacho aparece del lado que se destapa. */
+        function (dx) { item.classList.toggle('a-izq', dx < 0); });
     });
   }
 
-  function borrarAviso(item) {
+  function borrarAviso(item, lado) {
     var id = Number(item.dataset.id);
     var cara = item.querySelector('.buzon-cara');
 
-    /* Sale del todo hacia la derecha y después la fila se cierra sola. Las
+    /* Sale del todo hacia su lado y después la fila se cierra sola. Las
        dos cosas por separado: si se colapsara la altura mientras todavía se
        está yendo, el aviso de abajo salta hacia arriba a mitad de camino. */
-    if (cara) { cara.style.transform = 'translateX(110%)'; }
+    if (cara) { cara.style.transform = 'translateX(' + (lado < 0 ? '-110%' : '110%') + ')'; }
 
     setTimeout(function () {
       item.style.height = item.offsetHeight + 'px';
