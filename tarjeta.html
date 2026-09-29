@@ -354,7 +354,12 @@
   /* display:block porque adentro de un botón van <span>. */
   .carnet-nom { display: block; font: 600 17px/1.2 var(--sans); }
   .carnet-desde { display: block; font: 500 12.5px/1.4 var(--sans); margin-top: 2px; }
-  .carnet-num { font: 600 13px/1 var(--sans); letter-spacing: .08em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .carnet-num { font: 600 13px/1 var(--sans); letter-spacing: .08em; white-space: nowrap; font-variant-numeric: tabular-nums;
+                display: inline-flex; align-items: center; gap: 8px; }
+  /* El dibujito de barras: dice "tocame y sale el código" sin una palabra. */
+  .carnet-barras { display: inline-grid; place-content: center; width: 30px; height: 30px; border-radius: 9px;
+                   background: rgba(255, 255, 255, .28); border: 1px solid rgba(0, 0, 0, .12); }
+  .carnet-barras svg { width: 17px; height: 17px; }
   .carnet-bloque { display: grid; gap: 12px; }
 
   /* El botón del código: carbón lleno, a todo el ancho, abajo de la tarjeta.
@@ -2081,7 +2086,12 @@
   }
 
   /* La tarjeta grande. Es un botón entero: tocarla abre el código. Adentro
-     van <span> y no <div>, que un botón no puede llevar bloques. */
+     van <span> y no <div>, que un botón no puede llevar bloques.
+
+     Sin el botón "Mostrar código" abajo (29/09/2026, Mauricio: "la gente va
+     a tocar la tarjeta ahí"). Lo que avisa que se toca es el dibujito de
+     barras al lado del número, sin texto. En Inicio el botón sigue: es
+     donde abre la app y el camino rápido en la caja. */
   function carnetHtml(t, nv) {
     var cod = String(t.codigo || '');
     return '<div class="carnet-bloque">' +
@@ -2090,9 +2100,8 @@
           '<span class="carnet-nivel">' + esc(nv.nombre) + '</span></span>' +
         '<span class="carnet-abajo"><span><span class="carnet-nom">' + esc(t.nombre) + '</span>' +
           '<span class="carnet-desde">Socio desde ' + mesAnio(t.desde) + '</span></span>' +
-          '<span class="carnet-num">•••• ' + esc(cod.slice(-4)) + '</span></span>' +
+          '<span class="carnet-num">•••• ' + esc(cod.slice(-4)) + '<span class="carnet-barras">' + icono('barras') + '</span></span></span>' +
       '</button>' +
-      botonCodigo() +
     '</div>';
   }
 
