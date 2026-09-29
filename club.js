@@ -103,6 +103,22 @@ var club = {
       martes de puntos dobles, Hot Sale. Sin nada privado adentro. */
   puntosExtra: function () {
     return llamar('club_multi_publicos', {});
+  },
+
+  /** "Mis datos": lo que el socio puede ver y corregir. El teléfono viene
+      enmascarado y NO se cambia desde acá (abre la tarjeta: se cambia en el
+      local). Ver SQL 25. */
+  misDatos: function (codigo) {
+    return llamar('club_mis_datos', { p_codigo: codigo });
+  },
+
+  /** Guardar "Mis datos". El cumpleaños sólo entra si nunca se cargó.
+      Devuelve {ok, cambios, ...datos} o {ok:false, campo, porque}. */
+  guardarMisDatos: function (codigo, nombre, mail, cumple, acepta) {
+    return llamar('club_mis_datos_guardar', {
+      p_codigo: codigo, p_nombre: nombre, p_mail: mail || null,
+      p_cumple: cumple || null, p_acepta: acepta
+    });
   }
 };
 

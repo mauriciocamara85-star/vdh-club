@@ -1118,10 +1118,58 @@
     padding: 15px 18px; text-align: left; text-decoration: none; color: var(--txt);
     font: 600 15px/1.35 var(--sans); cursor: pointer;
   }
+  .renglon { padding: 13px 16px 13px 14px; }
   .renglon > span { display: block; }
-  .renglon > span > span { display: block; font: 400 13.5px/1.4 var(--sans); color: var(--txt-2); }
-  .renglon svg { width: 18px; height: 18px; flex: none; color: var(--txt); transition: transform .2s ease; }
-  .renglon[aria-expanded="true"] svg { transform: rotate(90deg); }
+  .renglon-txt { flex: 1; min-width: 0; }
+  .renglon-txt > span { display: block; font: 400 13.5px/1.4 var(--sans); color: var(--txt-2); }
+  .renglon-ico { flex: none; width: 38px; height: 38px; border-radius: 11px; background: var(--acc-soft);
+                 display: grid !important; place-items: center; color: var(--txt); }
+  .renglon-ico svg { width: 20px; height: 20px; }
+  .renglon > svg { width: 18px; height: 18px; flex: none; color: var(--txt); transition: transform .2s ease; }
+  .renglon[aria-expanded="true"] > svg { transform: rotate(90deg); }
+
+  /* ── Mis datos ──
+     Una pantalla aparte, que se abre desde Inicio. Lo que se puede cambiar
+     son campos; lo que no, va escrito con dónde se cambia. */
+  .datos-volver { display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; padding: 6px 0;
+                  font: 600 15px var(--sans); color: var(--txt); cursor: pointer; margin-bottom: 6px; }
+  .datos-volver svg { width: 20px; height: 20px; }
+  .datos-tit { font: 700 26px/1.2 var(--sans); letter-spacing: -.3px; }
+  .datos-sub { font-size: 14.5px; color: var(--txt-2); margin: 4px 0 18px; }
+  .datos-grupo { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); padding: 18px; margin-bottom: 14px; display: grid; gap: 16px; }
+  .datos-grupo h2 { font: 600 16px var(--sans); }
+  .dcampo label { display: block; font: 600 14px var(--sans); color: var(--txt); margin-bottom: 7px; }
+  .dcampo label span { font-weight: 400; color: var(--txt-2); }
+  .dcampo input[type=text], .dcampo input[type=email], .dcampo input[type=date] {
+    width: 100%; background: #fff; border: 1.5px solid var(--linea); border-radius: 12px;
+    font: 500 16px var(--sans); color: var(--txt); padding: 13px 14px; outline: none;
+  }
+  .dcampo input:focus { border-color: var(--txt); box-shadow: 0 0 0 3px rgba(28, 28, 26, .12); }
+  .dcampo input.mal { border-color: var(--mal-txt); }
+  .dcampo .dayuda { font-size: 13px; color: var(--txt-2); margin-top: 6px; line-height: 1.45; }
+  .dcampo .error { font-size: 13.5px; color: var(--mal-txt); margin-top: 6px; font-weight: 600; }
+  .dcampo .error[hidden] { display: none; }
+  .dfijo { display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+           background: var(--bg); border-radius: 12px; padding: 13px 14px; }
+  .dfijo b { font: 600 16px var(--sans); }
+  .dfijo span { font-size: 13px; color: var(--txt-2); white-space: nowrap; }
+  .dpref { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; align-items: center; }
+  .dpref b { font: 600 15px var(--sans); }
+  .dpref p { grid-column: 1; font-size: 13.5px; color: var(--txt-2); line-height: 1.45; }
+  .dpref .llave, .dpref .btn-claro { grid-row: 1 / span 2; grid-column: 2; }
+  .dpref .btn-claro { width: auto; min-height: 40px; padding: 0 14px; font-size: 14px; margin: 0; }
+  /* El interruptor: un checkbox de verdad, con la forma de una llave. */
+  .llave { position: relative; width: 50px; height: 30px; flex: none; }
+  .llave input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+  .llave i { position: absolute; inset: 0; border-radius: 99px; background: var(--pista); border: 1px solid var(--linea); transition: background .2s; }
+  .llave i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+                    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .2s; }
+  .llave input:checked + i { background: var(--ok); border-color: var(--ok); }
+  .llave input:checked + i::after { transform: translateX(20px); }
+  .llave input:focus-visible + i { outline: 2px solid var(--txt); outline-offset: 2px; }
+  .msg.bien { background: var(--ok-soft); color: var(--ok); border: 1px solid var(--ok-borde); font-weight: 600; }
+  .msg[hidden] { display: none; }
+  .datos-pie { font-size: 13px; color: var(--txt-2); text-align: center; margin-top: 14px; }
   .dudas { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r-sm); padding: 2px 18px; }
   .dudas[hidden] { display: none; }
 
@@ -1205,6 +1253,14 @@
     <h1>Promociones</h1>
     <p class="vista-sub">Lo que está vigente hoy en todos los locales.</p>
     <div id="promoGrande"></div>
+  </section>
+
+  <!-- Mis datos: se abre desde Inicio. Lo arma pintarMisDatos(). -->
+  <section class="vista" id="vDatos" hidden>
+    <button type="button" class="datos-volver" id="datosVolver"></button>
+    <h1 class="datos-tit">Mis datos</h1>
+    <p class="datos-sub">Tus datos personales y cómo querés que te avisemos. Tus puntos, tu nivel y tus compras no cambian.</p>
+    <div id="datosCuerpo"><p class="cargando">Buscando tus datos…</p></div>
   </section>
 
   <section class="vista" id="vLocales" hidden>
@@ -1783,6 +1839,11 @@
       case 'barras':  return a + '<path d="M4 5v14M7 5v14M10 5v14M14 5v14M16 5v14M20 5v14"/></svg>';
       case 'mas':     return a + '<path d="M12 5v14M5 12h14"/></svg>';
       case 'flecha':  return a + '<path d="m9 18 6-6-6-6"/></svg>';
+      case 'volver':  return a + '<path d="m15 18-6-6 6-6"/></svg>';
+      case 'persona': return a + '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+      case 'pregunta':return a + '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/></svg>';
+      case 'charla':  return a + '<path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1 1 21 11.5Z"/></svg>';
+      case 'camara':  return a + '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>';
       case 'estrella':return a + '<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/></svg>';
       case 'trofeo':  return a + '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/>' +
                                  '<path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>';
@@ -1871,8 +1932,9 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-premio], #btnDudas, #movsVer, #canjeX, #canjeVelo');
+             ev.target.closest('[data-codigo], [data-premio], #btnDudas, #movsVer, #canjeX, #canjeVelo, #btnMisDatos');
     if (!el) { return; }
+    if (el.id === 'btnMisDatos') { irA('datos', true); return; }
     if (el.id === 'canjeX' || el.id === 'canjeVelo') { cerrarCanje(false); return; }
     if (el.hasAttribute('data-codigo')) { abrirCodigo(); return; }
     if (el.hasAttribute('data-premio')) { abrirCanje(premiosPintados[Number(el.getAttribute('data-premio'))]); return; }
@@ -2462,9 +2524,18 @@
     var wsp = 'https://wa.me/549' + WSP_CONSULTAS +
       '?text=' + encodeURIComponent('Hola! Tengo una consulta sobre el VDH Club.');
     var flecha = icono('flecha');
+    /* Cada renglón con su ícono a la izquierda, para que "Mis datos" (que
+       lo pide) no sea el único distinto. */
+    var ico = function (n) { return '<span class="renglon-ico">' + icono(n) + '</span>'; };
     return '<div class="renglones">' +
+      /* "Mis datos", primero del grupo: es de la cuenta, como las
+         preguntas. Instagram queda último porque es lo único que saca de
+         la app. Sólo acá: no se repite en Mi tarjeta ni en otra sección. */
+      '<button type="button" class="renglon toca" id="btnMisDatos">' +
+        ico('persona') + '<span class="renglon-txt">Mis datos<span>Datos personales y preferencias</span></span>' + flecha +
+      '</button>' +
       '<button type="button" class="renglon toca" id="btnDudas" aria-expanded="false" aria-controls="listaDudas">' +
-        '<span>Preguntas frecuentes<span>Puntos, niveles y premios</span></span>' + flecha +
+        ico('pregunta') + '<span class="renglon-txt">Preguntas frecuentes<span>Puntos, niveles y premios</span></span>' + flecha +
       '</button>' +
       '<div class="dudas" id="listaDudas" hidden>' +
         PREGUNTAS.map(function (p) {
@@ -2473,12 +2544,135 @@
         }).join('') +
       '</div>' +
       '<a class="renglon toca" target="_blank" rel="noopener" href="' + esc(wsp) + '">' +
-        '<span>Escribinos por WhatsApp<span>Te responde el equipo de VDH</span></span>' + flecha +
+        ico('charla') + '<span class="renglon-txt">Escribinos por WhatsApp<span>Te responde el equipo de VDH</span></span>' + flecha +
       '</a>' +
       '<a class="renglon toca" target="_blank" rel="noopener" href="https://instagram.com/vdh.indumentaria">' +
-        '<span>Seguinos en Instagram<span>Las novedades de VDH</span></span>' + flecha +
+        ico('camara') + '<span class="renglon-txt">Seguinos en Instagram<span>Las novedades de VDH</span></span>' + flecha +
       '</a>' +
     '</div>';
+  }
+
+  /* ═══ Mis datos ═════════════════════════════════════════════════════════
+     Lo que el socio ve y corrige de sí mismo (SQL 25). Decidido con
+     Mauricio el 29/09/2026:
+       · nombre, mail y promociones por WhatsApp: los cambia él;
+       · el cumpleaños: lo carga una vez si nunca lo cargó; si ya está, se
+         corrige en el local (y hay un solo regalo cada 12 meses igual);
+       · el teléfono: se ve enmascarado y se cambia en el local. Abre la
+         tarjeta, y la tarjeta se abre con el enlace: cambiarlo desde acá
+         sería regalarle la tarjeta a cualquiera que tenga el enlace.
+     Nada de esto toca puntos, nivel ni historial. */
+  function pintarMisDatos() {
+    $('datosVolver').innerHTML = icono('volver') + 'Volver';
+    $('datosVolver').onclick = function () {
+      if (history.state && history.state.v === 'datos') { history.back(); } else { irA('inicio', true); }
+    };
+    var caja = $('datosCuerpo');
+    if (!codigo) { caja.innerHTML = '<p class="vacio">Abrí tu tarjeta primero.</p>'; return; }
+    caja.innerHTML = '<p class="cargando">Buscando tus datos…</p>';
+    club.misDatos(codigo)
+      .then(function (d) {
+        if (!d || !d.hay) { caja.innerHTML = '<p class="vacio">No encontramos tu tarjeta. Recargá la página y probá de nuevo.</p>'; return; }
+        formMisDatos(d);
+      })
+      .catch(function () { caja.innerHTML = '<p class="vacio">No se pudo abrir. Fijate la señal y probá de nuevo.</p>'; });
+  }
+
+  function textoAvisos() {
+    var e = estadoAvisos();
+    return e === 'si' ? 'Activados: te llegan al celular y quedan en la campanita.'
+         : e === 'pedir' ? 'Apagados en este celular. Te enterás de las promos cuando entrás.'
+         : e === 'bloqueado' ? 'Bloqueados en el navegador. Se cambian desde el candado al lado de la dirección.'
+         : e === 'ios' ? 'En iPhone llegan si agregás la tarjeta a tu pantalla de inicio.'
+         : 'Este navegador no puede recibir avisos.';
+  }
+
+  function formMisDatos(d) {
+    var hoyMax = new Date(); hoyMax.setFullYear(hoyMax.getFullYear() - 5);
+    var max = hoyMax.getFullYear() + '-' + ('0' + (hoyMax.getMonth() + 1)).slice(-2) + '-' + ('0' + hoyMax.getDate()).slice(-2);
+    var e = estadoAvisos();
+    var error = function (id) { return '<div class="error" id="' + id + '" hidden></div>'; };
+    $('datosCuerpo').innerHTML =
+      '<div class="msg bien" id="datosOk" role="status" hidden style="margin:0 0 14px"></div>' +
+      '<div class="msg mal" id="datosMal" role="alert" hidden style="margin:0 0 14px"></div>' +
+      '<div class="datos-grupo"><h2>Tus datos</h2>' +
+        '<div class="dcampo"><label for="dNombre">Nombre y apellido</label>' +
+          '<input type="text" id="dNombre" autocomplete="name" autocapitalize="words" maxlength="80" value="' + esc(d.nombre || '') + '">' +
+          error('eNombre') + '</div>' +
+        '<div class="dcampo"><label for="dMail">Mail <span>— opcional</span></label>' +
+          '<input type="email" id="dMail" autocomplete="email" inputmode="email" autocapitalize="off" placeholder="vos@mail.com" value="' + esc(d.mail || '') + '">' +
+          error('eMail') + '</div>' +
+        (d.cumple
+          ? '<div class="dcampo"><label>Cumpleaños</label><div class="dfijo"><b>' + esc(fecha(d.cumple)) + '</b><span>se corrige en el local</span></div>' +
+            '<div class="dayuda">Si está mal, pedí que te lo corrijan en la caja de cualquier local.</div></div>'
+          : '<div class="dcampo"><label for="dCumple">Cumpleaños <span>— se carga una sola vez</span></label>' +
+            '<input type="date" id="dCumple" min="1920-01-01" max="' + max + '">' +
+            '<div class="dayuda">Te avisamos de tu regalo una semana antes. Revisalo bien: después se corrige sólo en el local.</div>' +
+            error('eCumple') + '</div>') +
+        '<div class="dcampo"><label>WhatsApp</label><div class="dfijo"><b>' + esc(d.telefono || '') + '</b><span>se cambia en el local</span></div>' +
+          '<div class="dayuda">Con este número recuperás tu tarjeta si la perdés. Por eso se cambia en la caja de cualquier local, y no desde acá.</div></div>' +
+      '</div>' +
+      '<div class="datos-grupo"><h2>Avisos y promociones</h2>' +
+        '<div class="dpref"><b>Promociones por WhatsApp</b>' +
+          '<label class="llave"><input type="checkbox" id="dPromos"' + (d.acepta_promos ? ' checked' : '') + ' aria-label="Promociones por WhatsApp"><i></i></label>' +
+          '<p>Te escribimos cuando entra colección nueva o hay una promo. Lo apagás cuando quieras.</p></div>' +
+        '<div class="dpref"><b>Avisos en este celular</b>' +
+          (e === 'no' ? '' : '<button type="button" class="btn btn-claro toca" id="dAvisos">' + (e === 'si' ? 'Cambiar' : 'Ver') + '</button>') +
+          '<p id="dAvisosTxt">' + esc(textoAvisos()) + '</p></div>' +
+      '</div>' +
+      '<button type="button" class="btn toca" id="dGuardar" style="margin-top:4px">Guardar cambios</button>' +
+      '<p class="datos-pie">Socio desde ' + esc(mesAnio(d.desde)) + '</p>';
+    $('dGuardar').onclick = guardarMisDatos;
+    if ($('dAvisos')) {
+      /* La campanita ya sabe prender y apagar los avisos: se abre ella, en
+         vez de repetir acá lo mismo con otra forma. */
+      $('dAvisos').onclick = function () { abrirAvisos(); };
+    }
+  }
+
+  function errorEn(id, txt) {
+    var e = $(id); if (!e) { return false; }
+    e.textContent = txt; e.hidden = false;
+    var campo = e.parentNode.querySelector('input'); if (campo) { campo.classList.add('mal'); campo.focus(); }
+    return true;
+  }
+
+  function guardarMisDatos() {
+    ['eNombre', 'eMail', 'eCumple'].forEach(function (id) { if ($(id)) { $(id).hidden = true; } });
+    Array.prototype.forEach.call(document.querySelectorAll('#datosCuerpo input.mal'), function (i) { i.classList.remove('mal'); });
+    $('datosOk').hidden = true; $('datosMal').hidden = true;
+
+    var nombre = $('dNombre').value.trim(), mail = $('dMail').value.trim();
+    var cumple = $('dCumple') ? $('dCumple').value : '';
+    /* Lo mismo que va a controlar la base, antes de viajar: el socio se
+       entera en el acto. La que manda sigue siendo la base. */
+    if (!nombre) { errorEn('eNombre', 'Tu nombre no puede quedar vacío.'); return; }
+    if (mail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) { errorEn('eMail', 'Ese mail no parece completo. Revisalo o dejalo vacío.'); return; }
+
+    var b = $('dGuardar'); b.disabled = true; b.textContent = 'Guardando…';
+    club.guardarMisDatos(codigo, nombre, mail, cumple || null, $('dPromos').checked)
+      .then(function (r) {
+        if (!r || !r.ok) {
+          var id = r && r.campo ? { nombre: 'eNombre', mail: 'eMail', cumple: 'eCumple' }[r.campo] : null;
+          if (!(id && errorEn(id, r.porque))) { $('datosMal').textContent = (r && r.porque) || 'No se pudo guardar. Probá de nuevo.'; $('datosMal').hidden = false; }
+          return;
+        }
+        formMisDatos(r);
+        $('datosOk').textContent = r.cambios ? 'Listo, guardamos tus cambios.' : 'No había nada para cambiar.';
+        $('datosOk').hidden = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        /* El saludo de Inicio y la tarjeta muestran el nombre: se redibujan
+           con el nuevo. Los puntos y el resto no se tocaron. */
+        if (r.cambios && socioCodigo && socioCodigo.nombre !== r.nombre) {
+          socioCodigo.nombre = r.nombre;
+          pintar(socioCodigo);
+        }
+      })
+      .catch(function () {
+        $('datosMal').textContent = 'No se pudo guardar. Fijate la señal y probá de nuevo: tus datos siguen como estaban.';
+        $('datosMal').hidden = false;
+      })
+      .then(function () { if ($('dGuardar')) { $('dGuardar').disabled = false; $('dGuardar').textContent = 'Guardar cambios'; } });
   }
 
   /* ═══ Las pestañas ═══════════════════════════════════════════════════
@@ -2496,15 +2690,18 @@
        declarado más abajo todavía vale undefined. Eso tiraba el script entero
        en la primera línea y ni la tarjeta se dibujaba. Una declaración de
        función se iza; el valor de un var, no. */
-    var VISTAS = { inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales' };
+    var VISTAS = { inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales', datos: 'vDatos' };
     var v = VISTAS[nombre] ? nombre : 'inicio';
+    /* "Mis datos" se abre desde Inicio y no tiene pestaña propia: la barra
+       sigue marcando Inicio. */
+    var pestania = v === 'datos' ? 'inicio' : v;
 
     Object.keys(VISTAS).forEach(function (k) {
       var s = $(VISTAS[k]);
       if (s) s.hidden = (k !== v);
     });
     Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
-      if (b.dataset.vista === v) b.setAttribute('aria-current', 'page');
+      if (b.dataset.vista === pestania) b.setAttribute('aria-current', 'page');
       else b.removeAttribute('aria-current');
     });
 
@@ -2529,6 +2726,7 @@
 
     if (v === 'promos') pintarPromoGrande();
     if (v === 'locales') pintarLocales();
+    if (v === 'datos') pintarMisDatos();
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
