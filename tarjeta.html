@@ -1692,8 +1692,9 @@
 
     /* Inicio (29/09/2026, sobre la app de King Of The Kongo): el saludo, la
        tarjeta con los puntos y los cuatro accesos, y el código abajo, a todo
-       el ancho. Todo lo de arriba es del socio; la novedad de la marca se
-       fue a Promos y acá queda un renglón que lleva ahí. */
+       el ancho. Todo lo de arriba es del socio. La novedad de la marca vive
+       sólo en Promos, arriba de todo (29/09/2026, Mauricio: "la sacaría de
+       inicio"); lo que avisa que hay una es el puntito en la pestaña. */
     var primerNombre = String(t.nombre || '').split(' ')[0];
     var inicio =
       '<h1 class="hola">Hola, ' + esc(primerNombre) + '</h1>' +
@@ -1704,7 +1705,6 @@
           '</h2></div>' + bloquePremio(t, destacado, true) + '</div>'
         : '') +
       misionesHtml(t) +
-      noveRenglon(t) +
       opinionHtml(t) +
       ayudaHtml();
 
@@ -1803,16 +1803,6 @@
           '<span class="mision-pts"><small>Sumá</small><b>' + miles(m.puntos) + '</b><small>puntos</small></span>' +
         '</button>';
       }).join('') + '</div></div>';
-  }
-
-  /* La novedad vive en Promos; en Inicio, un renglón que lleva ahí. */
-  function noveRenglon(t) {
-    var n = t.novedad;
-    if (!n || !n.titulo || !n.imagen) { return ''; }
-    return '<button type="button" class="renglon toca" data-atajo="promos">' +
-      '<span class="renglon-ico">' + icono('estrella') + '</span>' +
-      '<span class="renglon-txt">Novedades<span>' + esc(n.titulo) + '</span></span>' + icono('flecha') +
-    '</button>';
   }
 
   /* El puntito rojo en Promos mientras haya una novedad que no vio. La
