@@ -759,6 +759,23 @@
      nada cargado, se dice — un cartel vacío es peor que ninguno. */
   /* Si es lo único que hay en la pantalla, que mande: más grande, más aire
      y más letra. Antes quedaba un cartelito arriba y media pantalla vacía. */
+  /* ── La cuenta regresiva (SQL 35) ──
+     Los números con ancho fijo: si cada segundo cambia el ancho, el texto
+     tiembla. */
+  .reloj { font-variant-numeric: tabular-nums; }
+  .hoy-bonus b.reloj, .extra b.reloj { display: inline; font: 700 13px/1.4 var(--sans); }
+  .extra-reloj { font-weight: 600; }
+  .promo-reloj {
+    position: absolute; top: 14px; left: 14px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px 6px 10px; border-radius: 999px;
+    background: rgba(255, 255, 255, .95); color: var(--txt);
+    font: 600 13px/1.2 var(--sans); letter-spacing: 0;
+  }
+  .promo-reloj svg { width: 16px; height: 16px; flex: none; }
+  .promo-reloj b { font-weight: 700; }
+  .promo-grande.con-reloj { position: relative; }
+
   .promo-grande {
     /* Carbón liso desde el rediseño: el resplandor rojo se fue con el rojo. */
     background: linear-gradient(158deg, #34332F 0%, #1A1A18 78%);
@@ -2382,6 +2399,7 @@
                                  '<path d="M14 6v2M14 11v2M14 16v2"/></svg>';
       case 'check':   return a + '<path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
       case 'cruz':    return a + '<path d="M18 6 6 18M6 6l12 12"/></svg>';
+      case 'reloj':   return a + '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg>';
       default:        return a + '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
                                  '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>' +
                                  '<path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
@@ -2654,13 +2672,16 @@
       : ', hasta el ' + fecha(hoy.hasta);
     var nombre = esc(String(t.nombre || '').split(' ')[0]);
 
+    /* El último día, la cuenta regresiva en vez de la fecha (SQL 35). */
+    var cierre = terminaHoy(hoy.termina) ? ' · Termina en ' + reloj(hoy.termina) : hastaCuando + '.';
+
     var titulo, texto;
     if (hoy.cumple) {
       titulo = 'Es tu semana de cumple';
-      texto = 'Tus compras suman ' + cuanto + hastaCuando + '.';
+      texto = 'Tus compras suman ' + cuanto + cierre;
     } else {
       titulo = 'Tus compras suman ' + cuanto;
-      texto = esc(hoy.motivo || 'Puntos extra') + hastaCuando + '.';
+      texto = esc(hoy.motivo || 'Puntos extra') + cierre;
     }
 
     var icono = hoy.cumple
@@ -2676,6 +2697,31 @@
     return cartel('hoy:' + (hoy.motivo || '') + ':' + (hoy.hasta || hoyISO()) + (hoy.cumple ? ':cumple' : ''),
                   icono, titulo, texto);
   }
+
+  /* ── La cuenta regresiva (SQL 35, 29/09/2026) ──
+     "Termina en 02:28:58", como en Tienda de Puntos. La base dice el
+     momento exacto en que termina (`termina`) y acá se resta la hora del
+     teléfono. Cada reloj es un <b data-termina>, y un solo intervalo los
+     mueve a todos: lo que se redibuja no pierde el suyo. */
+  function faltaTexto(ms) {
+    var s = Math.max(0, Math.floor(ms / 1000));
+    var d = Math.floor(s / 86400); s -= d * 86400;
+    var dos = function (n) { return (n < 10 ? '0' : '') + n; };
+    return (d ? d + (d === 1 ? ' día ' : ' días ') : '') +
+           dos(Math.floor(s / 3600)) + ':' + dos(Math.floor(s % 3600 / 60)) + ':' + dos(s % 60);
+  }
+  function faltaMs(iso) { return new Date(iso).getTime() - Date.now(); }
+  function reloj(iso) {
+    return '<b class="reloj" data-termina="' + esc(iso) + '">' + faltaTexto(faltaMs(iso)) + '</b>';
+  }
+  /* Para los puntos extra, sólo el último día: "Termina en 6 días 12:00:00"
+     no apura a nadie, y "hasta el 5 de octubre" se entiende mejor. */
+  function terminaHoy(iso) { var ms = iso ? faltaMs(iso) : NaN; return ms > 0 && ms < 864e5; }
+  setInterval(function () {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-termina]'), function (r) {
+      r.textContent = faltaTexto(faltaMs(r.getAttribute('data-termina')));
+    });
+  }, 1000);
 
   /* Hoy como "2026-09-27", en la hora del teléfono. Es con lo que se compara
      el "hasta" que manda la base, que ya viene en días de Argentina. */
@@ -3500,7 +3546,10 @@
       extrasCargados.map(function (x) {
         return '<div class="extra' + (x.ahora ? ' ya' : '') + '">' + rayo +
           '<div><b>' + esc(x.nombre) + (x.ahora ? ' · ahora' : '') + '</b>' +
-          '<span>Tus compras suman ' + cuantoExtra(x.factor) + ' de puntos ' + esc(x.cuando) + '</span></div>' +
+          '<span>Tus compras suman ' + cuantoExtra(x.factor) + ' de puntos ' + esc(x.cuando) + '</span>' +
+          /* El que vale ahora, su último día: cuánto le queda (SQL 35). */
+          (x.ahora && terminaHoy(x.termina) ? '<span class="extra-reloj">Termina en ' + reloj(x.termina) + '</span>' : '') +
+          '</div>' +
         '</div>';
       }).join('') + '</div>';
   }
@@ -3525,8 +3574,13 @@
                           esc(p.enlace) + '">' : '<div>';
     var cierra = p.enlace ? '</a>' : '</div>';
 
+    /* La cuenta regresiva, si en Configuración la prendieron para esta
+       promo (SQL 35): arriba a la izquierda, sobre la foto. */
+    var cuenta = p.cuenta && p.termina && faltaMs(p.termina) > 0
+      ? '<span class="promo-reloj">' + icono('reloj') + '<span>Termina en ' + reloj(p.termina) + '</span></span>' : '';
+
     return abre +
-      '<div class="' + clase + '"' + estilo + '>' + esc(p.texto) +
+      '<div class="' + clase + (cuenta ? ' con-reloj' : '') + '"' + estilo + '>' + cuenta + esc(p.texto) +
         (p.hasta ? '<span class="promo-hasta">Hasta el ' + fecha(p.hasta) + '</span>' : '') +
         (p.enlace ? '<span class="promo-ver">Ver más ' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
