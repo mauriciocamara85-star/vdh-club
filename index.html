@@ -121,6 +121,12 @@
   }
   input:focus { border-color: var(--acc-txt); box-shadow: 0 0 0 4px rgba(28, 28, 26, .10); }
   .campo + .campo { margin-top: 15px; }
+  /* Nombre y apellido lado a lado; en un teléfono muy angosto, uno abajo
+     del otro. */
+  .dos-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .dos-campos .campo + .campo { margin-top: 0; }
+  .dos-campos + .campo { margin-top: 15px; }
+  @media (max-width: 340px) { .dos-campos { grid-template-columns: 1fr; } }
 
   /* La casilla de promociones. Grande y con el texto entero al lado: un
      consentimiento que se lee mal no es un consentimiento. */
@@ -182,9 +188,18 @@
   <span class="donde" id="donde" hidden></span>
 
   <form class="caja" id="forma" autocomplete="on">
-    <div class="campo">
-      <label for="nombre">¿Cómo te llamás?</label>
-      <input type="text" id="nombre" name="name" autocomplete="name" placeholder="Nombre y apellido" required>
+    <!-- Nombre y apellido por separado (29/09/2026): para saludar por el
+         nombre sin adivinar, y para reconocer al socio en la tienda online,
+         que los trae así. -->
+    <div class="dos-campos">
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" name="given-name" autocomplete="given-name" autocapitalize="words" maxlength="40" required>
+      </div>
+      <div class="campo">
+        <label for="apellido">Apellido</label>
+        <input type="text" id="apellido" name="family-name" autocomplete="family-name" autocapitalize="words" maxlength="40" required>
+      </div>
     </div>
     <div class="campo">
       <label for="tel">Tu WhatsApp</label>
@@ -254,7 +269,7 @@
 
     club.alta($('nombre').value.trim(), $('tel').value.trim(),
               local, $('cumple').value || null, $('acepta').checked,
-              $('mail').value.trim())
+              $('mail').value.trim(), $('apellido').value.trim())
       .then(function (r) {
         /* Ese número ya tiene tarjeta: se le abre la suya.
            Anotarse dos veces con el mismo teléfono no es un error del

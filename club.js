@@ -37,11 +37,14 @@ function llamar(fn, args) {
 
 var club = {
   /** Anotarse. Devuelve {alta:true, codigo} o {alta:false, porque}. */
-  alta: function (nombre, telefono, local, cumple, acepta, mail) {
+  alta: function (nombre, telefono, local, cumple, acepta, mail, apellido) {
+    /* El apellido va siempre, aunque esté vacío: así la base sabe que es la
+       página nueva y lo pide (SQL 26). */
     return llamar('club_alta', {
       p_nombre: nombre, p_telefono: telefono,
       p_local: local || null, p_cumple: cumple || null,
-      p_acepta: !!acepta, p_mail: mail || null
+      p_acepta: !!acepta, p_mail: mail || null,
+      p_apellido: apellido == null ? '' : apellido
     });
   },
 
@@ -114,9 +117,9 @@ var club = {
 
   /** Guardar "Mis datos". El cumpleaños sólo entra si nunca se cargó.
       Devuelve {ok, cambios, ...datos} o {ok:false, campo, porque}. */
-  guardarMisDatos: function (codigo, nombre, mail, cumple, acepta) {
+  guardarMisDatos: function (codigo, nombres, apellido, mail, cumple, acepta) {
     return llamar('club_mis_datos_guardar', {
-      p_codigo: codigo, p_nombre: nombre, p_mail: mail || null,
+      p_codigo: codigo, p_nombres: nombres, p_apellido: apellido, p_mail: mail || null,
       p_cumple: cumple || null, p_acepta: acepta
     });
   }

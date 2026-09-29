@@ -1139,6 +1139,10 @@
   .datos-grupo { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); padding: 18px; margin-bottom: 14px; display: grid; gap: 16px; }
   .datos-grupo h2 { font: 600 16px var(--sans); }
   .dcampo label { display: block; font: 600 14px var(--sans); color: var(--txt); margin-bottom: 7px; }
+  /* Nombre y apellido lado a lado; en un teléfono muy angosto, uno abajo
+     del otro. */
+  .dos-dcampos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  @media (max-width: 340px) { .dos-dcampos { grid-template-columns: 1fr; } }
   .dcampo label span { font-weight: 400; color: var(--txt-2); }
   .dcampo input[type=text], .dcampo input[type=email], .dcampo input[type=date] {
     width: 100%; background: #fff; border: 1.5px solid var(--linea); border-radius: 12px;
@@ -2592,13 +2596,26 @@
     var max = hoyMax.getFullYear() + '-' + ('0' + (hoyMax.getMonth() + 1)).slice(-2) + '-' + ('0' + hoyMax.getDate()).slice(-2);
     var e = estadoAvisos();
     var error = function (id) { return '<div class="error" id="' + id + '" hidden></div>'; };
+    if (d.nombres == null && d.apellido == null) {
+      var partes = String(d.nombre || '').trim().split(/\s+/);
+      d.apellido = partes.length > 1 ? partes.pop() : '';
+      d.nombres = partes.join(' ');
+    }
     $('datosCuerpo').innerHTML =
       '<div class="msg bien" id="datosOk" role="status" hidden style="margin:0 0 14px"></div>' +
       '<div class="msg mal" id="datosMal" role="alert" hidden style="margin:0 0 14px"></div>' +
       '<div class="datos-grupo"><h2>Tus datos</h2>' +
-        '<div class="dcampo"><label for="dNombre">Nombre y apellido</label>' +
-          '<input type="text" id="dNombre" autocomplete="name" autocapitalize="words" maxlength="80" value="' + esc(d.nombre || '') + '">' +
-          error('eNombre') + '</div>' +
+        /* Nombre y apellido por separado (SQL 26). Si la base todavía no
+           los tiene partidos, los parte ella: la última palabra es el
+           apellido, y el socio lo corrige acá si quedó mal. */
+        '<div class="dos-dcampos">' +
+          '<div class="dcampo"><label for="dNombre">Nombre</label>' +
+            '<input type="text" id="dNombre" autocomplete="given-name" autocapitalize="words" maxlength="40" value="' + esc(d.nombres || '') + '">' +
+            error('eNombre') + '</div>' +
+          '<div class="dcampo"><label for="dApellido">Apellido</label>' +
+            '<input type="text" id="dApellido" autocomplete="family-name" autocapitalize="words" maxlength="40" value="' + esc(d.apellido || '') + '">' +
+            error('eApellido') + '</div>' +
+        '</div>' +
         '<div class="dcampo"><label for="dMail">Mail <span>— opcional</span></label>' +
           '<input type="email" id="dMail" autocomplete="email" inputmode="email" autocapitalize="off" placeholder="vos@mail.com" value="' + esc(d.mail || '') + '">' +
           error('eMail') + '</div>' +
@@ -2638,22 +2655,23 @@
   }
 
   function guardarMisDatos() {
-    ['eNombre', 'eMail', 'eCumple'].forEach(function (id) { if ($(id)) { $(id).hidden = true; } });
+    ['eNombre', 'eApellido', 'eMail', 'eCumple'].forEach(function (id) { if ($(id)) { $(id).hidden = true; } });
     Array.prototype.forEach.call(document.querySelectorAll('#datosCuerpo input.mal'), function (i) { i.classList.remove('mal'); });
     $('datosOk').hidden = true; $('datosMal').hidden = true;
 
-    var nombre = $('dNombre').value.trim(), mail = $('dMail').value.trim();
+    var nombre = $('dNombre').value.trim(), apellido = $('dApellido').value.trim(), mail = $('dMail').value.trim();
     var cumple = $('dCumple') ? $('dCumple').value : '';
     /* Lo mismo que va a controlar la base, antes de viajar: el socio se
        entera en el acto. La que manda sigue siendo la base. */
     if (!nombre) { errorEn('eNombre', 'Tu nombre no puede quedar vacío.'); return; }
+    if (!apellido) { errorEn('eApellido', 'Tu apellido no puede quedar vacío.'); return; }
     if (mail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) { errorEn('eMail', 'Ese mail no parece completo. Revisalo o dejalo vacío.'); return; }
 
     var b = $('dGuardar'); b.disabled = true; b.textContent = 'Guardando…';
-    club.guardarMisDatos(codigo, nombre, mail, cumple || null, $('dPromos').checked)
+    club.guardarMisDatos(codigo, nombre, apellido, mail, cumple || null, $('dPromos').checked)
       .then(function (r) {
         if (!r || !r.ok) {
-          var id = r && r.campo ? { nombre: 'eNombre', mail: 'eMail', cumple: 'eCumple' }[r.campo] : null;
+          var id = r && r.campo ? { nombres: 'eNombre', nombre: 'eNombre', apellido: 'eApellido', mail: 'eMail', cumple: 'eCumple' }[r.campo] : null;
           if (!(id && errorEn(id, r.porque))) { $('datosMal').textContent = (r && r.porque) || 'No se pudo guardar. Probá de nuevo.'; $('datosMal').hidden = false; }
           return;
         }
