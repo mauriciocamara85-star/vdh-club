@@ -1687,7 +1687,7 @@
         '<button type="button" class="btn btn-oliva toca" data-premio="' + i + '">Ver cómo canjear</button>' +
       '</div>';
     }
-    var av = Math.min(100, Math.round((p.puntos - p.falta) * 100 / p.puntos));
+    var av = Math.max(0, Math.min(100, Math.round((p.puntos - p.falta) * 100 / p.puntos)));
     return '<div class="listo aun">' + fotoPremio(p, 'miniatura') +
       '<div>' + estadoPremio(p) +
         '<div class="listo-nom">' + esc(p.nombre) + '</div>' +
@@ -1707,7 +1707,7 @@
       '</div>' +
       '<div class="premios-fila" tabindex="0" aria-label="Premios">' +
         premios.map(function (p, i) {
-          var av = Math.min(100, Math.round((p.puntos - p.falta) * 100 / p.puntos));
+          var av = Math.max(0, Math.min(100, Math.round((p.puntos - p.falta) * 100 / p.puntos)));
           return '<button type="button" class="premio-card toca' + (p.agotado ? ' agotado' : '') +
                  '" data-premio="' + i + '">' +
             fotoPremio(p, 'miniatura premio-foto') +
@@ -1731,7 +1731,8 @@
     var ult = t.ultimas || [];
     var filas = ult.map(function (m, i) {
       var titulo;
-      if (m.tipo === 'compra') { titulo = 'Compra en ' + nombreLocal(m.local); }
+      if (m.tipo === 'compra' && m.local === 'TIENDA ONLINE') { titulo = 'Compra en la tienda online'; }
+      else if (m.tipo === 'compra') { titulo = 'Compra en ' + nombreLocal(m.local); }
       else if (m.concepto === 'regalo_cumple') { titulo = 'Regalo de cumple: ' + (m.obs || ''); }
       else if (m.tipo === 'canje') { titulo = 'Te llevaste: ' + (m.obs || 'un premio'); }
       else if (m.concepto === 'bienvenida') { titulo = 'Regalo de bienvenida'; }
