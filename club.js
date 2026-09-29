@@ -115,6 +115,12 @@ var club = {
     return llamar('club_mis_datos', { p_codigo: codigo });
   },
 
+  /** La app se abrió instalada en la pantalla: cumple la misión de
+      instalar (SQL 33). Una vez por socio, lo cuida la base. */
+  misionInstalada: function (codigo) {
+    return llamar('club_mision_instalada', { p_codigo: codigo });
+  },
+
   /** Guardar "Mis datos". El cumpleaños sólo entra si nunca se cargó.
       Devuelve {ok, cambios, ...datos} o {ok:false, campo, porque}. */
   guardarMisDatos: function (codigo, nombres, apellido, mail, cumple, acepta) {

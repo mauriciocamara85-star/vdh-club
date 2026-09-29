@@ -1089,6 +1089,99 @@
   .saludo-pts b { display: block; font: 700 24px/1.1 var(--sans); font-variant-numeric: tabular-nums; }
   .saludo-pts span { font-size: 12.5px; color: var(--txt-2); }
 
+  /* ── La tarjeta de Inicio (29/09/2026, sobre la app de King Of The Kongo) ──
+     Arriba una franja con el metal del nivel; adentro los puntos y cuatro
+     accesos redondos. El código queda afuera, abajo, a todo el ancho: es lo
+     que se usa en la caja y no puede competir con nada. */
+  .hola { font: 700 24px/1.2 var(--sans); letter-spacing: -.3px; }
+  .ti { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); overflow: hidden;
+        box-shadow: 0 1px 2px rgba(28, 28, 26, .06), 0 10px 24px -16px rgba(28, 28, 26, .35); }
+  .ti-franja { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 18px; }
+  .ti-franja span { font: 700 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; }
+  .ti-franja b { font: 600 11.5px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase;
+                 border: 1.5px solid currentColor; border-radius: 999px; padding: 5px 10px; }
+  .ti-franja.nv-plata { background: linear-gradient(135deg, #C9CDD3 0%, #979DA6 45%, #B9BEC5 100%); color: #121417; }
+  .ti-franja.nv-oro { background: linear-gradient(135deg, #EED79E 0%, #C99A3E 45%, #E0BC6C 100%); color: #1A1406; }
+  .ti-franja.nv-platino { background: linear-gradient(135deg, #3A3935 0%, #1A1A18 55%, #46443F 100%); color: #F1EEE7; }
+  .ti-cuerpo { padding: 16px 18px 18px; display: grid; gap: 4px; }
+  .ti-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .ti-rot { font: 600 15px var(--sans); }
+  .ti-ver { border: 0; background: none; padding: 4px 0; display: inline-flex; align-items: center; gap: 2px;
+            font: 500 14px var(--sans); color: var(--txt); cursor: pointer; }
+  .ti-ver svg { width: 16px; height: 16px; }
+  .ti-pts { font: 700 40px/1.1 var(--sans); letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+  .ti-vence { font: 500 13px/1.45 var(--sans); color: var(--mal-txt); }
+  .ti-acc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+  .ti-btn { border: 0; background: none; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 7px;
+            font: 500 12.5px/1.2 var(--sans); color: var(--txt); text-align: center; position: relative; }
+  .ti-ico { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+            background: var(--hoja); border: 1px solid var(--linea); box-shadow: 0 2px 6px -2px rgba(28, 28, 26, .18); }
+  .ti-ico svg { width: 24px; height: 24px; }
+  .ti-btn:active .ti-ico { transform: scale(.94); }
+  .ti-btn:focus-visible .ti-ico { outline: 2px solid var(--txt); outline-offset: 2px; }
+  .ti-cuenta { position: absolute; top: -2px; left: calc(50% + 14px); min-width: 20px; height: 20px; padding: 0 6px;
+               border-radius: 999px; background: var(--ok); color: #fff; font: 700 11.5px/20px var(--sans); }
+
+  /* ── Sumá más puntos ──
+     Cada misión es un renglón con lo que hay que hacer a la izquierda y los
+     puntos, en verde, a la derecha. Sólo las que faltan. */
+  .misiones { display: grid; gap: 10px; }
+  .mision { display: grid; grid-template-columns: minmax(0, 1fr) auto; width: 100%; padding: 0; overflow: hidden;
+            background: var(--hoja); border: 1px solid var(--ok-borde); border-radius: var(--r-sm);
+            text-align: left; font: inherit; color: var(--txt); cursor: pointer; }
+  .mision-txt { padding: 13px 14px; display: grid; gap: 3px; }
+  .mision-txt b { font: 600 15px/1.3 var(--sans); }
+  .mision-txt span { font-size: 13.5px; line-height: 1.4; color: var(--txt-2); }
+  .mision-pts { background: var(--ok); color: #fff; display: grid; place-content: center; justify-items: center;
+                padding: 8px 14px; min-width: 86px; text-align: center; }
+  .mision-pts small { font: 600 10.5px var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+  .mision-pts b { font: 700 22px/1.1 var(--sans); font-variant-numeric: tabular-nums; }
+
+  /* ── Mis cupones ── */
+  .cupones { display: grid; gap: 14px; }
+  .cupon { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); overflow: hidden; }
+  .cupon-arriba { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 16px 18px 12px;
+                  border-bottom: 1.5px dashed var(--linea); }
+  .cupon-pct { font: 700 30px/1 var(--sans); letter-spacing: -.5px; }
+  .cupon-pct small { font: 500 14px var(--sans); color: var(--txt-2); letter-spacing: 0; margin-left: 4px; }
+  .cupon-clase { font: 600 11.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--txt-2); text-align: right; }
+  .cupon-cuerpo { padding: 14px 18px 16px; display: grid; gap: 10px; }
+  .cupon-cod { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+               background: var(--bg); border-radius: 12px; padding: 10px 12px 10px 14px; }
+  .cupon-cod b { font: 700 19px/1.2 var(--sans); letter-spacing: .06em; word-break: break-all;
+                 user-select: all; -webkit-user-select: all; }
+  .cupon-copiar { flex: none; border: 1px solid var(--linea); background: var(--hoja); border-radius: 10px; padding: 7px 12px;
+                  font: 600 13px var(--sans); color: var(--txt); cursor: pointer; }
+  .cupon-cond { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13.5px; color: var(--txt-2); line-height: 1.45; }
+  .cupon-cond b { color: var(--txt); }
+
+  /* ── Niveles ── */
+  .niveles { display: grid; gap: 12px; }
+  .niv { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); padding: 16px 18px; display: grid; gap: 10px; }
+  .niv.actual { border: 2px solid var(--txt); }
+  .niv-cab { display: flex; align-items: center; gap: 12px; }
+  .niv-cab .trofeo { width: 44px; height: 44px; flex: none; }
+  .niv-cab .trofeo svg { width: 22px; height: 22px; }
+  .niv-nom { font: 700 18px/1.2 var(--sans); }
+  .niv-desde { font-size: 13px; color: var(--txt-2); }
+  .niv-marca { margin-left: auto; font: 600 12px var(--sans); padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .niv-marca.es { background: var(--txt); color: #fff; }
+  .niv-marca.ya { background: var(--ok-soft); color: var(--ok); }
+  .niv-marca.falta { background: var(--bg); color: var(--txt); }
+  .niv ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; line-height: 1.4; }
+  .niv li { display: flex; gap: 8px; align-items: flex-start; }
+  .niv li svg { width: 18px; height: 18px; flex: none; margin-top: 1px; color: var(--ok); }
+  .niv-avance { display: grid; gap: 6px; }
+  .niv-avance .barra { height: 8px; }
+  .aviso-vence { background: var(--mal-bg); border: 1px solid var(--mal-borde); color: var(--mal-txt);
+                 border-radius: var(--r-sm); padding: 12px 14px; font: 500 14px/1.45 var(--sans); }
+  .aviso-vence.tranqui { background: var(--hoja); border-color: var(--linea); color: var(--txt-2); }
+
+  /* El puntito de "hay algo nuevo" en la pestaña Promos. */
+  .tab-punto { position: absolute; top: 6px; left: calc(50% + 8px); width: 9px; height: 9px; border-radius: 50%;
+               background: var(--mal-txt); box-shadow: 0 0 0 2px var(--bg); }
+  #cajaPremios, #cajaMovs, .nivel-caja { scroll-margin-top: 76px; }
+
   /* La novedad: foto apaisada arriba y el texto abajo, no encima — encima
      tapaba justo la prenda. Toda la tarjeta es el enlace. */
   .nove { display: block; border-radius: var(--r); overflow: hidden; background: var(--hoja); border: 1px solid var(--linea);
@@ -1265,6 +1358,22 @@
     <h1 class="datos-tit">Mis datos</h1>
     <p class="datos-sub">Tus datos personales y cómo querés que te avisemos. Tus puntos, tu nivel y tus compras no cambian.</p>
     <div id="datosCuerpo"><p class="cargando">Buscando tus datos…</p></div>
+  </section>
+
+  <!-- Mis cupones y Niveles: se abren desde la tarjeta de Inicio, como Mis
+       datos. Los arman pintarCupones() y pintarNiveles(). -->
+  <section class="vista" id="vCupones" hidden>
+    <button type="button" class="datos-volver" id="cuponesVolver"></button>
+    <h1 class="datos-tit">Mis cupones</h1>
+    <p class="datos-sub">Mostrá el código en la caja de cualquier local, o decí tu WhatsApp.</p>
+    <div id="cuponesCuerpo"></div>
+  </section>
+
+  <section class="vista" id="vNiveles" hidden>
+    <button type="button" class="datos-volver" id="nivelesVolver"></button>
+    <h1 class="datos-tit">Niveles</h1>
+    <p class="datos-sub">Tu nivel sale de lo que compraste en los últimos 12 meses. Canjear premios no te baja.</p>
+    <div id="nivelesCuerpo"></div>
   </section>
 
   <section class="vista" id="vLocales" hidden>
@@ -1523,7 +1632,13 @@
           '<span class="barra"><i style="width:' + tramo + '%"></i></span>' +
           '<span class="num-uni">' + (nv.sigue ? 'Para llegar a ' + esc(nv.sigue) : 'Nivel más alto') + '</span></div>' +
       '</div>' +
-      '<p class="aclara">Para el nivel cuentan tus compras de los últimos 12 meses. Canjear no lo baja.</p></div>';
+      '<p class="aclara">Para el nivel cuentan tus compras de los últimos 12 meses. Canjear no lo baja.</p>' +
+      /* Cuándo vencen, a la vista y no escondido en las preguntas (idea de
+         la app de King, 29/09/2026). */
+      (t.vence_puntos
+        ? '<p class="aclara">Tus puntos para canjear vencen el <b>' + fechaConAnio(t.vence_puntos) +
+          '</b> si no comprás antes. Cada compra los renueva por 12 meses.</p>'
+        : '') + '</div>';
 
     /* La tarjeta del nivel, como en la app de Fidelity: el trofeo, qué da
        este nivel y qué da el siguiente. El avance ya está arriba, en los
@@ -1568,21 +1683,21 @@
       '<p class="letra-chica">Tu código es sólo tuyo: no lo compartas.<br>' +
       'Si perdés esta página, en cualquier local te la vuelven a abrir con tu teléfono.</p>';
 
+    /* Inicio (29/09/2026, sobre la app de King Of The Kongo): el saludo, la
+       tarjeta con los puntos y los cuatro accesos, y el código abajo, a todo
+       el ancho. Todo lo de arriba es del socio; la novedad de la marca se
+       fue a Promos y acá queda un renglón que lleva ahí. */
     var primerNombre = String(t.nombre || '').split(' ')[0];
     var inicio =
-      '<div class="saludo">' +
-        '<div class="saludo-fila">' +
-          '<div><h1>Hola, ' + esc(primerNombre) + '</h1><p>Nivel ' + esc(nv.nombre) + '</p></div>' +
-          '<div class="saludo-pts"><b data-cuenta="' + puntos + '">' + miles(puntos) + '</b><span>para canjear</span></div>' +
-        '</div>' +
-        botonCodigo() +
-      '</div>' +
+      '<h1 class="hola">Hola, ' + esc(primerNombre) + '</h1>' +
+      '<div class="carnet-bloque">' + tarjetaInicio(t, nv) + botonCodigo() + '</div>' +
       bonus +
-      novedadHtml(t.novedad) +
       (destacado
         ? '<div><div class="sec-cab"><h2>' + (destacado.alcanzado ? 'Ya podés canjear' : 'Tu próximo premio') +
           '</h2></div>' + bloquePremio(t, destacado, true) + '</div>'
         : '') +
+      misionesHtml(t) +
+      noveRenglon(t) +
       opinionHtml(t) +
       ayudaHtml();
 
@@ -1605,6 +1720,252 @@
     engancharFilaInstalar();
     ofrecerInstalar();
     precargarPromo();
+    marcarPromos();
+    avisarInstalada(t);
+  }
+
+  /* ═══ La tarjeta de Inicio: los accesos, las misiones y las vistas ═════
+     (29/09/2026, sobre la app de King Of The Kongo). */
+
+  /* Días de hoy a una fecha 'AAAA-MM-DD', en hora local. */
+  function diasHasta(iso) {
+    var d = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+    if (!d) { return null; }
+    var hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    return Math.round((new Date(+d[1], +d[2] - 1, +d[3]) - hoy) / 864e5);
+  }
+  /* "5 de diciembre de 2026": con año, porque un vencimiento a doce meses
+     sin año se lee como de este año. */
+  function fechaConAnio(iso) {
+    var d = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+    if (!d) { return ''; }
+    return new Date(+d[1], +d[2] - 1, +d[3]).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function tarjetaInicio(t, nv) {
+    var cupones = (t.cupones || []).length;
+    var faltan = t.vence_puntos ? diasHasta(t.vence_puntos) : null;
+    var boton = function (clave, ico, txt, extra) {
+      return '<button type="button" class="ti-btn" data-atajo="' + clave + '">' +
+        '<span class="ti-ico">' + icono(ico) + '</span>' + txt + (extra || '') + '</button>';
+    };
+    return '<div class="ti">' +
+      '<div class="ti-franja ' + claseNivel(nv.nombre) + '"><span>VDH Club</span><b>Nivel ' + esc(nv.nombre) + '</b></div>' +
+      '<div class="ti-cuerpo">' +
+        '<div class="ti-fila"><span class="ti-rot">Puntos disponibles</span>' +
+          '<button type="button" class="ti-ver" data-atajo="tarjeta">Ver mi tarjeta' + icono('flecha') + '</button></div>' +
+        '<b class="ti-pts" data-cuenta="' + (t.puntos || 0) + '">' + miles(t.puntos || 0) + '</b>' +
+        /* El vencimiento, acá sólo cuando se acerca: dos meses antes. Antes
+           de eso está en Mi tarjeta y en Niveles, sin apurar a nadie. */
+        (faltan !== null && faltan >= 0 && faltan <= 60
+          ? '<p class="ti-vence">Vencen el ' + fechaConAnio(t.vence_puntos) + ' si no comprás antes.</p>'
+          : '') +
+        '<div class="ti-acc">' +
+          boton('canjear', 'regalo', 'Canjear') +
+          boton('movs', 'movs', 'Movimientos') +
+          boton('cupones', 'ticket', 'Mis cupones', cupones ? '<span class="ti-cuenta">' + cupones + '</span>' : '') +
+          boton('niveles', 'trofeo', 'Niveles') +
+        '</div>' +
+      '</div></div>';
+  }
+
+  /* "Sumá más puntos": las misiones que le faltan, hasta tres. La de
+     instalar no se ofrece a quien ya la tiene instalada (la app lo avisa
+     sola), y la de avisos no, en un navegador que no puede recibirlos. */
+  function misionesHtml(t) {
+    var todas = t.misiones || [];
+    var pend = todas.filter(function (m) {
+      if (m.hecha) { return false; }
+      if (m.clave === 'instalar' && estaInstalada()) { return false; }
+      if (m.clave === 'avisos' && estadoAvisos() === 'no') { return false; }
+      return true;
+    });
+    if (!pend.length) { return ''; }
+    var hechas = todas.filter(function (m) { return m.hecha; }).length;
+    return '<div><div class="sec-cab"><h2>Sumá más puntos</h2>' +
+        (hechas ? '<span class="sec-nota">' + hechas + ' de ' + todas.length + ' hechas</span>' : '') + '</div>' +
+      '<div class="misiones">' + pend.slice(0, 3).map(function (m) {
+        return '<button type="button" class="mision toca" data-mision="' + esc(m.accion) + '">' +
+          '<span class="mision-txt"><b>' + esc(m.titulo) + '</b><span>' + esc(m.texto) + '</span></span>' +
+          '<span class="mision-pts"><small>Sumá</small><b>' + miles(m.puntos) + '</b><small>puntos</small></span>' +
+        '</button>';
+      }).join('') + '</div></div>';
+  }
+
+  /* La novedad vive en Promos; en Inicio, un renglón que lleva ahí. */
+  function noveRenglon(t) {
+    var n = t.novedad;
+    if (!n || !n.titulo || !n.imagen) { return ''; }
+    return '<button type="button" class="renglon toca" data-atajo="promos">' +
+      '<span class="renglon-ico">' + icono('estrella') + '</span>' +
+      '<span class="renglon-txt">Novedades<span>' + esc(n.titulo) + '</span></span>' + icono('flecha') +
+    '</button>';
+  }
+
+  /* El puntito rojo en Promos mientras haya una novedad que no vio. La
+     clave va adentro y no en un var de afuera: irA('promos') puede correr
+     al arrancar, antes de que un var de más abajo tenga su valor. */
+  function claveNove() {
+    var n = socioCodigo && socioCodigo.novedad;
+    return n && n.titulo ? String(n.titulo) + '|' + String(n.imagen || '') : '';
+  }
+  function marcarPromos(vista) {
+    var K = 'vdh_club_nove_vista', k = claveNove(), visto = '';
+    try { visto = localStorage.getItem(K) || ''; } catch (e) {}
+    if (vista && k) { try { localStorage.setItem(K, k); } catch (e) {} visto = k; }
+    var tab = document.querySelector('.tab[data-vista="promos"]');
+    if (!tab) { return; }
+    var punto = tab.querySelector('.tab-punto');
+    var hay = !!k && k !== visto;
+    if (hay && !punto) { tab.insertAdjacentHTML('beforeend', '<span class="tab-punto" aria-hidden="true"></span>'); }
+    if (!hay && punto) { punto.remove(); }
+  }
+
+  /* Los cuatro accesos. Canjear y Movimientos llevan a esa parte de Mi
+     tarjeta, que es donde ya están; Mis cupones y Niveles son pantallas. */
+  function atajo(clave) {
+    if (clave === 'tarjeta' || clave === 'promos' || clave === 'cupones' || clave === 'niveles') { irA(clave, true); return; }
+    if (clave === 'canjear' || clave === 'movs') {
+      irA('tarjeta', true);
+      if (clave === 'movs') {
+        Array.prototype.forEach.call(document.querySelectorAll('#todo .mov[hidden]'), function (m) { m.hidden = false; });
+        if ($('movsVer')) { $('movsVer').hidden = true; }
+      }
+      var destino = $(clave === 'canjear' ? 'cajaPremios' : 'cajaMovs');
+      if (destino) { setTimeout(function () { destino.scrollIntoView({ block: 'start' }); }, 30); }
+    }
+  }
+
+  function hacerMision(accion) {
+    if (accion === 'datos') { irA('datos', true); return; }
+    if (accion === 'avisos') { abrirAvisos(); return; }
+    if (accion === 'instalar') { abrirInstalar(); return; }
+    /* Las de comprar se cumplen en la caja: lleva a los locales. */
+    if (accion === 'comprar') { irA('locales', true); }
+  }
+
+  /* Volver a pedir la tarjeta a la base y redibujar: después de algo que
+     pudo sumar puntos (una misión cumplida). Si falla, queda lo que había. */
+  function recargarTarjeta() {
+    if (!codigo) { return; }
+    club.tarjeta(codigo)
+      .then(function (t) { if (t && t.hay) { guardarUltima(t); pintar(t); } })
+      .catch(function () {});
+  }
+
+  /* Abierta desde la pantalla de inicio: la misión de instalar se cumple
+     sola. Una vez por visita. */
+  function avisarInstalada(t) {
+    if (!estaInstalada() || window.__vdhInstaladaAvisada) { return; }
+    var m = (t.misiones || []).filter(function (x) { return x.clave === 'instalar' && !x.hecha; })[0];
+    if (!m) { return; }
+    window.__vdhInstaladaAvisada = true;
+    club.misionInstalada(codigo)
+      .then(function (r) { if (r && r.dio) { recargarTarjeta(); } })
+      .catch(function () {});
+  }
+
+  function volverDe(vista, boton) {
+    $(boton).innerHTML = icono('volver') + 'Volver';
+    $(boton).onclick = function () {
+      if (history.state && history.state.v === vista) { history.back(); } else { irA('inicio', true); }
+    };
+  }
+
+  /* ── Mis cupones ── */
+  function pintarCupones() {
+    volverDe('cupones', 'cuponesVolver');
+    var t = socioCodigo || {};
+    var l = t.cupones || [];
+    var caja = $('cuponesCuerpo');
+    if (!l.length) {
+      caja.innerHTML = '<div class="caja" style="margin-top:0"><h2>Todavía no tenés cupones</h2>' +
+        '<p class="vacio" style="margin-top:6px">Cuando te demos uno —en el local, por WhatsApp o en una campaña— ' +
+        'aparece acá con su código.</p></div>';
+      return;
+    }
+    caja.innerHTML = '<div class="cupones">' + l.map(function (c, i) {
+      var cond = [];
+      if (c.desde && diasHasta(c.desde) > 0) { cond.push('Vale desde el <b>' + fecha(c.desde) + '</b>'); }
+      if (c.vence) { cond.push(diasHasta(c.vence) === 0 ? '<b>Vence hoy</b>' : 'Vence el <b>' + fecha(c.vence) + '</b>'); }
+      if (c.compra_minima) { cond.push('Compra mínima de <b>$' + miles(c.compra_minima) + '</b>'); }
+      if (c.tope) { cond.push('Descuento máximo de <b>$' + miles(c.tope) + '</b>'); }
+      if (c.locales && c.locales.length) { cond.push('Sólo en ' + c.locales.map(nombreLocal).map(esc).join(', ')); }
+      if (!c.acumulable) { cond.push('No se suma a otras promociones'); }
+      if (c.clase === 'campana' && c.por_cliente) {
+        cond.push(c.por_cliente === 1 ? 'Una vez por persona: en la caja te piden tu WhatsApp'
+                                      : c.por_cliente + ' veces por persona: en la caja te piden tu WhatsApp');
+      }
+      return '<div class="cupon">' +
+        '<div class="cupon-arriba"><span class="cupon-pct">' + esc(c.pct) + '%<small>de descuento</small></span>' +
+          '<span class="cupon-clase">' + (c.clase === 'campana' ? 'Para todos' : 'Para vos') + '</span></div>' +
+        '<div class="cupon-cuerpo">' +
+          '<div class="cupon-cod"><b>' + esc(c.codigo) + '</b>' +
+            '<button type="button" class="cupon-copiar" data-copiar="' + esc(c.codigo) + '">Copiar</button></div>' +
+          '<ul class="cupon-cond">' + cond.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
+        '</div></div>';
+    }).join('') + '</div>' +
+    '<p class="aclara" style="margin-top:14px">Los cupones son para los locales: en la tienda online no se pueden usar.</p>';
+  }
+
+  function copiarCupon(boton) {
+    var cod = boton.getAttribute('data-copiar');
+    var listo = function () { boton.textContent = 'Copiado'; setTimeout(function () { boton.textContent = 'Copiar'; }, 1800); };
+    var elegir = function () {
+      try {
+        var r = document.createRange(); r.selectNodeContents(boton.previousElementSibling);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      } catch (e) {}
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(cod).then(listo).catch(elegir);
+    } else { elegir(); }
+  }
+
+  /* ── Niveles ── */
+  function pintarNiveles() {
+    volverDe('niveles', 'nivelesVolver');
+    var t = socioCodigo || {};
+    var nv = t.nivel || { nombre: 'Plata' };
+    var lista = t.niveles || [];
+    var xp = Number(t.xp) || 0;
+    var yo = -1;
+    lista.forEach(function (n, i) { if (n.nombre === nv.nombre) { yo = i; } });
+
+    var avance = nv.hasta_xp
+      ? '<div class="caja niv-avance" style="margin-top:0">' +
+          '<div class="sec-cab" style="margin:0"><h2>' + miles(xp) + ' <small style="font-weight:500;color:var(--txt-2)">de ' +
+            miles(nv.hasta_xp) + '</small></h2><span class="sec-nota">puntos de compras</span></div>' +
+          '<span class="barra"><i style="width:' + Math.max(0, Math.min(100, Math.round(xp * 100 / nv.hasta_xp))) + '%"></i></span>' +
+          '<p class="vacio">Te faltan <b>' + miles(nv.falta_xp) + '</b> para llegar a <b>' + esc(nv.sigue) + '</b>.</p>' +
+        '</div>'
+      : '<div class="caja" style="margin-top:0"><h2>Estás en el nivel más alto</h2></div>';
+
+    var tarjetas = lista.map(function (n, i) {
+      var marca = i === yo ? '<span class="niv-marca es">Tu nivel</span>'
+                : i < yo ? '<span class="niv-marca ya">Superado</span>'
+                : '<span class="niv-marca falta">Te faltan ' + miles(Math.max(0, n.desde_xp - xp)) + '</span>';
+      var multi = Number(n.multiplica) || 1;
+      var ok = icono('check');
+      return '<div class="niv' + (i === yo ? ' actual' : '') + '">' +
+        '<div class="niv-cab"><div class="trofeo ' + claseNivel(n.nombre) + '">' + icono('trofeo') + '</div>' +
+          '<div><div class="niv-nom">' + esc(n.nombre) + '</div><div class="niv-desde">' +
+            (Number(n.desde_xp) ? 'Desde ' + miles(n.desde_xp) + ' puntos de compras' : 'Desde que te anotás') +
+          '</div></div>' + marca + '</div>' +
+        '<ul>' +
+          '<li>' + ok + '<span>' + (multi > 1 ? '<b>' + coma(multi) + ' puntos</b> por cada $100' : '<b>1 punto</b> por cada $100') + '</span></li>' +
+          (Number(n.bono) > 0 ? '<li>' + ok + '<span>Al llegar te regalamos <b>' + miles(n.bono) + ' puntos</b></span></li>' : '') +
+          (n.regalo_cumple ? '<li>' + ok + '<span>En tu cumple: <b>' + esc(n.regalo_cumple) + '</b></span></li>' : '') +
+        '</ul></div>';
+    }).join('');
+
+    var faltan = t.vence_puntos ? diasHasta(t.vence_puntos) : null;
+    var vence = t.vence_puntos
+      ? '<p class="aviso-vence' + (faltan > 60 ? ' tranqui' : '') + '">Tus puntos para canjear vencen el <b>' +
+          fechaConAnio(t.vence_puntos) + '</b> si no comprás antes. Cada compra los renueva por 12 meses.</p>'
+      : '';
+
+    $('nivelesCuerpo').innerHTML = '<div class="niveles">' + avance + tarjetas + vence + '</div>';
   }
 
   /* Los que se pintaron, para que la hoja de canje sepa de cuál se habla. */
@@ -1745,7 +2106,7 @@
              '<em class="' + (n >= 0 ? 'mas' : 'menos') + '">' +
                (n === 0 ? '' : (n > 0 ? '+' : '−') + miles(Math.abs(n))) + '</em></div>';
     }).join('');
-    return '<div>' +
+    return '<div id="cajaMovs">' +
       '<div class="sec-cab"><h2>Tus movimientos</h2>' +
         (ult.length > 3 ? '<button type="button" class="movs-ver" id="movsVer">Ver todos</button>' : '') +
       '</div>' +
@@ -1852,6 +2213,11 @@
       case 'estrella':return a + '<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/></svg>';
       case 'trofeo':  return a + '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/>' +
                                  '<path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>';
+      case 'movs':    return a + '<path d="M20.5 12a8.5 8.5 0 0 1-15 5.4L4 16"/><path d="M4 20.5V16h4.5"/>' +
+                                 '<path d="M3.5 12a8.5 8.5 0 0 1 15-5.4L20 8"/><path d="M20 3.5V8h-4.5"/></svg>';
+      case 'ticket':  return a + '<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2.2a1.8 1.8 0 0 0 0 3.6V16a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2.2a1.8 1.8 0 0 0 0-3.6Z"/>' +
+                                 '<path d="M14 6v2M14 11v2M14 16v2"/></svg>';
+      case 'check':   return a + '<path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
       default:        return a + '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
                                  '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>' +
                                  '<path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
@@ -1937,8 +2303,11 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-premio], #btnDudas, #movsVer, #canjeX, #canjeVelo, #btnMisDatos');
+             ev.target.closest('[data-codigo], [data-premio], #btnDudas, #movsVer, #canjeX, #canjeVelo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar]');
     if (!el) { return; }
+    if (el.hasAttribute('data-atajo')) { atajo(el.getAttribute('data-atajo')); return; }
+    if (el.hasAttribute('data-mision')) { hacerMision(el.getAttribute('data-mision')); return; }
+    if (el.hasAttribute('data-copiar')) { copiarCupon(el); return; }
     if (el.id === 'btnMisDatos') { irA('datos', true); return; }
     if (el.id === 'canjeX' || el.id === 'canjeVelo') { cerrarCanje(false); return; }
     if (el.hasAttribute('data-codigo')) { abrirCodigo(); return; }
@@ -2686,6 +3055,9 @@
           socioCodigo.nombre = r.nombre;
           pintar(socioCodigo);
         }
+        /* Cargar el mail y el cumple cumple la misión del perfil: se trae la
+           tarjeta de nuevo para que se vean los puntos. */
+        if (r.cambios) { recargarTarjeta(); }
       })
       .catch(function () {
         $('datosMal').textContent = 'No se pudo guardar. Fijate la señal y probá de nuevo: tus datos siguen como estaban.';
@@ -2709,11 +3081,12 @@
        declarado más abajo todavía vale undefined. Eso tiraba el script entero
        en la primera línea y ni la tarjeta se dibujaba. Una declaración de
        función se iza; el valor de un var, no. */
-    var VISTAS = { inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales', datos: 'vDatos' };
+    var VISTAS = { inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales', datos: 'vDatos',
+                   cupones: 'vCupones', niveles: 'vNiveles' };
     var v = VISTAS[nombre] ? nombre : 'inicio';
-    /* "Mis datos" se abre desde Inicio y no tiene pestaña propia: la barra
-       sigue marcando Inicio. */
-    var pestania = v === 'datos' ? 'inicio' : v;
+    /* "Mis datos", "Mis cupones" y "Niveles" se abren desde Inicio y no
+       tienen pestaña propia: la barra sigue marcando Inicio. */
+    var pestania = (v === 'datos' || v === 'cupones' || v === 'niveles') ? 'inicio' : v;
 
     Object.keys(VISTAS).forEach(function (k) {
       var s = $(VISTAS[k]);
@@ -2743,9 +3116,11 @@
       } catch (e) { /* en file:// tira excepción; las pestañas andan igual */ }
     }
 
-    if (v === 'promos') pintarPromoGrande();
+    if (v === 'promos') { pintarPromoGrande(); marcarPromos(true); }
     if (v === 'locales') pintarLocales();
     if (v === 'datos') pintarMisDatos();
+    if (v === 'cupones') pintarCupones();
+    if (v === 'niveles') pintarNiveles();
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
@@ -2927,7 +3302,9 @@
       'Ver mi tarjeta</button>';
 
     var pintar = function (lista) {
-      caja.innerHTML = extrasHtml() +
+      /* La novedad, arriba de todo (29/09/2026): se mudó de Inicio a Promos,
+         donde tiene lugar para la foto grande. */
+      caja.innerHTML = novedadHtml(socioCodigo && socioCodigo.novedad) + extrasHtml() +
         ((lista && lista.length)
           ? '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>' +
             '<p class="vacio" style="margin-top:20px">Mostrá tu tarjeta en la caja de ' +
@@ -3530,6 +3907,9 @@
       }).then(function () {
         pintarAvisos();
         pintarCampana();
+        /* Activarlos cumple una misión: la tarjeta se trae de nuevo para
+           que se vean los puntos. */
+        recargarTarjeta();
       });
     }).catch(function () {
       var l = $('buzonLista');
