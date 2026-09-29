@@ -790,7 +790,6 @@
   /* La pantalla termina en algo que hacer. Contarle a alguien que hay un
      2x1 sirve si va al local y muestra la tarjeta; sin esto, la pantalla
      informa y lo deja ahí parado. */
-  .promo-ir { margin-top: 18px; }
 
   /* Varias promos, una abajo de la otra, y GRANDES. Es pedido de Mauricio y
      se sostiene: con una foto cada una, scrollear se parece a mirar un feed
@@ -3476,32 +3475,26 @@
     var caja = $('promoGrande');
     if (!caja) return;
 
-    var irALaTarjeta = '<button type="button" class="btn promo-ir" id="promoVerTarjeta">' +
-      'Ver mi tarjeta</button>';
-
     var pintar = function (lista) {
       /* Primero las ofertas y la novedad DESPUÉS, con su título y aire
          arriba (29/09/2026, Mauricio: con la novedad arriba, "Nueva
          colección" ocupaba casi toda la primera pantalla y la promo quedaba
-         abajo, que es a lo que se entra acá). */
+         abajo, que es a lo que se entra acá).
+
+         Nada más: sin "Mostrá tu tarjeta en la caja…" ni el botón "Ver mi
+         tarjeta" al final. Lo pidió él el mismo día, "para no ser
+         repetitivo": la tarjeta está en la barra de abajo, a un toque. */
       var nove = novedadHtml(socioCodigo && socioCodigo.novedad);
       caja.innerHTML = extrasHtml() +
         ((lista && lista.length)
-          ? '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>' +
-            '<p class="vacio" style="margin-top:20px">Mostrá tu tarjeta en la caja de ' +
-            'cualquier local para aprovechar' + (lista.length > 1 ? 'las' : 'la') + '.</p>'
+          ? '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>'
           /* Con puntos extra arriba, "no hay promociones" se contradice con
              lo que el cliente acaba de leer: el cartel vacío no va. */
           : extrasCargados.length ? ''
           : '<div class="caja"><h2>No hay promociones activas</h2>' +
             '<p class="vacio">Cuando haya una, te la mostramos acá. Mientras tanto, tus ' +
             'compras siguen sumando puntos.</p></div>') +
-        (nove ? '<div class="promo-nove">' + nove + '</div>' : '') +
-        irALaTarjeta;
-
-      if ($('promoVerTarjeta')) {
-        $('promoVerTarjeta').onclick = function () { irA('tarjeta', true); };
-      }
+        (nove ? '<div class="promo-nove">' + nove + '</div>' : '');
     };
 
     /* Los puntos extra se piden cada vez que se entra: una hora feliz
