@@ -780,6 +780,7 @@
      se sostiene: con una foto cada una, scrollear se parece a mirar un feed
      de prendas y no a leer carteles. */
   .promos-lista { display: grid; gap: 22px; }
+  .promo-nove { margin-bottom: 32px; }
 
   /* Las condiciones —qué productos participan, si combina con otros
      descuentos, en qué locales vale— van en un <details> y no en otra
@@ -3304,9 +3305,14 @@
     var pintar = function (lista) {
       /* La novedad, arriba de todo (29/09/2026): se mudó de Inicio a Promos,
          donde tiene lugar para la foto grande. */
-      caja.innerHTML = novedadHtml(socioCodigo && socioCodigo.novedad) + extrasHtml() +
+      /* Con aire abajo y, si hay promociones, su propio título: pegada a la
+         primera promo, la foto de la novedad parecía parte de la misma
+         (lo vio Mauricio en el celular, 29/09/2026). */
+      var nove = novedadHtml(socioCodigo && socioCodigo.novedad);
+      caja.innerHTML = (nove ? '<div class="promo-nove">' + nove + '</div>' : '') + extrasHtml() +
         ((lista && lista.length)
-          ? '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>' +
+          ? (nove ? '<div class="sec-cab"><h2>Promociones de hoy</h2></div>' : '') +
+            '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>' +
             '<p class="vacio" style="margin-top:20px">Mostrá tu tarjeta en la caja de ' +
             'cualquier local para aprovechar' + (lista.length > 1 ? 'las' : 'la') + '.</p>'
           /* Con puntos extra arriba, "no hay promociones" se contradice con
