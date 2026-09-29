@@ -1138,6 +1138,26 @@
   .mision-pts small { font: 600 10.5px var(--sans); letter-spacing: .1em; text-transform: uppercase; }
   .mision-pts b { font: 700 22px/1.1 var(--sans); font-variant-numeric: tabular-nums; }
 
+  .mision.hecha { border-color: var(--linea); cursor: default; }
+  .mision.hecha .mision-txt { opacity: .7; }
+  .mision.hecha .mision-pts { background: var(--ok-soft); color: var(--ok); }
+  .mision.hecha .mision-pts svg { width: 22px; height: 22px; }
+
+  /* ── Tus puntos: los puntos y las tres solapas ── */
+  .movs-cab { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
+  .movs-cab b { font: 700 40px/1.1 var(--sans); letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+  .movs-cab span { font-size: 15px; color: var(--txt-2); }
+  .movs-vence { font-size: 13.5px; color: var(--txt-2); margin-top: 2px; }
+  .solapas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 18px 0 16px; border-bottom: 1px solid var(--linea); }
+  .solapa { border: 0; background: none; padding: 12px 4px; font: 500 15px var(--sans); color: var(--txt-2); cursor: pointer;
+            border-bottom: 2.5px solid transparent; margin-bottom: -1px; }
+  .solapa[aria-selected="true"] { color: var(--txt); font-weight: 600; border-bottom-color: var(--txt); }
+  .solapa:focus-visible { outline: 2px solid var(--txt); outline-offset: -2px; }
+
+  /* El nivel en Mi tarjeta: un renglón con el trofeo del metal. */
+  .nivel-fila .renglon-ico.trofeo { border-radius: 11px; }
+  .nivel-fila .renglon-ico.trofeo svg { width: 20px; height: 20px; }
+
   /* ── Mis cupones ── */
   .cupones { display: grid; gap: 14px; }
   .cupon { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); overflow: hidden; }
@@ -1368,6 +1388,14 @@
     <h1 class="datos-tit">Mis cupones</h1>
     <p class="datos-sub">Mostrá el código en la caja de cualquier local, o decí tu WhatsApp.</p>
     <div id="cuponesCuerpo"></div>
+  </section>
+
+  <!-- Movimientos, como "Mi cuenta" de la app de King: los puntos y tres
+       solapas (Misiones · Movimientos · Canjes). Lo arma pintarMovs(). -->
+  <section class="vista" id="vMovs" hidden>
+    <button type="button" class="datos-volver" id="movsVolver"></button>
+    <h1 class="datos-tit">Tus puntos</h1>
+    <div id="movsCuerpo"></div>
   </section>
 
   <section class="vista" id="vNiveles" hidden>
@@ -1632,48 +1660,26 @@
             (nv.hasta_xp ? ' <small>de ' + miles(nv.hasta_xp) + '</small>' : '') + '</span>' +
           '<span class="barra"><i style="width:' + tramo + '%"></i></span>' +
           '<span class="num-uni">' + (nv.sigue ? 'Para llegar a ' + esc(nv.sigue) : 'Nivel más alto') + '</span></div>' +
-      '</div>' +
-      '<p class="aclara">Para el nivel cuentan tus compras de los últimos 12 meses. Canjear no lo baja.</p>' +
-      /* Cuándo vencen, a la vista y no escondido en las preguntas (idea de
-         la app de King, 29/09/2026). */
-      (t.vence_puntos
-        ? '<p class="aclara">Tus puntos para canjear vencen el <b>' + fechaConAnio(t.vence_puntos) +
-          '</b> si no comprás antes. Cada compra los renueva por 12 meses.</p>'
-        : '') + '</div>';
+      '</div></div>';
 
-    /* La tarjeta del nivel, como en la app de Fidelity: el trofeo, qué da
-       este nivel y qué da el siguiente. El avance ya está arriba, en los
-       dos números. */
-    var claseNv = claseNivel(nv.nombre);
-    var sigueMulti = Number(nv.sigue_multiplica) || 0;
-    var siguiente = [];
-    if (sigueMulti > 1) { siguiente.push(coma(sigueMulti) + ' puntos por cada $100'); }
-    if (Number(nv.sigue_bono) > 0) { siguiente.push(miles(nv.sigue_bono) + ' de regalo al llegar'); }
+    /* El nivel, en un renglón (29/09/2026, Mauricio: "más rápido de
+       entender"). Lo que da cada nivel, el regalo de cumple y el
+       vencimiento están en la pantalla de Niveles, a un toque. */
     var nivelHtml =
-      '<div class="caja nivel-caja">' +
-        '<div class="nivel-top">' +
-          '<div class="trofeo ' + claseNv + '">' + icono('trofeo') + '</div>' +
-          '<div><small class="nivel-rotulo">Tu nivel</small><b class="nivel-nom">' + esc(nv.nombre) + '</b></div>' +
-        '</div>' +
-        '<ul class="beneficios">' +
-          '<li>' + icono('mas') + '<span>' +
-            (multi > 1 ? 'Sumás <b>' + coma(multi) + ' puntos</b> por cada $100' : '<b>1 punto</b> por cada $100') +
-          '</span></li>' +
-          (nv.regalo_cumple
-            ? '<li>' + icono('regalo') + '<span>En tu cumple: <b>' + esc(nv.regalo_cumple) + '</b></span></li>'
-            : '') +
-        '</ul>' +
-        (nv.sigue
-          ? '<p class="nivel-txt">Te faltan <b>' + miles(nv.falta_xp) + '</b> puntos de compras para <b>' +
-              esc(nv.sigue) + '</b>' + (siguiente.length ? ': ' + siguiente.join(' y ') : '') + '.</p>'
-          : '<p class="nivel-txt">Estás en el nivel más alto del Club.</p>') +
-      '</div>';
+      '<button type="button" class="renglon toca nivel-fila" data-atajo="niveles">' +
+        '<span class="renglon-ico trofeo ' + claseNivel(nv.nombre) + '">' + icono('trofeo') + '</span>' +
+        '<span class="renglon-txt">Nivel ' + esc(nv.nombre) +
+          '<span>' + (multi > 1 ? 'Sumás ' + coma(multi) + ' puntos por cada $100' : '1 punto por cada $100') + '</span></span>' +
+        icono('flecha') +
+      '</button>';
 
+    /* Mi tarjeta, simple: la tarjeta, los dos números, los premios, el
+       nivel y los últimos movimientos. Los carteles (subiste de nivel,
+       cumple, puntos dobles) y "Ya podés canjear" viven en Inicio: acá se
+       repetían. */
     var todo =
       carnetHtml(t, nv) +
-      bonus +
       dosNumeros +
-      (destacado ? bloquePremio(t, destacado, false) : '') +
       (premios.length ? filaPremios(premios) : '') +
       nivelHtml +
       movimientosHtml(t) +
@@ -1723,6 +1729,12 @@
     precargarPromo();
     marcarPromos();
     avisarInstalada(t);
+    /* Si se entró directo a una de las pantallas de adentro (#movs,
+       #cupones, #niveles), se abrió antes de que llegara la tarjeta: se
+       redibuja con los datos. */
+    if ($('vMovs') && !$('vMovs').hidden) { pintarMovs(); }
+    if ($('vCupones') && !$('vCupones').hidden) { pintarCupones(); }
+    if ($('vNiveles') && !$('vNiveles').hidden) { pintarNiveles(); }
   }
 
   /* ═══ La tarjeta de Inicio: los accesos, las misiones y las vistas ═════
@@ -1822,19 +1834,64 @@
     if (!hay && punto) { punto.remove(); }
   }
 
-  /* Los cuatro accesos. Canjear y Movimientos llevan a esa parte de Mi
-     tarjeta, que es donde ya están; Mis cupones y Niveles son pantallas. */
+  /* Los accesos. Canjear lleva a los premios de Mi tarjeta; Movimientos,
+     Mis cupones y Niveles son pantallas propias. */
   function atajo(clave) {
     if (clave === 'tarjeta' || clave === 'promos' || clave === 'cupones' || clave === 'niveles') { irA(clave, true); return; }
-    if (clave === 'canjear' || clave === 'movs') {
+    if (clave === 'movs' || clave === 'misiones') {
+      solapaMovs = clave === 'misiones' ? 'misiones' : 'movimientos';
+      irA('movs', true);
+      return;
+    }
+    if (clave === 'canjear') {
       irA('tarjeta', true);
-      if (clave === 'movs') {
-        Array.prototype.forEach.call(document.querySelectorAll('#todo .mov[hidden]'), function (m) { m.hidden = false; });
-        if ($('movsVer')) { $('movsVer').hidden = true; }
-      }
-      var destino = $(clave === 'canjear' ? 'cajaPremios' : 'cajaMovs');
+      var destino = $('cajaPremios');
       if (destino) { setTimeout(function () { destino.scrollIntoView({ block: 'start' }); }, 30); }
     }
+  }
+
+  /* ── Movimientos, como "Mi cuenta" en la app de King: los puntos arriba y
+     tres solapas, Misiones · Movimientos · Canjes (29/09/2026). ── */
+  var solapaMovs = 'movimientos';
+  function pintarMovs() {
+    volverDe('movs', 'movsVolver');
+    var t = socioCodigo || {};
+    var ult = t.ultimas || [];
+    var misiones = t.misiones || [];
+    var s = solapaMovs || 'movimientos';
+
+    var solapas = [['misiones', 'Misiones'], ['movimientos', 'Movimientos'], ['canjes', 'Canjes']];
+    var cuerpo;
+    if (s === 'misiones') {
+      cuerpo = misiones.length
+        ? '<div class="misiones">' + misiones.map(function (m) {
+            return m.hecha
+              ? '<div class="mision hecha"><span class="mision-txt"><b>' + esc(m.titulo) + '</b><span>' + esc(m.texto) + '</span></span>' +
+                  '<span class="mision-pts">' + icono('check') + '<small>Hecha</small></span></div>'
+              : '<button type="button" class="mision toca" data-mision="' + esc(m.accion) + '">' +
+                  '<span class="mision-txt"><b>' + esc(m.titulo) + '</b><span>' + esc(m.texto) + '</span></span>' +
+                  '<span class="mision-pts"><small>Sumá</small><b>' + miles(m.puntos) + '</b><small>puntos</small></span></button>';
+          }).join('') + '</div>'
+        : '<p class="vacio">Por ahora no hay misiones.</p>';
+    } else {
+      var esCanje = function (m) { return m.tipo === 'canje'; };
+      var lista = ult.filter(function (m) { return s === 'canjes' ? esCanje(m) : !esCanje(m); });
+      cuerpo = lista.length
+        ? '<div class="caja" style="padding:4px 18px;margin-top:0">' + lista.map(filaMov).join('') + '</div>'
+        : '<p class="vacio">' + (s === 'canjes' ? 'Todavía no te llevaste ningún premio.' : 'Todavía no hay movimientos.') + '</p>';
+    }
+
+    $('movsCuerpo').innerHTML =
+      '<div class="movs-cab"><b data-cuenta="' + (t.puntos || 0) + '">' + miles(t.puntos || 0) + '</b><span>puntos</span></div>' +
+      (t.vence_puntos ? '<p class="movs-vence">Vencen el ' + fechaConAnio(t.vence_puntos) + ' si no comprás antes.</p>' : '') +
+      '<div class="solapas" role="tablist">' + solapas.map(function (x) {
+        return '<button type="button" role="tab" class="solapa" data-solapa="' + x[0] + '" aria-selected="' + (x[0] === s) + '">' + x[1] + '</button>';
+      }).join('') + '</div>' +
+      '<div class="solapa-cuerpo">' + cuerpo + '</div>';
+
+    Array.prototype.forEach.call($('movsCuerpo').querySelectorAll('[data-solapa]'), function (b) {
+      b.onclick = function () { solapaMovs = b.getAttribute('data-solapa'); pintarMovs(); };
+    });
   }
 
   function hacerMision(accion) {
@@ -2089,27 +2146,35 @@
   /* Lo que entró y lo que salió, con el signo y en color: verde lo que suma,
      gris lo que resta. Un canje no es una mala noticia — es el premio. Los
      tres últimos a la vista y el resto a un toque. */
+  /* Un movimiento en un renglón: qué fue, cuándo y los puntos. */
+  function filaMov(m) {
+    var titulo;
+    if (m.tipo === 'compra' && m.local === 'TIENDA ONLINE') { titulo = 'Compra en la tienda online'; }
+    else if (m.tipo === 'compra') { titulo = 'Compra en ' + nombreLocal(m.local); }
+    else if (m.concepto === 'regalo_cumple') { titulo = 'Regalo de cumple: ' + (m.obs || ''); }
+    else if (m.tipo === 'canje') { titulo = 'Te llevaste: ' + (m.obs || 'un premio'); }
+    else if (m.concepto === 'bienvenida') { titulo = 'Regalo de bienvenida'; }
+    else if (m.concepto === 'bono_nivel') { titulo = m.obs || 'Regalo por subir de nivel'; }
+    else if (m.concepto === 'vencimiento') { titulo = 'Puntos vencidos'; }
+    else if (String(m.concepto || '').indexOf('mision:') === 0) {
+      titulo = 'Misión: ' + String(m.obs || '').replace(/^Misión cumplida:\s*/, '');
+    }
+    else { titulo = m.obs || 'Ajuste'; }
+    var n = Number(m.puntos) || 0;
+    return '<div class="mov"><div><b>' + esc(titulo) + '</b>' +
+             '<span>' + fecha(m.cuando) + '</span></div>' +
+           '<em class="' + (n >= 0 ? 'mas' : 'menos') + '">' +
+             (n === 0 ? '' : (n > 0 ? '+' : '−') + miles(Math.abs(n))) + '</em></div>';
+  }
+
+  /* Los tres últimos y "Ver todos", que abre la pantalla de Movimientos
+     con sus solapas (como la app de King). */
   function movimientosHtml(t) {
     var ult = t.ultimas || [];
-    var filas = ult.map(function (m, i) {
-      var titulo;
-      if (m.tipo === 'compra' && m.local === 'TIENDA ONLINE') { titulo = 'Compra en la tienda online'; }
-      else if (m.tipo === 'compra') { titulo = 'Compra en ' + nombreLocal(m.local); }
-      else if (m.concepto === 'regalo_cumple') { titulo = 'Regalo de cumple: ' + (m.obs || ''); }
-      else if (m.tipo === 'canje') { titulo = 'Te llevaste: ' + (m.obs || 'un premio'); }
-      else if (m.concepto === 'bienvenida') { titulo = 'Regalo de bienvenida'; }
-      else if (m.concepto === 'bono_nivel') { titulo = m.obs || 'Regalo por subir de nivel'; }
-      else if (m.concepto === 'vencimiento') { titulo = 'Puntos vencidos'; }
-      else { titulo = m.obs || 'Ajuste'; }
-      var n = Number(m.puntos) || 0;
-      return '<div class="mov"' + (i >= 3 ? ' hidden' : '') + '><div><b>' + esc(titulo) + '</b>' +
-               '<span>' + fecha(m.cuando) + '</span></div>' +
-             '<em class="' + (n >= 0 ? 'mas' : 'menos') + '">' +
-               (n === 0 ? '' : (n > 0 ? '+' : '−') + miles(Math.abs(n))) + '</em></div>';
-    }).join('');
+    var filas = ult.slice(0, 3).map(filaMov).join('');
     return '<div id="cajaMovs">' +
-      '<div class="sec-cab"><h2>Tus movimientos</h2>' +
-        (ult.length > 3 ? '<button type="button" class="movs-ver" id="movsVer">Ver todos</button>' : '') +
+      '<div class="sec-cab"><h2>Últimos movimientos</h2>' +
+        (ult.length ? '<button type="button" class="movs-ver" data-atajo="movs">Ver todos</button>' : '') +
       '</div>' +
       '<div class="caja" style="padding:4px 18px">' + filas +
         (t.compras
@@ -2304,7 +2369,7 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-premio], #btnDudas, #movsVer, #canjeX, #canjeVelo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar]');
+             ev.target.closest('[data-codigo], [data-premio], #btnDudas, #canjeX, #canjeVelo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar]');
     if (!el) { return; }
     if (el.hasAttribute('data-atajo')) { atajo(el.getAttribute('data-atajo')); return; }
     if (el.hasAttribute('data-mision')) { hacerMision(el.getAttribute('data-mision')); return; }
@@ -2317,11 +2382,6 @@
       var abierta = el.getAttribute('aria-expanded') === 'true';
       el.setAttribute('aria-expanded', abierta ? 'false' : 'true');
       if ($('listaDudas')) { $('listaDudas').hidden = abierta; }
-      return;
-    }
-    if (el.id === 'movsVer') {
-      Array.prototype.forEach.call(document.querySelectorAll('#todo .mov[hidden]'), function (m) { m.hidden = false; });
-      el.hidden = true;
     }
   });
 
@@ -3083,11 +3143,14 @@
        en la primera línea y ni la tarjeta se dibujaba. Una declaración de
        función se iza; el valor de un var, no. */
     var VISTAS = { inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales', datos: 'vDatos',
-                   cupones: 'vCupones', niveles: 'vNiveles' };
+                   cupones: 'vCupones', niveles: 'vNiveles', movs: 'vMovs' };
     var v = VISTAS[nombre] ? nombre : 'inicio';
-    /* "Mis datos", "Mis cupones" y "Niveles" se abren desde Inicio y no
-       tienen pestaña propia: la barra sigue marcando Inicio. */
-    var pestania = (v === 'datos' || v === 'cupones' || v === 'niveles') ? 'inicio' : v;
+    /* Mis datos, Mis cupones, Niveles y Movimientos no tienen pestaña
+       propia: se abren desde Inicio o desde Mi tarjeta, y la barra sigue
+       marcando la pestaña de donde se vino. */
+    var subvista = v === 'datos' || v === 'cupones' || v === 'niveles' || v === 'movs';
+    var marcada = document.querySelector('.tab[data-vista][aria-current]');
+    var pestania = subvista ? (marcada ? marcada.dataset.vista : 'inicio') : v;
 
     Object.keys(VISTAS).forEach(function (k) {
       var s = $(VISTAS[k]);
@@ -3122,6 +3185,7 @@
     if (v === 'datos') pintarMisDatos();
     if (v === 'cupones') pintarCupones();
     if (v === 'niveles') pintarNiveles();
+    if (v === 'movs') pintarMovs();
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
