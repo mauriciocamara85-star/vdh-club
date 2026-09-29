@@ -1097,6 +1097,28 @@
   .premio-pts { font-size: 13px; color: var(--txt-2); font-variant-numeric: tabular-nums; }
   .premio-card .barra { height: 4px; margin-top: 2px; }
 
+  /* ── Canjeá: el catálogo entero, de a dos ──
+     Como la app de King: la foto manda y el estado va encima, en una
+     pastilla abajo al centro. Verde si alcanza; oscura con lo que falta. */
+  .catalogo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .cat-premio { display: flex; flex-direction: column; width: 100%; padding: 0; text-align: left;
+                background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r);
+                overflow: hidden; font: inherit; color: inherit; cursor: pointer; }
+  .cat-foto { position: relative; display: block; }
+  .cat-premio.agotado .premio-foto { filter: grayscale(1); opacity: .55; }
+  .cat-estado { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+                max-width: calc(100% - 14px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                padding: 5px 11px; border-radius: 999px; font: 600 12px/1.3 var(--sans);
+                background: rgba(28, 28, 26, .84); color: #fff; }
+  /* En un teléfono angosto "Faltan 18.000 puntos" no entra en la foto:
+     se va la palabra, que abajo ya dice "20.700 puntos". */
+  @media (max-width: 374px) { .cat-pal { display: none; } }
+  .cat-estado.si { background: var(--ok); }
+  .cat-estado.ya { background: rgba(255, 255, 255, .94); color: var(--txt); }
+  .cat-txt { padding: 10px 12px 12px; display: grid; gap: 3px; }
+  .cat-nom { font: 600 14.5px/1.25 var(--sans); }
+  .cat-pts { font-size: 13px; color: var(--txt-2); font-variant-numeric: tabular-nums; }
+
   /* ── Movimientos: los tres últimos y "Ver todos" ── */
   .movs-ver { border: 0; background: none; padding: 0; cursor: pointer; font: 500 13.5px var(--sans); color: var(--txt);
               text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--linea); }
@@ -1429,6 +1451,16 @@
     <button type="button" class="datos-volver" id="movsVolver"></button>
     <h1 class="datos-tit">Tus puntos</h1>
     <div id="movsCuerpo"></div>
+  </section>
+
+  <!-- Canjeá: todos los premios en grilla, como la app de King. Se abre
+       con "Canjear" en Inicio y con "Ver todos" en Mi tarjeta. Lo arma
+       pintarPremios(). -->
+  <section class="vista" id="vPremios" hidden>
+    <button type="button" class="datos-volver" id="premiosVolver"></button>
+    <h1 class="datos-tit">Canjeá</h1>
+    <p class="datos-sub" id="premiosSub"></p>
+    <div id="premiosCuerpo"></div>
   </section>
 
   <section class="vista" id="vNiveles" hidden>
@@ -1769,6 +1801,7 @@
     if ($('vMovs') && !$('vMovs').hidden) { pintarMovs(); }
     if ($('vCupones') && !$('vCupones').hidden) { pintarCupones(); }
     if ($('vNiveles') && !$('vNiveles').hidden) { pintarNiveles(); }
+    if ($('vPremios') && !$('vPremios').hidden) { pintarPremios(); }
   }
 
   /* ═══ La tarjeta de Inicio: los accesos, las misiones y las vistas ═════
@@ -1858,19 +1891,15 @@
     if (!hay && punto) { punto.remove(); }
   }
 
-  /* Los accesos. Canjear lleva a los premios de Mi tarjeta; Movimientos,
-     Mis cupones y Niveles son pantallas propias. */
+  /* Los accesos. Canjear, Movimientos, Mis cupones y Niveles son pantallas
+     propias. Canjear abre el catálogo de premios (29/09/2026: antes llevaba
+     a los premios de Mi tarjeta). */
   function atajo(clave) {
-    if (clave === 'tarjeta' || clave === 'promos' || clave === 'cupones' || clave === 'niveles') { irA(clave, true); return; }
+    if (clave === 'canjear') { clave = 'premios'; }
+    if (clave === 'tarjeta' || clave === 'promos' || clave === 'cupones' || clave === 'niveles' || clave === 'premios') { irA(clave, true); return; }
     if (clave === 'movs' || clave === 'misiones') {
       solapaMovs = clave === 'misiones' ? 'misiones' : 'movimientos';
       irA('movs', true);
-      return;
-    }
-    if (clave === 'canjear') {
-      irA('tarjeta', true);
-      var destino = $('cajaPremios');
-      if (destino) { setTimeout(function () { destino.scrollIntoView({ block: 'start' }); }, 30); }
     }
   }
 
@@ -1952,6 +1981,34 @@
     $(boton).onclick = function () {
       if (history.state && history.state.v === vista) { history.back(); } else { irA('inicio', true); }
     };
+  }
+
+  /* ── Canjeá: todos los premios (29/09/2026, sobre la app de King) ──
+     En el orden que les da Configuración. Tocar uno abre la misma hoja de
+     "Cómo canjear" que en Mi tarjeta: el canje lo hace el vendedor en la
+     caja, acá no se reserva nada. */
+  function pintarPremios() {
+    volverDe('premios', 'premiosVolver');
+    var t = socioCodigo || {};
+    var l = t.premios || [];
+    $('premiosSub').innerHTML = t.hay ? 'Tenés <b>' + miles(t.puntos || 0) + ' puntos</b>. Se piden en la caja de cualquier local.' : '';
+    if (!l.length) {
+      $('premiosCuerpo').innerHTML = '<div class="caja" style="margin-top:0"><h2>Todavía no hay premios</h2>' +
+        '<p class="vacio" style="margin-top:6px">Cuando los carguemos, aparecen acá.</p></div>';
+      return;
+    }
+    /* Los índices son los de premiosPintados (el mismo t.premios), que es
+       lo que lee el click de data-premio. */
+    $('premiosCuerpo').innerHTML = '<div class="catalogo">' + l.map(function (p, i) {
+      var estado = p.agotado ? '<span class="cat-estado ya">Ya canjeado</span>'
+                 : p.alcanzado ? '<span class="cat-estado si">Te alcanza</span>'
+                 : '<span class="cat-estado">Faltan ' + miles(p.falta) + '<span class="cat-pal"> puntos</span></span>';
+      return '<button type="button" class="cat-premio toca' + (p.agotado ? ' agotado' : '') + '" data-premio="' + i + '">' +
+        '<span class="cat-foto">' + fotoPremio(p, 'miniatura premio-foto') + estado + '</span>' +
+        '<span class="cat-txt"><span class="cat-nom">' + esc(p.nombre) + '</span>' +
+          '<span class="cat-pts">' + miles(p.puntos) + ' puntos</span></span>' +
+      '</button>';
+    }).join('') + '</div>';
   }
 
   /* ── Mis cupones ── */
@@ -2156,12 +2213,13 @@
     '</div>';
   }
 
-  /* Los premios, de costado y con foto. Cada uno se toca y abre su hoja. */
+  /* Los premios, de costado y con foto. Cada uno se toca y abre su hoja.
+     "Ver todos" abre el catálogo entero (29/09/2026: antes decía "Deslizá
+     para ver más", que no se podía tocar). */
   function filaPremios(premios) {
     return '<div id="cajaPremios">' +
       '<div class="sec-cab"><h2>Premios</h2>' +
-        /* Con dos entran los dos: la frase mentiría. */
-        (premios.length > 2 ? '<span class="sec-nota">Deslizá para ver más</span>' : '') +
+        '<button type="button" class="movs-ver" data-atajo="premios">Ver todos</button>' +
       '</div>' +
       '<div class="premios-fila" tabindex="0" aria-label="Premios">' +
         premios.map(function (p, i) {
@@ -2396,10 +2454,14 @@
     return true;
   }
 
+  /* La pantalla que está a la vista, también las de adentro: la hoja de
+     canje se abre desde el catálogo, y el "atrás" tiene que volver ahí. */
   function vistaActual() {
     var v = 'inicio';
-    ['inicio', 'tarjeta', 'promos', 'locales'].forEach(function (k) {
-      var s = $({ inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales' }[k]);
+    var ids = { inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales', datos: 'vDatos',
+                cupones: 'vCupones', niveles: 'vNiveles', movs: 'vMovs', premios: 'vPremios' };
+    Object.keys(ids).forEach(function (k) {
+      var s = $(ids[k]);
       if (s && !s.hidden) { v = k; }
     });
     return v;
@@ -3264,12 +3326,12 @@
        en la primera línea y ni la tarjeta se dibujaba. Una declaración de
        función se iza; el valor de un var, no. */
     var VISTAS = { inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales', datos: 'vDatos',
-                   cupones: 'vCupones', niveles: 'vNiveles', movs: 'vMovs' };
+                   cupones: 'vCupones', niveles: 'vNiveles', movs: 'vMovs', premios: 'vPremios' };
     var v = VISTAS[nombre] ? nombre : 'inicio';
     /* Mis datos, Mis cupones, Niveles y Movimientos no tienen pestaña
        propia: se abren desde Inicio o desde Mi tarjeta, y la barra sigue
        marcando la pestaña de donde se vino. */
-    var subvista = v === 'datos' || v === 'cupones' || v === 'niveles' || v === 'movs';
+    var subvista = v === 'datos' || v === 'cupones' || v === 'niveles' || v === 'movs' || v === 'premios';
     var marcada = document.querySelector('.tab[data-vista][aria-current]');
     var pestania = subvista ? (marcada ? marcada.dataset.vista : 'inicio') : v;
 
@@ -3307,6 +3369,7 @@
     if (v === 'cupones') pintarCupones();
     if (v === 'niveles') pintarNiveles();
     if (v === 'movs') pintarMovs();
+    if (v === 'premios') pintarPremios();
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
