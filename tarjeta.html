@@ -486,6 +486,20 @@
   .extra.ya { background: linear-gradient(135deg, var(--acc), var(--acc-2)); border-color: transparent; color: #fff; }
   .extra.ya svg { color: #fff; }
   .extra.ya span { color: #fff; opacity: .92; }
+  /* "Para vos": lo mismo que un puntos extra, pero se toca (abre el código
+     o los cupones). */
+  .pv {
+    display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+    padding: 13px 14px; border-radius: var(--r-sm);
+    background: var(--hoja); border: 1px solid var(--linea); color: var(--txt);
+    font: inherit; cursor: pointer;
+  }
+  .pv > svg:first-child { width: 22px; height: 22px; flex: none; color: var(--acc-txt); }
+  .pv > svg:last-child { width: 18px; height: 18px; flex: none; color: var(--txt-3); }
+  .pv > div { flex: 1; min-width: 0; }
+  .pv b { display: block; font: 700 15px/1.3 var(--sans); }
+  .pv span { display: block; font-size: 13px; color: var(--txt-2); margin-top: 1px; }
+  .pv:focus-visible { outline: 2px solid var(--txt); outline-offset: 2px; }
   .hoy-bonus b { display: block; font: 700 15px/1.3 var(--sans); }
   .hoy-bonus span { display: block; font-size: 13px; line-height: 1.4; opacity: .94; margin-top: 2px; }
   /* Se saca deslizando (como el buzón: el navegador se queda con el scroll
@@ -2420,7 +2434,8 @@
       case 'check':   return a + '<path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
       case 'cruz':    return a + '<path d="M18 6 6 18M6 6l12 12"/></svg>';
       case 'reloj':   return a + '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg>';
-      case 'pin':     return a + '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+      case 'candado': return a + '<rect x="4.5" y="10.5" width="15" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>';
+      case 'pin':     return a +'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
       case 'calendario': return a + '<rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>';
       default:        return a + '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
                                  '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>' +
@@ -3625,6 +3640,41 @@
     return n === 0 ? 'Último día' : n === 1 ? 'Termina mañana' : n > 1 && n < 7 ? 'Quedan ' + (n + 1) + ' días' : '';
   }
 
+  /* Las promos de nivel (SQL 39): si el socio llega, y cuánto le falta. La
+     cuenta es la del nivel: lo que sumó en compras en los últimos 12 meses. */
+  function llegaNivel(p) {
+    return !p.desde_nivel || (Number((socioCodigo || {}).xp) || 0) >= (Number(p.nivel_xp) || 0);
+  }
+  function faltaNivel(p) {
+    return Math.max(0, (Number(p.nivel_xp) || 0) - (Number((socioCodigo || {}).xp) || 0));
+  }
+  function rotuloPromo(p) {
+    if (p.desde_nivel) {
+      return '<span class="promo-solo">' + icono(llegaNivel(p) ? 'estrella' : 'candado') + 'Socios ' + esc(p.para || p.desde_nivel) + '</span>';
+    }
+    return p.solo_socios ? '<span class="promo-solo">' + icono('estrella') + 'Sólo socios</span>' : '';
+  }
+
+  /* ── Para vos (30/09/2026) ──
+     Arriba de todo, lo que es SÓLO de este socio y Inicio no muestra entero:
+     su regalo de cumple (el cartel de Inicio se puede cerrar; acá queda
+     mientras valga) y sus cupones personales. Sin nada, no aparece. */
+  function paraVosHtml() {
+    var t = socioCodigo || {}, c = t.cumple || {}, filas = [];
+    if (c.vale && !c.usado && c.texto) {
+      filas.push('<button type="button" class="pv" data-codigo>' + icono('regalo') +
+        '<div><b>Tu regalo de cumple: ' + esc(c.texto) + '</b><span>' +
+          (c.es_hoy ? 'Hoy es el último día' : 'Hasta el ' + fecha(c.hasta)) + '. Mostrá tu código en la caja.</span></div>' +
+        icono('flecha') + '</button>');
+    }
+    (t.cupones || []).filter(function (x) { return x.clase === 'personal'; }).forEach(function (x) {
+      filas.push('<button type="button" class="pv" data-atajo="cupones">' + icono('ticket') +
+        '<div><b>' + esc(x.pct) + '% de descuento</b><span>Tu cupón ' + esc(x.codigo) +
+          (x.vence ? ' · vence el ' + fecha(x.vence) : '') + '</span></div>' + icono('flecha') + '</button>');
+    });
+    return filas.length ? '<div class="extras"><div class="extras-tit">Para vos</div>' + filas.join('') + '</div>' : '';
+  }
+
   /* Las promos a la vista, para abrir sus condiciones por el número. */
   var promosPintadas = [];
 
@@ -3652,8 +3702,10 @@
        promo (SQL 35): arriba a la izquierda, sobre la foto. */
     var cuenta = p.cuenta && p.termina && faltaMs(p.termina) > 0
       ? '<span class="promo-reloj">' + icono('reloj') + '<span>Termina en ' + reloj(p.termina) + '</span></span>' : '';
-    /* "Sólo socios" (SQL 38): lo que hace que ser del Club valga la pena. */
-    var solo = p.solo_socios ? '<span class="promo-solo">' + icono('estrella') + 'Sólo socios</span>' : '';
+    /* "Sólo socios" (SQL 38) o "Socios Oro y Platino" (SQL 39): lo que hace
+       que ser del Club, y subir de nivel, valga la pena. */
+    var solo = rotuloPromo(p);
+    var llega = llegaNivel(p);
     var urge = quedan(p.hasta);
 
     return '<article class="promo">' + abre +
@@ -3673,9 +3725,13 @@
         '<div class="promo-dato">' + icono('pin') + '<span>' + esc(dondeTexto(p)) + '</span></div>' +
         (p.hasta ? '<div class="promo-dato">' + icono('calendario') + '<span>Hasta el ' + fecha(p.hasta) +
           (urge ? ' · <b' + (/Último|mañana/.test(urge) ? ' class="urge"' : '') + '>' + urge + '</b>' : '') + '</span></div>' : '') +
+        /* La de un nivel que todavía no tiene: cuánto le falta. Es el
+           motivo para volver a comprar. */
+        (!llega ? '<div class="promo-dato">' + icono('candado') + '<span>Te faltan <b>' + miles(faltaNivel(p)) +
+          ' puntos</b> para llegar a ' + esc(p.desde_nivel) + '</span></div>' : '') +
         (solo || p.condiciones
           ? '<div class="promo-acciones">' +
-              (solo && p.donde !== 'online' ? '<button type="button" class="promo-accion" data-codigo>' + icono('barras') + 'Mostrar mi código</button>' : '') +
+              (solo && llega && p.donde !== 'online' ? '<button type="button" class="promo-accion" data-codigo>' + icono('barras') + 'Mostrar mi código</button>' : '') +
               (p.condiciones ? '<button type="button" class="promo-accion" data-cond="' + i + '">Ver condiciones' + icono('flecha') + '</button>' : '') +
             '</div>'
           : '') +
@@ -3694,8 +3750,12 @@
         /* En la tienda online no hay forma automática de saber si es socio:
            cómo se usa ahí (un cupón) lo dicen las condiciones que escribe
            Mauricio, no esta línea. */
-        (p.solo_socios ? '<li>' + icono('estrella') + '<span><b>Sólo para socios del VDH Club.</b>' +
-          (p.donde === 'online' ? '' : ' Mostrá tu código en la caja.') + '</span></li>' : '') +
+        (p.desde_nivel
+          ? '<li>' + icono(llegaNivel(p) ? 'estrella' : 'candado') + '<span><b>Para socios ' + esc(p.para || p.desde_nivel) + '.</b>' +
+              (!llegaNivel(p) ? ' Te faltan ' + miles(faltaNivel(p)) + ' puntos para llegar a ' + esc(p.desde_nivel) + ': cada compra suma.'
+               : p.donde === 'online' ? '' : ' Mostrá tu código en la caja.') + '</span></li>'
+          : p.solo_socios ? '<li>' + icono('estrella') + '<span><b>Sólo para socios del VDH Club.</b>' +
+              (p.donde === 'online' ? '' : ' Mostrá tu código en la caja.') + '</span></li>' : '') +
         '<li>' + icono('pin') + '<span>' + esc(dondeTexto(p)) + '.</span></li>' +
         (p.hasta ? '<li>' + icono('calendario') + '<span>Hasta el ' + fecha(p.hasta) + ' inclusive.</span></li>' : '') +
       '</ul>' +
@@ -3718,13 +3778,16 @@
          tarjeta" al final. Lo pidió él el mismo día, "para no ser
          repetitivo": la tarjeta está en la barra de abajo, a un toque. */
       var nove = novedadHtml(socioCodigo && socioCodigo.novedad);
-      /* Primero las de socios y después la que termina antes (SQL 38; la
-         base ya las manda así, esto es por si todavía no corrió el 38). */
+      /* Primero las de su nivel, después las de socios, después el resto, y
+         en cada grupo la que termina antes. Al final, las de un nivel que
+         todavía no tiene: se ven (son un motivo para subir) pero no le
+         ganan a las que puede usar hoy. */
+      var grupo = function (p) { return !llegaNivel(p) ? 3 : p.desde_nivel ? 0 : p.solo_socios ? 1 : 2; };
       promosPintadas = (lista || []).slice().sort(function (a, b) {
-        if (!!a.solo_socios !== !!b.solo_socios) { return a.solo_socios ? -1 : 1; }
+        if (grupo(a) !== grupo(b)) { return grupo(a) - grupo(b); }
         return String(a.hasta || '9999').localeCompare(String(b.hasta || '9999'));
       });
-      caja.innerHTML = extrasHtml() +
+      caja.innerHTML = paraVosHtml() + extrasHtml() +
         (promosPintadas.length
           ? '<div class="promos-lista">' + promosPintadas.map(unaPromo).join('') + '</div>'
           /* Con puntos extra arriba, "no hay promociones" se contradice con
