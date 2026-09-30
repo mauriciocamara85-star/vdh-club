@@ -765,8 +765,26 @@
   .reloj { font-variant-numeric: tabular-nums; }
   .hoy-bonus b.reloj, .extra b.reloj { display: inline; font: 700 13px/1.4 var(--sans); }
   .extra-reloj { font-weight: 600; }
+  /* El ejemplo en números: "Con $50.000 sumás 1.200 puntos en vez de 600".
+     Se entiende más que "el doble". */
+  .extra .extra-ej { font-weight: 600; color: var(--txt); margin-top: 3px; }
+  .extra.ya .extra-ej { color: #fff; opacity: 1; }
+  /* Arriba a la izquierda de la foto: el rótulo "Sólo socios" y la cuenta
+     regresiva, uno al lado del otro (SQL 38). */
+  .promo-marcas {
+    position: absolute; top: 14px; left: 14px; right: 14px;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start;
+  }
+  /* Blanco como el reloj: la foto la elige Mauricio y puede ser oscura o
+     no haber foto (el fondo carbón); un rótulo oscuro ahí se pierde. */
+  .promo-solo {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px 6px 10px; border-radius: 999px;
+    background: rgba(255, 255, 255, .95); color: #16181B;
+    font: 700 12.5px/1.2 var(--sans); letter-spacing: .5px; text-transform: uppercase;
+  }
+  .promo-solo svg { width: 15px; height: 15px; flex: none; }
   .promo-reloj {
-    position: absolute; top: 14px; left: 14px;
     display: inline-flex; align-items: center; gap: 6px;
     padding: 6px 12px 6px 10px; border-radius: 999px;
     background: rgba(255, 255, 255, .95); color: var(--txt);
@@ -774,9 +792,40 @@
   }
   .promo-reloj svg { width: 16px; height: 16px; flex: none; }
   .promo-reloj b { font-weight: 700; }
-  .promo-grande.con-reloj { position: relative; }
+
+  /* ── Cada promo: la foto y, abajo, lo que hay que saber (30/09/2026) ──
+     Sobre lo que hacen Nike, H&M y Sephora: en dos segundos, dónde vale,
+     hasta cuándo y qué hay que hacer. Todo en el mismo bloque: antes "Ver
+     condiciones" quedaba suelto entre una promo y la otra. */
+  .promo {
+    background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r);
+    overflow: hidden; box-shadow: 0 16px 34px -22px rgba(22, 24, 27, .7);
+  }
+  .promo .promo-grande { border-radius: 0; box-shadow: none; min-height: 40vh; }
+  .promo-info { display: grid; gap: 7px; padding: 14px 16px 12px; }
+  .promo-dato { display: flex; align-items: center; gap: 9px; font-size: 14.5px; line-height: 1.35; color: var(--txt-2); }
+  .promo-dato svg { width: 18px; height: 18px; flex: none; color: var(--txt-3); }
+  .promo-dato b { color: var(--txt); font-weight: 700; }
+  .promo-dato b.urge { color: var(--acc-txt); }
+  .promo-acciones { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 16px; margin-top: 1px; }
+  .promo-accion {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 42px; padding: 0;
+    background: none; border: 0; cursor: pointer;
+    font: 700 14.5px var(--sans); color: var(--acc-txt);
+  }
+  .promo-accion svg { width: 17px; height: 17px; }
+  .promo-accion:focus-visible { outline: 2px solid var(--txt); outline-offset: 3px; border-radius: 6px; }
+  /* Las condiciones, en la hoja de abajo. */
+  .cond-tit { font: 700 18px/1.3 var(--display); letter-spacing: -.3px; }
+  .cond-lista { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .cond-lista li { display: flex; gap: 10px; font-size: 14.5px; line-height: 1.45; color: var(--txt-2); }
+  .cond-lista li svg { width: 18px; height: 18px; flex: none; margin-top: 1px; color: var(--txt-3); }
+  .cond-lista li b { color: var(--txt); }
+  .cond-txt { font-size: 14.5px; line-height: 1.55; color: var(--txt-2); white-space: pre-line;
+              border-top: 1px solid var(--linea); padding-top: 14px; }
 
   .promo-grande {
+    position: relative;
     /* Carbón liso desde el rediseño: el resplandor rojo se fue con el rojo. */
     background: linear-gradient(158deg, #34332F 0%, #1A1A18 78%);
     background-size: cover;
@@ -802,41 +851,12 @@
   }
   .promo-ver svg { width: 15px; height: 15px; }
 
-  .promo-hasta {
-    display: block;
-    font: 600 13px/1 var(--sans);
-    letter-spacing: .5px; text-transform: uppercase;
-    opacity: .75;
-    margin-top: 18px;
-  }
-  /* La pantalla termina en algo que hacer. Contarle a alguien que hay un
-     2x1 sirve si va al local y muestra la tarjeta; sin esto, la pantalla
-     informa y lo deja ahí parado. */
-
   /* Varias promos, una abajo de la otra, y GRANDES. Es pedido de Mauricio y
      se sostiene: con una foto cada una, scrollear se parece a mirar un feed
      de prendas y no a leer carteles. */
   .promos-lista { display: grid; gap: 22px; }
   .promo-nove { margin-top: 32px; }
   .promo-nove:first-child { margin-top: 0; }
-
-  /* Las condiciones —qué productos participan, si combina con otros
-     descuentos, en qué locales vale— van en un <details> y no en otra
-     pantalla: se leen una vez de cada diez y no justifican hacer navegar a
-     nadie. Cerradas por defecto, para que no le ganen a la promo. */
-  .promo-cond { margin-top: 10px; }
-  .promo-cond summary {
-    display: inline-flex; align-items: center; gap: 6px;
-    font: 700 14px var(--sans);
-    color: var(--acc-txt);
-    cursor: pointer; list-style: none;
-  }
-  .promo-cond summary::-webkit-details-marker { display: none; }
-  .promo-cond p {
-    font-size: 14.5px; color: var(--txt-2); line-height: 1.55;
-    margin-top: 9px;
-    white-space: pre-line;
-  }
 
   /* ── Con foto ──
      La foto va atrás de todo y encima un velo NEGRO DE ABAJO HACIA ARRIBA.
@@ -1441,7 +1461,7 @@
 
   <section class="vista" id="vPromos" hidden>
     <h1>Promociones</h1>
-    <p class="vista-sub">Lo que está vigente hoy en todos los locales.</p>
+    <p class="vista-sub">Lo que está vigente hoy.</p>
     <div id="promoGrande"></div>
   </section>
 
@@ -2400,6 +2420,8 @@
       case 'check':   return a + '<path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
       case 'cruz':    return a + '<path d="M18 6 6 18M6 6l12 12"/></svg>';
       case 'reloj':   return a + '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg>';
+      case 'pin':     return a + '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+      case 'calendario': return a + '<rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>';
       default:        return a + '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/>' +
                                  '<path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>' +
                                  '<path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
@@ -2443,7 +2465,14 @@
            'en la caja de cualquier local.</p>';
     }
     $('canjeCuerpo').innerHTML = h;
-    if (!capa.hidden) { return; }
+    subirHoja();
+  }
+
+  /* La hoja que sube desde abajo. La usan "Cómo canjear" y las condiciones
+     de una promo: lo de adentro lo pone cada una. */
+  function subirHoja() {
+    var capa = $('canje');
+    if (!capa || !capa.hidden) { return; }
     capa.hidden = false;
     /* Dos cuadros: el primero pinta la hoja abajo de todo y el segundo la
        sube. En uno solo el navegador junta los dos y no hay animación. */
@@ -2489,8 +2518,10 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-premio], #btnDudas, #canjeX, #canjeVelo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
+             ev.target.closest('[data-codigo], [data-premio], [data-cond], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
     if (!el) { return; }
+    if (el.hasAttribute('data-cond')) { abrirCondiciones(promosPintadas[Number(el.getAttribute('data-cond'))]); return; }
+    if (el.id === 'canjeListo') { cerrarCanje(false); return; }
     if (el.hasAttribute('data-cartel-x')) { sacarCartel(el.closest('[data-cartel]'), 1); return; }
     if (el.hasAttribute('data-atajo')) { atajo(el.getAttribute('data-atajo')); return; }
     if (el.hasAttribute('data-mision')) { hacerMision(el.getAttribute('data-mision')); return; }
@@ -3547,6 +3578,7 @@
         return '<div class="extra' + (x.ahora ? ' ya' : '') + '">' + rayo +
           '<div><b>' + esc(x.nombre) + (x.ahora ? ' · ahora' : '') + '</b>' +
           '<span>Tus compras suman ' + cuantoExtra(x.factor) + ' de puntos ' + esc(x.cuando) + '</span>' +
+          '<span class="extra-ej">' + ejemploExtra(x.factor) + '</span>' +
           /* El que vale ahora, su último día: cuánto le queda (SQL 35). */
           (x.ahora && terminaHoy(x.termina) ? '<span class="extra-reloj">Termina en ' + reloj(x.termina) + '</span>' : '') +
           '</div>' +
@@ -3554,8 +3586,50 @@
       }).join('') + '</div>';
   }
 
-  /** Una promoción: la tarjeta grande y, si las tiene, sus condiciones. */
-  function unaPromo(p) {
+  /* Cuántos pesos hacen un punto: club_reglas.pesos_por_punto = 100. Si
+     cambia, cambia acá (y en la pregunta "¿Cómo sumo puntos?"). */
+  function pesosPorPunto() { return 100; }
+
+  /* Un ejemplo con SU nivel: un Oro con el doble ve 1.200 en vez de 600,
+     que es lo que va a ver en la caja. Mismo redondeo que la base (para
+     abajo). */
+  function ejemploExtra(f) {
+    var nv = (socioCodigo && socioCodigo.nivel) || {};
+    var multi = Number(nv.multiplica) || 1, base = 50000 / pesosPorPunto();
+    var sin = Math.floor(base * multi + 1e-9), con = Math.floor(base * multi * (Number(f) || 1) + 1e-9);
+    return 'Con $50.000 sumás ' + miles(con) + ' puntos en vez de ' + miles(sin);
+  }
+
+  /* ── Dónde vale y hasta cuándo (SQL 38) ── */
+  function nombreLocal(codigo) {
+    var c = String(codigo || '').trim().toUpperCase();
+    var l = (typeof LOCALES_VDH !== 'undefined' ? LOCALES_VDH : []).filter(function (x) { return x.codigo === c; })[0];
+    return l ? l.nombre : c.charAt(0) + c.slice(1).toLowerCase();
+  }
+  function dondeTexto(p) {
+    if (p.donde === 'online') { return 'Sólo en la tienda online'; }
+    if (p.donde === 'locales_online') { return 'En los locales y en vdh.com.ar'; }
+    if (p.donde === 'algunos' && p.locales && p.locales.length) {
+      var n = p.locales.map(nombreLocal);
+      return 'Sólo en ' + (n.length > 1 ? n.slice(0, -1).join(', ') + ' y ' + n[n.length - 1] : n[0]);
+    }
+    return 'En todos los locales';
+  }
+  /* "Último día", "Termina mañana", "Quedan 3 días": la urgencia de verdad,
+     sin cronómetros por todos lados. Con más de una semana, sólo la fecha. */
+  function quedan(iso) {
+    var d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    if (!d) { return ''; }
+    var hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    var n = Math.round((new Date(+d[1], +d[2] - 1, +d[3]) - hoy) / 864e5);
+    return n === 0 ? 'Último día' : n === 1 ? 'Termina mañana' : n > 1 && n < 7 ? 'Quedan ' + (n + 1) + ' días' : '';
+  }
+
+  /* Las promos a la vista, para abrir sus condiciones por el número. */
+  var promosPintadas = [];
+
+  /** Una promoción: la foto grande y abajo lo que hay que saber. */
+  function unaPromo(p, i) {
     /* La dirección de la foto va en una variable CSS y no pegada en el
        style: así el velo oscuro que hace legible el texto queda escrito UNA
        vez en la hoja de estilos, con su explicación al lado. Se escapan las
@@ -3578,23 +3652,56 @@
        promo (SQL 35): arriba a la izquierda, sobre la foto. */
     var cuenta = p.cuenta && p.termina && faltaMs(p.termina) > 0
       ? '<span class="promo-reloj">' + icono('reloj') + '<span>Termina en ' + reloj(p.termina) + '</span></span>' : '';
+    /* "Sólo socios" (SQL 38): lo que hace que ser del Club valga la pena. */
+    var solo = p.solo_socios ? '<span class="promo-solo">' + icono('estrella') + 'Sólo socios</span>' : '';
+    var urge = quedan(p.hasta);
 
-    return abre +
-      '<div class="' + clase + (cuenta ? ' con-reloj' : '') + '"' + estilo + '>' + cuenta + esc(p.texto) +
-        (p.hasta ? '<span class="promo-hasta">Hasta el ' + fecha(p.hasta) + '</span>' : '') +
+    return '<article class="promo">' + abre +
+      '<div class="' + clase + '"' + estilo + '>' +
+        (solo || cuenta ? '<div class="promo-marcas">' + solo + cuenta + '</div>' : '') +
+        esc(p.texto) +
         (p.enlace ? '<span class="promo-ver">Ver más ' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
           'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
           '<path d="m9 18 6-6-6-6"/></svg></span>' : '') +
       '</div>' +
       cierra +
-      /* Las condiciones quedan AFUERA del enlace: abrir un desplegable y que
-         encima te lleve a otra página es lo contrario de lo que se quiso
-         hacer. */
-      (p.condiciones
-        ? '<details class="promo-cond"><summary>Ver condiciones</summary><p>' +
-          esc(p.condiciones) + '</p></details>'
-        : '');
+      /* Lo que hay que saber va AFUERA del enlace: tocar "Ver condiciones" y
+         que encima te lleve a otra página es lo contrario de lo que se
+         quiso hacer. */
+      '<div class="promo-info">' +
+        '<div class="promo-dato">' + icono('pin') + '<span>' + esc(dondeTexto(p)) + '</span></div>' +
+        (p.hasta ? '<div class="promo-dato">' + icono('calendario') + '<span>Hasta el ' + fecha(p.hasta) +
+          (urge ? ' · <b' + (/Último|mañana/.test(urge) ? ' class="urge"' : '') + '>' + urge + '</b>' : '') + '</span></div>' : '') +
+        (solo || p.condiciones
+          ? '<div class="promo-acciones">' +
+              (solo && p.donde !== 'online' ? '<button type="button" class="promo-accion" data-codigo>' + icono('barras') + 'Mostrar mi código</button>' : '') +
+              (p.condiciones ? '<button type="button" class="promo-accion" data-cond="' + i + '">Ver condiciones' + icono('flecha') + '</button>' : '') +
+            '</div>'
+          : '') +
+      '</div>' +
+    '</article>';
+  }
+
+  /* Las condiciones, en la hoja que sube desde abajo: qué, para quién,
+     dónde, hasta cuándo, y lo que escribió Mauricio. */
+  function abrirCondiciones(p) {
+    if (!p || !$('canje')) { return; }
+    $('canjeTit').textContent = 'Condiciones';
+    $('canjeCuerpo').innerHTML =
+      '<div class="cond-tit">' + esc(p.texto) + '</div>' +
+      '<ul class="cond-lista">' +
+        /* En la tienda online no hay forma automática de saber si es socio:
+           cómo se usa ahí (un cupón) lo dicen las condiciones que escribe
+           Mauricio, no esta línea. */
+        (p.solo_socios ? '<li>' + icono('estrella') + '<span><b>Sólo para socios del VDH Club.</b>' +
+          (p.donde === 'online' ? '' : ' Mostrá tu código en la caja.') + '</span></li>' : '') +
+        '<li>' + icono('pin') + '<span>' + esc(dondeTexto(p)) + '.</span></li>' +
+        (p.hasta ? '<li>' + icono('calendario') + '<span>Hasta el ' + fecha(p.hasta) + ' inclusive.</span></li>' : '') +
+      '</ul>' +
+      (p.condiciones ? '<p class="cond-txt">' + esc(p.condiciones) + '</p>' : '') +
+      '<button type="button" class="btn" id="canjeListo">Entendido</button>';
+    subirHoja();
   }
 
   function pintarPromoGrande() {
@@ -3611,9 +3718,15 @@
          tarjeta" al final. Lo pidió él el mismo día, "para no ser
          repetitivo": la tarjeta está en la barra de abajo, a un toque. */
       var nove = novedadHtml(socioCodigo && socioCodigo.novedad);
+      /* Primero las de socios y después la que termina antes (SQL 38; la
+         base ya las manda así, esto es por si todavía no corrió el 38). */
+      promosPintadas = (lista || []).slice().sort(function (a, b) {
+        if (!!a.solo_socios !== !!b.solo_socios) { return a.solo_socios ? -1 : 1; }
+        return String(a.hasta || '9999').localeCompare(String(b.hasta || '9999'));
+      });
       caja.innerHTML = extrasHtml() +
-        ((lista && lista.length)
-          ? '<div class="promos-lista">' + lista.map(unaPromo).join('') + '</div>'
+        (promosPintadas.length
+          ? '<div class="promos-lista">' + promosPintadas.map(unaPromo).join('') + '</div>'
           /* Con puntos extra arriba, "no hay promociones" se contradice con
              lo que el cliente acaba de leer: el cartel vacío no va. */
           : extrasCargados.length ? ''
