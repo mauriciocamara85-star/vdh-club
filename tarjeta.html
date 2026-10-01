@@ -738,6 +738,27 @@
     font-size: 13.5px; line-height: 1.65; color: var(--txt);
   }
   .instala-glifo { width: 16px; height: 16px; vertical-align: -3px; }
+  /* Los pasos de iPhone (01/10/2026): numerados, y cada uno con el botón
+     que hay que tocar dibujado como se ve en la pantalla. La gente no
+     busca la palabra, busca el dibujito. */
+  .instala-pasos {
+    list-style: none; margin: 12px 0 0; padding: 10px 12px;
+    background: var(--bg); border-radius: 11px;
+    display: grid; gap: 9px;
+  }
+  .instala-pasos li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: center; font-size: 14px; line-height: 1.4; }
+  .instala-n {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--txt); color: var(--hoja);
+    display: grid; place-items: center; font: 700 12px/1 var(--sans);
+  }
+  .instala-boton {
+    display: inline-grid; place-items: center; vertical-align: middle;
+    width: 28px; height: 26px; margin: -3px 2px 0;
+    border-radius: 8px; background: var(--hoja); border: 1px solid var(--linea);
+  }
+  .instala-boton svg { width: 15px; height: 15px; }
+  .instala-premio { display: block; margin-top: 4px; font-weight: 700; color: var(--ok); }
   .instala-x {
     position: absolute; top: 6px; right: 6px;
     width: 34px; height: 34px;
@@ -2994,12 +3015,17 @@
        funcione — pero probable no se promete en un cartel: si algún día
        falla, el cliente queda parado en la caja creyendo lo que le dijimos.
        Se promete cuando esté probado de punta a punta. */
+    /* La misión de instalar, si la tiene pendiente: es el mejor motivo
+       para hacerlo. Los puntos se dan al abrirla desde la pantalla de
+       inicio (club_mision_instalada). */
+    var mi = ((socioCodigo || {}).misiones || []).filter(function (x) { return x.clave === 'instalar' && !x.hecha; })[0];
     p.innerHTML = 'Agregá VDH Club a la pantalla de inicio y abrila con un toque.' +
       (modo === 'chrome'
         ? (esSamsung()
             ? ' Desde este navegador Android muestra un aviso de seguridad, así que se agrega desde Chrome.'
             : ' La estás viendo dentro de otra app: se agrega desde Chrome.')
-        : '');
+        : '') +
+      (mi && Number(mi.puntos) ? '<span class="instala-premio">Abrila desde ahí y te regalamos ' + miles(mi.puntos) + ' puntos.</span>' : '');
 
     if (modo === 'directo') {
       pie.innerHTML = '<button type="button" class="btn" id="instalaYa">Instalar VDH Club</button>';
@@ -3016,7 +3042,10 @@
       return;
     }
 
-    pie.innerHTML = '<p class="instala-paso">' + pasoAMano(modo) + '</p>';
+    /* En iPhone, los pasos en lista; en el resto, un renglón. */
+    pie.innerHTML = modo === 'safari' || modo === 'ios-otra'
+      ? pasosIOS()
+      : '<p class="instala-paso">' + pasoAMano(modo) + '</p>';
   }
 
   function instalarAhora() {
@@ -3031,6 +3060,54 @@
        mirar; y si dijo sí, además llega appinstalled. */
     p.userChoice.then(function () { cerrarInstalar(true); })
                 .catch(function () { cerrarInstalar(true); });
+  }
+
+  /* ── Agregar a inicio en iPhone ──
+     Apple no deja que una página se instale sola: lo único que se puede
+     hacer es decir dónde tocar, y ese "dónde" cambia con el navegador:
+
+       safari26  el Safari de iOS 26. El botón de compartir ya no está en la
+                 barra: está adentro de los tres puntitos de abajo a la
+                 derecha (01/10/2026, con una clienta en el local).
+       safari    el Safari de antes: compartir abajo, en el medio.
+       chrome    Chrome o Edge en iPhone: compartir arriba, al lado de la
+                 dirección.
+       firefox   Firefox en iPhone: el menú de abajo, después compartir.
+       otra      dentro de Instagram, Facebook y otras apps: ahí no existe;
+                 primero hay que abrirla en Safari.
+
+     iOS 26 deja el número del sistema congelado en la identificación (dice
+     iOS 18); el de Safari ("Version/26") sí cambia, y es el que se mira. */
+  function navegadorIOS() {
+    var ua = navigator.userAgent || '';
+    if (/CriOS|EdgiOS/.test(ua)) { return 'chrome'; }
+    if (/FxiOS/.test(ua)) { return 'firefox'; }
+    if (!/Safari\//.test(ua)) { return 'otra'; }
+    var v = /Version\/(\d+)/.exec(ua);
+    return v && Number(v[1]) >= 26 ? 'safari26' : 'safari';
+  }
+
+  function pasosIOS() {
+    var a = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+    var boton = function (dibujo, nombre) { return '<span class="instala-boton" role="img" aria-label="' + nombre + '">' + dibujo + '</span>'; };
+    var puntos = boton('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg>', 'tres puntos');
+    var compartir = boton(a + '<path d="M12 3v11"/><path d="m8 7 4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>', 'compartir');
+    var agregar = boton(a + '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/></svg>', 'agregar');
+    var menu = boton(a + '<path d="M4 7h16M4 12h16M4 17h16"/></svg>', 'menú');
+    var brujula = boton(a + '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8z"/></svg>', 'Safari');
+    var final = 'Bajá y elegí ' + agregar + ' <b>Agregar a pantalla de inicio</b>, y después <b>Agregar</b>';
+    var pasos;
+    switch (navegadorIOS()) {
+      case 'safari26': pasos = ['Tocá ' + puntos + ' abajo a la derecha', 'Tocá ' + compartir + ' <b>Compartir</b>', final]; break;
+      case 'safari':   pasos = ['Tocá ' + compartir + ' abajo, en el medio', final]; break;
+      case 'chrome':   pasos = ['Tocá ' + compartir + ' arriba, al lado de la dirección', final]; break;
+      case 'firefox':  pasos = ['Tocá ' + menu + ' abajo a la derecha', 'Tocá ' + compartir + ' <b>Compartir</b>', final]; break;
+      default:         pasos = ['Estás dentro de otra app: tocá ' + puntos + ' o ' + brujula + ' y elegí <b>Abrir en Safari</b>',
+                               'En Safari: ' + compartir + ' <b>Compartir</b> → <b>Agregar a pantalla de inicio</b>'];
+    }
+    return '<ol class="instala-pasos">' + pasos.map(function (t, i) {
+      return '<li><span class="instala-n">' + (i + 1) + '</span><span>' + t + '</span></li>';
+    }).join('') + '</ol>';
   }
 
   /* Los dos glifos que hacen la diferencia entre entender y no entender:
@@ -4114,7 +4191,7 @@
       html += '<div class="buzon-prender">' +
                 '<p>Para que te lleguen al teléfono, agregá la tarjeta a tu pantalla ' +
                 'de inicio. Es la única forma que deja Apple.</p>' +
-                '<p>' + comoAgregar() + '</p>' +
+                comoAgregar() +
               '</div>';
     } else if (e === 'bloqueado') {
       html += '<div class="buzon-prender">' +
@@ -4427,24 +4504,11 @@
     var ios = /iPad|iPhone|iPod/.test(ua) ||
               (ua.indexOf('Macintosh') > -1 && 'ontouchend' in document);
 
-    if (!ios) return 'Abrí el menú del navegador y tocá <b>Agregar a la pantalla principal</b>.';
-
-    /* En iPhone, "Agregar a inicio" existe SÓLO en Safari. Y el camino
-       principal del Club termina justo al revés: el vendedor le manda la
-       tarjeta por WhatsApp, el cliente la toca ahí, y se le abre en el
-       navegador interno de WhatsApp, donde esa opción no está. O sea que el
-       que más la necesita es el que no puede.
-
-       La seña: los navegadores internos de iOS usan WKWebView y su
-       identificación NO termina en "Safari/...". Safari de verdad sí. No es
-       infalible, pero si se equivoca lo único que pasa es que el cliente lee
-       un renglón de más. */
-    var dentroDeOtraApp = !/Safari\//.test(ua);
-
-    return dentroDeOtraApp
-      ? 'Estás viéndola dentro de otra app. Tocá el botón de <b>abrir en Safari</b> ' +
-        'y ahí sí: <b>Compartir</b> → <b>Agregar a inicio</b>.'
-      : 'Tocá <b>Compartir</b> abajo y después <b>Agregar a inicio</b>.';
+    if (!ios) return '<p>Abrí el menú del navegador y tocá <b>Agregar a la pantalla principal</b>.</p>';
+    /* En iPhone, los mismos pasos que el cartel, según el navegador
+       (pasosIOS). "Agregar a inicio" existe SÓLO en un navegador de verdad:
+       dentro de Instagram o Facebook primero hay que salir a Safari. */
+    return pasosIOS();
   }
 
   /* "23 de septiembre", como lo diría alguien. Sin el año: la tarjeta es de
