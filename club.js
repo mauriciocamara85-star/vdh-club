@@ -102,6 +102,12 @@ var club = {
     return llamar('club_promos_ver', {});
   },
 
+  /** Los productos de vdh.com.ar para la pestaña Tienda, con las cuotas y
+      la transferencia de la tienda (SQL 41). Sin PIN: es lo público. */
+  tienda: function () {
+    return llamar('club_tienda_ver', {});
+  },
+
   /** Los puntos extra en curso y los de la próxima semana: hora feliz,
       martes de puntos dobles, Hot Sale. Sin nada privado adentro. */
   puntosExtra: function () {

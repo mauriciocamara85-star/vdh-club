@@ -890,6 +890,94 @@
      se sostiene: con una foto cada una, scrollear se parece a mirar un feed
      de prendas y no a leer carteles. */
   .promos-lista { display: grid; gap: 22px; }
+
+  /* ── La promo destacada ── */
+  .promos-sec { font: 700 12px var(--sans); letter-spacing: .6px; text-transform: uppercase; color: var(--txt-3); margin: 26px 0 10px; }
+  .promos-sec:first-child { margin-top: 0; }
+
+  /* ── La tienda (02/10/2026) ──
+     Lo de vdh.com.ar adentro del Club, con lo que la tienda no puede decir:
+     cuántos puntos le suma A ESTE socio, con su nivel. El pago sigue en la
+     tienda: carrito, stock y medios de pago son de Tienda Nube. */
+  .tienda-nivel {
+    display: flex; gap: 12px; align-items: center;
+    padding: 13px 14px; margin-bottom: 18px;
+    border-radius: var(--r-sm); background: var(--ok-soft); border: 1px solid var(--ok-borde);
+    font-size: 13.5px; line-height: 1.4; color: var(--txt);
+  }
+  .tienda-nivel svg { width: 22px; height: 22px; flex: none; color: var(--ok); }
+  .tienda-nivel b { color: var(--ok); }
+  .tienda-cats {
+    display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+    margin: 0 -20px 20px; padding: 0 20px;
+  }
+  .tienda-cats::-webkit-scrollbar { display: none; }
+  .tienda-cat {
+    flex: none; padding: 8px 15px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--linea); background: var(--hoja); color: var(--txt-2);
+    font: 600 13.5px/1.2 var(--sans);
+  }
+  .tienda-cat[aria-pressed="true"] { background: var(--txt); border-color: var(--txt); color: var(--hoja); }
+  .tienda-tit { font: 700 12px var(--sans); letter-spacing: .6px; text-transform: uppercase; color: var(--txt-3); margin: 0 0 10px; }
+  .tienda-fila {
+    display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding-inline: 20px;
+    margin: 0 -20px 24px; padding: 0 20px;
+  }
+  .tienda-fila::-webkit-scrollbar { display: none; }
+  .tienda-fila .prod { flex: 0 0 58%; scroll-snap-align: start; }
+  .tienda-grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 12px; }
+  .prod { display: block; text-align: left; border: 0; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+  .prod-foto {
+    position: relative; aspect-ratio: 4 / 5; border-radius: var(--r-sm); overflow: hidden;
+    background: var(--fondo-foto) center / cover no-repeat;
+  }
+  .prod-off {
+    position: absolute; top: 8px; left: 8px; padding: 4px 9px; border-radius: 999px;
+    background: var(--txt); color: var(--hoja); font: 700 12px/1.2 var(--sans);
+  }
+  .prod-nom { font: 600 14px/1.3 var(--sans); margin-top: 9px; }
+  .prod-precio { font: 700 15px/1.3 var(--sans); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .prod-precio s { font-weight: 500; font-size: 12.5px; color: var(--txt-3); margin-left: 5px; }
+  .prod-pts {
+    display: inline-flex; align-items: center; gap: 4px; margin-top: 6px;
+    padding: 3px 9px 3px 7px; border-radius: 999px;
+    background: var(--ok-soft); color: var(--ok); font: 700 12px/1.3 var(--sans);
+  }
+  .prod-pts svg { width: 13px; height: 13px; }
+  /* Abajo de los puntos, chico: lo mismo que dice la tienda. */
+  .prod-pago { font-size: 12.5px; line-height: 1.35; color: var(--txt-2); margin-top: 6px; }
+  .prod-pago b { font-weight: 600; color: var(--txt); }
+  .ficha-pagos { border: 1px solid var(--linea); border-radius: var(--r-sm); background: var(--hoja); }
+  .ficha-pago { display: flex; gap: 12px; align-items: center; padding: 12px 14px; font-size: 14px; line-height: 1.35; }
+  .ficha-pago + .ficha-pago { border-top: 1px solid var(--linea); }
+  .ficha-pago svg { width: 22px; height: 22px; flex: none; color: var(--txt-2); }
+  .ficha-pago b { font-weight: 700; }
+  .ficha-pago small { display: block; font-size: 12.5px; color: var(--txt-3); }
+  /* La ficha, en la hoja que sube desde abajo. */
+  .ficha-foto { aspect-ratio: 1 / 1; border-radius: var(--r-sm); background: var(--fondo-foto) center / cover no-repeat; }
+  .ficha-nom { font: 700 19px/1.25 var(--display); letter-spacing: -.3px; }
+  .ficha-precio { font: 700 18px/1.2 var(--sans); margin-top: 3px; }
+  .ficha-precio s { font-weight: 500; font-size: 14px; color: var(--txt-3); margin-left: 6px; }
+  .ficha-pts {
+    display: flex; gap: 12px; align-items: center; padding: 13px 14px;
+    border-radius: var(--r-sm); background: var(--ok-soft); border: 1px solid var(--ok-borde);
+  }
+  .ficha-pts svg { width: 24px; height: 24px; flex: none; color: var(--ok); }
+  .ficha-pts b { display: block; font: 700 16px/1.3 var(--sans); color: var(--ok); }
+  .ficha-pts span { display: block; font-size: 13px; color: var(--txt-2); margin-top: 1px; }
+  .ficha-et { font: 700 12px var(--sans); letter-spacing: .5px; text-transform: uppercase; color: var(--txt-3); margin-bottom: 7px; }
+  .ficha-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .ficha-chip { padding: 6px 12px; border-radius: 10px; border: 1px solid var(--linea); background: var(--hoja); font: 600 13.5px/1.2 var(--sans); }
+  .ficha-chip.no { color: var(--txt-3); text-decoration: line-through; background: var(--bg); }
+  .ficha-ojo { display: flex; gap: 10px; font-size: 13px; line-height: 1.45; color: var(--txt-2); }
+  .ficha-ojo svg { width: 18px; height: 18px; flex: none; margin-top: 1px; }
+  .btn-tienda { display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+  .tienda-toda {
+    display: flex; align-items: center; justify-content: center; gap: 6px; margin: 26px 0 6px;
+    font: 600 14px var(--sans); color: var(--txt-2); text-decoration: none;
+  }
+  .tienda-toda svg { width: 16px; height: 16px; }
+  .btn-tienda svg { width: 18px; height: 18px; }
   .promo-nove { margin-top: 32px; }
   .promo-nove:first-child { margin-top: 0; }
 
@@ -1494,6 +1582,12 @@
     <p class="cargando" id="cargando">Abriendo tu tarjeta…</p>
   </section>
 
+  <section class="vista" id="vTienda" hidden>
+    <h1>Tienda</h1>
+    <p class="vista-sub">Lo de vdh.com.ar, con los puntos que te suma a vos.</p>
+    <div id="tiendaTodo"></div>
+  </section>
+
   <section class="vista" id="vPromos" hidden>
     <h1>Promociones</h1>
     <p class="vista-sub">Lo que está vigente hoy.</p>
@@ -1629,7 +1723,9 @@
      Inicio · Promos · Mi tarjeta · Locales · Tienda. Mi tarjeta en el medio,
      que es donde la busca el pulgar. Instagram salió de la barra —la barra
      es para usar el Club, no para irse a otra app— y quedó al final de
-     Inicio. La tienda es un enlace de verdad: abre vdh.com.ar afuera. -->
+     Inicio. La tienda era un enlace a vdh.com.ar; desde el 02/10/2026 es
+     una pestaña: los productos de la tienda adentro del Club, con los
+     puntos de cada uno (SQL 41). El pago sigue en la tienda. -->
 <nav class="tabs" aria-label="Secciones">
   <button type="button" class="tab" data-vista="inicio">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1Z"/></svg>
@@ -1651,10 +1747,10 @@
     Locales
   </button>
 
-  <a class="tab" href="https://vdh.com.ar/" target="_blank" rel="noopener">
+  <button type="button" class="tab" data-vista="tienda">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
     Tienda
-  </a>
+  </button>
 </nav>
 
 <script src="locales.js"></script>
@@ -3494,7 +3590,7 @@
        declarado más abajo todavía vale undefined. Eso tiraba el script entero
        en la primera línea y ni la tarjeta se dibujaba. Una declaración de
        función se iza; el valor de un var, no. */
-    var VISTAS = { inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales', datos: 'vDatos',
+    var VISTAS = { inicio: 'vInicio', tarjeta: 'vTarjeta', promos: 'vPromos', locales: 'vLocales', tienda: 'vTienda', datos: 'vDatos',
                    cupones: 'vCupones', niveles: 'vNiveles', movs: 'vMovs', premios: 'vPremios' };
     var v = VISTAS[nombre] ? nombre : 'inicio';
     /* Mis datos, Mis cupones, Niveles y Movimientos no tienen pestaña
@@ -3534,6 +3630,7 @@
 
     if (v === 'promos') { pintarPromoGrande(); marcarPromos(true); }
     if (v === 'locales') pintarLocales();
+    if (v === 'tienda') pintarTienda();
     if (v === 'datos') pintarMisDatos();
     if (v === 'cupones') pintarCupones();
     if (v === 'niveles') pintarNiveles();
@@ -3866,7 +3963,15 @@
       });
       caja.innerHTML = paraVosHtml() + extrasHtml() +
         (promosPintadas.length
-          ? '<div class="promos-lista">' + promosPintadas.map(unaPromo).join('') + '</div>'
+          ? (function () {
+              var d = promosPintadas.filter(function (p) { return p.destacada && llegaNivel(p); })[0];
+              var resto = promosPintadas.filter(function (p) { return p !== d; });
+              return d
+                ? '<div class="promos-sec">Destacada</div><div class="promos-lista">' + unaPromo(d, promosPintadas.indexOf(d)) + '</div>' +
+                  (resto.length ? '<div class="promos-sec">Todas las promos</div><div class="promos-lista">' +
+                    resto.map(function (p) { return unaPromo(p, promosPintadas.indexOf(p)); }).join('') + '</div>' : '')
+                : '<div class="promos-lista">' + promosPintadas.map(unaPromo).join('') + '</div>';
+            })()
           /* Con puntos extra arriba, "no hay promociones" se contradice con
              lo que el cliente acaba de leer: el cartel vacío no va. */
           : extrasCargados.length ? ''
@@ -3890,6 +3995,146 @@
       .catch(function () {
         caja.innerHTML = '<p class="vacio">No se pudo cargar. Fijate la señal y probá de nuevo.</p>';
       });
+  }
+
+  /* ── La tienda (SQL 41, 02/10/2026) ──
+     Los productos de vdh.com.ar, que la base trae de Tienda Nube cada hora:
+     lo publicado y con stock. Lo que agrega el Club es lo que la tienda no
+     puede decir: cuántos puntos le suma a ESTE socio, con su nivel. El pago
+     sigue en la tienda: "Comprar" lleva a la página del producto.
+
+     Se pide una vez por visita y se guarda en memoria: cambiar de pestaña y
+     volver no la vuelve a pedir. */
+  var tiendaCargada = null, tiendaCuando = 0, tiendaCat = 'Todo';
+  /* El orden de las pastillas: las prendas que más se buscan primero. */
+  var TIPOS_ORDEN = ['Remeras', 'Buzos', 'Camperas', 'Camisas', 'Pantalones', 'Chombas', 'Bermudas', 'Shorts',
+                     'Sweaters', 'Sacos', 'Chalecos', 'Accesorios', 'Otros'];
+  function precioDe(p) { return Number(p.oferta) > 0 ? Number(p.oferta) : Number(p.precio); }
+  /* Mismo cálculo que la caja: cada $100, por lo que multiplica su nivel,
+     redondeado para abajo. */
+  function puntosDe(p) {
+    var multi = Number(((socioCodigo || {}).nivel || {}).multiplica) || 1;
+    return Math.floor(precioDe(p) / pesosPorPunto() * multi + 1e-9);
+  }
+  /* Cuotas y transferencia: las lee la base de la página de la tienda, así
+     que si la tienda pasa a 6 cuotas, acá también. 0 o sin dato: no se
+     muestra la línea. */
+  function pagoTienda() { return (tiendaCargada && tiendaCargada.pago) || {}; }
+  function cuotasTienda() { return Number(pagoTienda().cuotas) || 0; }
+  function transfTienda() { return Number(pagoTienda().transferencia) || 0; }
+  function cuotaDe(p) { return precioDe(p) / cuotasTienda(); }
+  function transferenciaDe(p) { return precioDe(p) * (1 - transfTienda() / 100); }
+  function pagoIcono(n) {
+    var a = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+    return n === 'tarjeta' ? a + '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/></svg>'
+                           : a + '<path d="M3 10 12 4l9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>';
+  }
+
+  function unProducto(p, i) {
+    var off = Number(p.oferta) > 0 ? Math.round((1 - p.oferta / p.precio) * 100) : 0;
+    return '<button type="button" class="prod toca" data-prod="' + i + '">' +
+      '<div class="prod-foto"' + (p.foto ? ' style="background-image:url(&quot;' + esc(p.foto) + '&quot;)"' : '') + '>' +
+        (off ? '<span class="prod-off">-' + off + '%</span>' : '') + '</div>' +
+      '<div class="prod-nom">' + esc(p.nombre) + '</div>' +
+      '<div class="prod-precio">$' + miles(precioDe(p)) + (off ? '<s>$' + miles(p.precio) + '</s>' : '') + '</div>' +
+      '<span class="prod-pts">' + icono('estrella') + '+' + miles(puntosDe(p)) + ' puntos</span>' +
+      (cuotasTienda() > 1 ? '<div class="prod-pago"><b>' + cuotasTienda() + ' x $' + miles(cuotaDe(p)) + '</b> sin interés</div>' : '') +
+      (transfTienda() > 0 ? '<div class="prod-pago"><b>$' + miles(transferenciaDe(p)) + '</b> con transferencia</div>' : '') +
+    '</button>';
+  }
+
+  /* Sin productos (la base todavía no los trajo, o no hay señal): la
+     tienda sigue a un toque, como antes. */
+  function tiendaAfuera(txt) {
+    return '<div class="caja"><h2>' + esc(txt) + '</h2>' +
+      '<p class="vacio">Mientras tanto, mirá todo en la tienda: tus compras online suman puntos igual.</p>' +
+      '<a class="btn btn-tienda" style="margin-top:14px" target="_blank" rel="noopener" href="https://vdh.com.ar/">Ir a vdh.com.ar' + icono('flecha') + '</a></div>';
+  }
+
+  function pintarTienda() {
+    var caja = $('tiendaTodo');
+    if (!caja) { return; }
+    /* Más de diez minutos en memoria: se vuelve a pedir (un precio pudo
+       cambiar), pero mientras tanto se ve lo que había. */
+    if (!tiendaCargada || Date.now() - tiendaCuando > 6e5) {
+      if (!tiendaCargada) { caja.innerHTML = '<p class="vacio">Buscando…</p>'; }
+      club.tienda()
+        .then(function (t) { tiendaCargada = t || {}; tiendaCuando = Date.now(); dibujarTienda(); })
+        .catch(function () { if (!tiendaCargada) { caja.innerHTML = tiendaAfuera('No se pudo cargar la tienda'); } });
+      if (!tiendaCargada) { return; }
+    }
+    dibujarTienda();
+  }
+
+  function dibujarTienda() {
+    var caja = $('tiendaTodo');
+    if (!caja || !tiendaCargada) { return; }
+    var todos = tiendaCargada.productos || [];
+    if (!todos.length) { caja.innerHTML = tiendaAfuera('La tienda se está cargando'); return; }
+    var nv = (socioCodigo || {}).nivel || {};
+    var multi = Number(nv.multiplica) || 1;
+    var cats = ['Todo'].concat(TIPOS_ORDEN.filter(function (t) { return todos.some(function (p) { return p.tipo === t; }); }));
+    if (cats.indexOf(tiendaCat) < 0) { tiendaCat = 'Todo'; }
+    var fila = function (titulo, l) {
+      return l.length ? '<div class="tienda-tit">' + esc(titulo) + '</div><div class="tienda-fila">' +
+        l.map(function (p) { return unProducto(p, todos.indexOf(p)); }).join('') + '</div>' : '';
+    };
+    var novedades = todos.filter(function (p) { return p.nuevo; });
+    /* Las campañas de la tienda ("2DA AL 50% OFF", "Últimos talles"), cada
+       una en su fila, sólo mientras tengan productos: lo decide la base. */
+    var campanas = (tiendaCargada.campanas || []).map(function (c) {
+      return fila(c, todos.filter(function (p) { return (p.campanas || []).indexOf(c) >= 0; }));
+    }).join('');
+    /* Con Novedades arriba, abajo va el resto: repetirlas es relleno. */
+    var lista = todos.filter(function (p) { return tiendaCat === 'Todo' ? !(novedades.length && p.nuevo) : p.tipo === tiendaCat; });
+    caja.innerHTML =
+      '<div class="tienda-nivel">' + icono('estrella') + '<span>Sos <b>' + esc(nv.nombre || 'Plata') + '</b>: en vdh.com.ar cada $100 te suma ' +
+        (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + ', igual que en el local.</span></div>' +
+      '<div class="tienda-cats">' + cats.map(function (c) {
+        return '<button type="button" class="tienda-cat" data-cat="' + esc(c) + '" aria-pressed="' + (c === tiendaCat) + '">' + esc(c) + '</button>';
+      }).join('') + '</div>' +
+      (tiendaCat === 'Todo' ? fila('Novedades', novedades) + campanas + (lista.length ? '<div class="tienda-tit">Más para vos</div>' : '') : '') +
+      '<div class="tienda-grilla">' + lista.map(function (p) { return unProducto(p, todos.indexOf(p)); }).join('') + '</div>' +
+      '<a class="tienda-toda" target="_blank" rel="noopener" href="https://vdh.com.ar/">Ver toda la tienda en vdh.com.ar' + icono('flecha') + '</a>';
+    Array.prototype.forEach.call(caja.querySelectorAll('[data-cat]'), function (b) {
+      b.onclick = function () { tiendaCat = b.dataset.cat; dibujarTienda(); };
+    });
+    Array.prototype.forEach.call(caja.querySelectorAll('[data-prod]'), function (b) {
+      b.onclick = function () { abrirProducto(todos[Number(b.dataset.prod)]); };
+    });
+  }
+
+  function abrirProducto(p) {
+    if (!p || !$('canje')) { return; }
+    var nv = (socioCodigo || {}).nivel || {};
+    var off = Number(p.oferta) > 0;
+    var pts = puntosDe(p);
+    var falta = Number(nv.falta_xp) || 0;
+    var chips = function (l) { return '<div class="ficha-chips">' + l.map(function (x) {
+      return '<span class="ficha-chip' + (x.hay ? '' : ' no') + '">' + esc(x.n) + '</span>'; }).join('') + '</div>'; };
+    $('canjeTit').textContent = p.tipo || 'Tienda';
+    $('canjeCuerpo').innerHTML =
+      (p.foto ? '<div class="ficha-foto" style="background-image:url(&quot;' + esc(p.foto) + '&quot;)"></div>' : '') +
+      '<div><div class="ficha-nom">' + esc(p.nombre) + '</div>' +
+        '<div class="ficha-precio">$' + miles(precioDe(p)) + (off ? '<s>$' + miles(p.precio) + '</s>' : '') + '</div></div>' +
+      '<div class="ficha-pts">' + icono('estrella') + '<div><b>Sumás ' + miles(pts) + ' puntos</b>' +
+        '<span>Con tu nivel ' + esc(nv.nombre || 'Plata') + '.' +
+        /* Lo que le falta para el próximo nivel, si hay próximo: con esta
+           compra, ¿llega? */
+        (nv.sigue && falta ? (pts >= falta ? ' ¡Con esta compra llegás a ' + esc(nv.sigue) + '!'
+                                           : ' Te faltan ' + miles(falta - pts) + ' para ' + esc(nv.sigue) + ' después de esta compra.') : '') +
+        '</span></div></div>' +
+      (cuotasTienda() > 1 || transfTienda() > 0 ? '<div class="ficha-pagos">' +
+        (cuotasTienda() > 1 ? '<div class="ficha-pago">' + pagoIcono('tarjeta') + '<span><b>' + cuotasTienda() + ' cuotas sin interés</b> de $' + miles(cuotaDe(p)) + '</span></div>' : '') +
+        (transfTienda() > 0 ? '<div class="ficha-pago">' + pagoIcono('banco') + '<span><b>$' + miles(transferenciaDe(p)) + '</b> con transferencia' +
+          '<small>' + coma(transfTienda()) + '% OFF. Los puntos se cuentan sobre lo que pagás.</small></span></div>' : '') +
+      '</div>' : '') +
+      ((p.colores || []).length > 1 ? '<div><div class="ficha-et">Colores</div>' + chips(p.colores) + '</div>' : '') +
+      ((p.talles || []).length ? '<div><div class="ficha-et">Talles en la tienda</div>' + chips(p.talles) + '</div>' : '') +
+      '<div class="ficha-ojo">' + icono('pregunta') + '<span>Para que te sume, comprá con el <b>mismo mail o teléfono</b> de tu tarjeta. ' +
+        'Los puntos aparecen cuando se acredita el pago.</span></div>' +
+      '<a class="btn btn-tienda" target="_blank" rel="noopener" href="' + esc(p.url) + '">Comprar en vdh.com.ar' + icono('flecha') + '</a>';
+    subirHoja();
   }
 
   /* ── Los locales ──
