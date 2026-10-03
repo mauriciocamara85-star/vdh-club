@@ -1090,6 +1090,79 @@
   .tz-off { font-style: normal; font-weight: 700; color: var(--mal-txt); }
   /* Adentro de una categoría. */
   #vTienda.en-categoria > h1, #vTienda.en-categoria > .vista-sub { display: none; }
+
+  /* ── La Tienda como vdh.com.ar, editorial (SQL 45, 03/10/2026) ──
+     Sin título ni bajada: lo primero que se ve es la foto. */
+  #vTienda.en-v3 > h1, #vTienda.en-v3 > .vista-sub { display: none; }
+  .tv-portada {
+    position: relative; display: flex; flex-direction: column; justify-content: flex-end;
+    margin: -6px -20px 3px; height: calc(100svh - 160px); min-height: 460px; max-height: 860px;
+    background: #1A1A18 center / cover no-repeat; background-image: var(--foto); color: #fff; overflow: hidden;
+  }
+  .tv-portada::after, .tv-sec::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to top, rgba(10, 11, 12, .62) 0%, rgba(10, 11, 12, .2) 30%, rgba(10, 11, 12, 0) 55%);
+  }
+  .tv-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .tv-portada-pie { position: relative; z-index: 2; padding: 0 22px 26px; }
+  .tv-marca { display: block; font: 800 clamp(64px, 22vw, 108px)/.86 var(--display); letter-spacing: -4px; }
+  .tv-portada-txt { display: block; margin-top: 10px; font: 600 15px/1.35 var(--sans); }
+  .tv-ver {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; min-height: 44px; padding: 0 20px;
+    border: 1px solid #fff; border-radius: 0; background: #fff; color: #111; cursor: pointer;
+    font: 700 13px var(--sans); letter-spacing: .12em; text-transform: uppercase;
+  }
+  .tv-ver svg { width: 16px; height: 16px; }
+  /* ☰: arriba a la izquierda, sobre la foto o arriba de la grilla. */
+  .tv-menu {
+    position: absolute; top: 14px; left: 14px; z-index: 3; width: 44px; height: 44px;
+    display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer;
+    background: rgba(255, 255, 255, .92); color: #111;
+  }
+  .tv-menu svg { width: 22px; height: 22px; }
+  .tv-sec {
+    position: relative; display: flex; align-items: flex-end; width: calc(100% + 40px); margin: 0 -20px 3px;
+    height: 72svh; min-height: 420px; max-height: 760px; padding: 0 22px 24px; border: 0; cursor: pointer;
+    background: var(--fondo-foto) center 22% / cover no-repeat; background-image: var(--foto); color: #fff; text-align: left;
+  }
+  .tv-sec-nom { position: relative; z-index: 1; font: 800 clamp(34px, 11vw, 52px)/.95 var(--display); letter-spacing: -1.4px; text-transform: uppercase; }
+  .tv-sec-nom small { display: block; margin-top: 8px; font: 700 13px var(--sans); letter-spacing: .1em; }
+  .tv-pie { display: grid; gap: 10px; justify-items: center; padding: 26px 0 6px; }
+  .tv-nivel { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; color: var(--txt-2); }
+  .tv-nivel svg { width: 16px; height: 16px; color: var(--ok); }
+  .tv-nivel b { color: var(--ok); }
+  /* Adentro de una categoría. */
+  .tv-barra { display: flex; align-items: center; justify-content: space-between; margin: -4px 0 8px; }
+  .tv-barra .tv-menu { position: static; background: var(--hoja); border: 1px solid var(--linea); }
+  .tv-arriba { font: 600 12px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--txt-3); margin-bottom: 2px; }
+  .tv-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px 18px; padding: 0 20px; }
+  .tv-chips::-webkit-scrollbar { display: none; }
+  .tv-chip {
+    flex: none; padding: 8px 14px; border: 1px solid var(--linea); border-radius: 999px; background: var(--hoja);
+    color: var(--txt-2); font: 600 13px var(--sans); cursor: pointer;
+  }
+  .tv-chip[aria-pressed="true"] { background: var(--txt); border-color: var(--txt); color: var(--hoja); }
+  /* El menú: un panel desde la izquierda, como en Zara. */
+  .tv-cajon { position: fixed; inset: 0; z-index: 75; }
+  .tv-cajon[hidden] { display: none; }
+  .tv-cajon-velo { position: absolute; inset: 0; background: rgba(0, 0, 0, .4); }
+  .tv-cajon-panel {
+    position: absolute; top: 0; bottom: 0; left: 0; width: min(86vw, 380px); overflow-y: auto;
+    padding: calc(env(safe-area-inset-top) + 18px) 24px calc(env(safe-area-inset-bottom) + 24px);
+    background: var(--hoja); display: flex; flex-direction: column; gap: 6px;
+  }
+  .tv-cajon-cab { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .tv-cajon-cab b { font: 800 30px/1 var(--display); letter-spacing: -1px; }
+  .tv-cajon-cab button { width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--bg); display: grid; place-items: center; cursor: pointer; }
+  .tv-cajon-cab svg { width: 20px; height: 20px; }
+  .tv-cajon ul { list-style: none; margin: 0; padding: 0; }
+  .tv-cajon-item { display: block; width: 100%; padding: 9px 0; border: 0; background: none; text-align: left; cursor: pointer;
+                   font: 700 19px/1.2 var(--sans); letter-spacing: .02em; text-transform: uppercase; color: var(--txt); }
+  .tv-cajon ul ul .tv-cajon-item { padding: 6px 0 6px 16px; font: 500 15px/1.2 var(--sans); text-transform: none; color: var(--txt-2); }
+  .tv-cajon-nivel { margin-top: auto; padding-top: 22px; }
+  /* El video de una promo, de fondo, con el velo de abajo encima. */
+  .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero-velo { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 11, 12, .84) 0%, rgba(10, 11, 12, .5) 24%, rgba(10, 11, 12, 0) 50%); }
   .tz-volver { display: inline-flex; align-items: center; gap: 2px; margin: 0 0 10px -4px; padding: 4px; border: 0; background: none; font: 600 14px var(--sans); color: var(--txt-2); cursor: pointer; }
   .tz-volver svg { width: 18px; height: 18px; }
   .tz-titulo { font: 800 clamp(32px, 10vw, 46px)/1 var(--display); letter-spacing: -1.3px; text-transform: uppercase; }
@@ -4009,7 +4082,10 @@
       (gal ? '<button type="button" class="hero-accion" data-coleccion="' + i + '">Ver la colección' + icono('flecha') + '</button>'
            : p.enlace ? '<a class="hero-accion" target="_blank" rel="noopener" href="' + esc(p.enlace) + '">Ver más' + icono('flecha') + '</a>' : '') +
       (p.condiciones ? '<button type="button" class="hero-accion" data-cond="' + i + '">Ver condiciones</button>' : '');
-    return '<article class="promo-hero ' + (p.imagen ? 'con-foto' : 'en-carbon') + '"' + estilo + '>' + toque +
+    /* Con video (SQL 45): de fondo, con la foto mientras carga y su velo. */
+    var vid = videoHtml(p.video, p.imagen, 'hero-video');
+    return '<article class="promo-hero ' + (p.imagen || vid ? 'con-foto' : 'en-carbon') + '"' + estilo + '>' +
+      (vid ? vid + '<span class="hero-velo"></span>' : '') + toque +
       (solo || cuenta ? '<div class="promo-marcas">' + solo + cuenta + '</div>' : '') +
       '<div class="hero-pie">' +
         (p.sobre ? '<span class="hero-sobre">' + esc(p.sobre) + '</span>' : '') +
@@ -4129,6 +4205,11 @@
       var feed = function (l) {
         return '<div class="promos-feed">' + l.map(function (p) { return unaPromo(p, promosPintadas.indexOf(p)); }).join('') + '</div>';
       };
+      /* La de portada: la marcada, o la primera con foto o con video. */
+      if (!promosPintadas.filter(function (p) { return p.destacada && llegaNivel(p); })[0]) {
+        hero = promosPintadas.filter(function (p) { return (p.imagen || p.video) && llegaNivel(p); })[0];
+        resto = promosPintadas.filter(function (p) { return p !== hero; });
+      }
       caja.innerHTML = (hero ? feed([hero]) : '') + paraVosHtml() + extrasHtml() +
         (promosPintadas.length
           ? (resto.length ? (hero ? '<div class="promos-sec">Todas las promos</div>' : '') + feed(resto) : '')
@@ -4138,6 +4219,7 @@
           : '<div class="caja"><h2>No hay promociones activas</h2>' +
             '<p class="vacio">Cuando haya una, te la mostramos acá. Mientras tanto, tus ' +
             'compras siguen sumando puntos.</p></div>');
+      arrancarVideos(caja);
     };
 
     /* Los puntos extra se piden cada vez que se entra: una hora feliz
@@ -4189,6 +4271,29 @@
                            : a + '<path d="M3 10 12 4l9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>';
   }
 
+  /* Un video de fondo, mudo y en loop, con su foto mientras carga. No va si
+     el teléfono pide menos movimiento o ahorro de datos: queda la foto (un
+     video lo descarga cada socio que lo ve). */
+  function videoHtml(src, poster, clase) {
+    if (!src) { return ''; }
+    var quieto = false;
+    try {
+      quieto = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) ||
+               !!(navigator.connection && navigator.connection.saveData);
+    } catch (e) {}
+    if (quieto) { return ''; }
+    return '<video class="' + clase + '" autoplay muted loop playsinline preload="metadata"' +
+      (poster ? ' poster="' + esc(poster) + '"' : '') + ' src="' + esc(src) + '"></video>';
+  }
+  /* Algunos navegadores no arrancan un video que entró por innerHTML: se lo
+     empuja, mudo. */
+  function arrancarVideos(caja) {
+    Array.prototype.forEach.call((caja || document).querySelectorAll('video[autoplay]'), function (v) {
+      v.muted = true; v.playsInline = true;
+      try { var p = v.play(); if (p && p.catch) { p.catch(function () {}); } } catch (e) {}
+    });
+  }
+
   /* Cuánto se descuenta, en %: el de antes contra el de ahora. */
   function offDe(p) {
     return Number(p.oferta) > 0 && Number(p.precio) > Number(p.oferta) ? Math.round((1 - p.oferta / p.precio) * 100) : 0;
@@ -4237,6 +4342,121 @@
     dibujarTienda();
   }
 
+  /* ── La Tienda como vdh.com.ar (SQL 45) ──
+     tiendaCat: 'Todo' (la portada) o 'cat:' + el handle de una categoría
+     del menú de la tienda ("cat:camperas", "cat:camperas1"). */
+  function nodoMenu(handle) {
+    var menu = (tiendaCargada && tiendaCargada.menu) || [], r = null;
+    menu.forEach(function (m) {
+      if (m.handle === handle) { r = { nodo: m, padre: null }; }
+      (m.hijos || []).forEach(function (h) { if (h.handle === handle) { r = { nodo: h, padre: m }; } });
+    });
+    return r;
+  }
+  function deCategoria(todos, nodo) {
+    var hs = [nodo.handle].concat((nodo.hijos || []).map(function (h) { return h.handle; }));
+    return todos.filter(function (p) { return (p.categorias || []).some(function (c) { return hs.indexOf(c) >= 0; }); });
+  }
+  function iconoMenu() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>';
+  }
+  function nivelLinea() {
+    var nv = (socioCodigo || {}).nivel || {}, multi = Number(nv.multiplica) || 1;
+    return '<span class="tv-nivel">' + icono('estrella') + '<span>Sos <b>' + esc(nv.nombre || 'Plata') + '</b> · cada $100 sumás ' +
+      (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + '</span></span>';
+  }
+
+  function dibujarTiendaV3(caja, todos) {
+    var menu = tiendaCargada.menu || [];
+    var v = tiendaCat;
+    if (v !== 'Todo' && !(/^cat:/.test(v) && nodoMenu(v.slice(4)))) { v = tiendaCat = 'Todo'; }
+    if ($('vTienda')) { $('vTienda').classList.add('en-v3'); $('vTienda').classList.remove('en-categoria'); }
+    var toda = '<a class="tienda-toda" target="_blank" rel="noopener" href="https://vdh.com.ar/">Ver toda la tienda en vdh.com.ar' + icono('flecha') + '</a>';
+    var fotoDe = function (nodo) {
+      var l = deCategoria(todos, nodo).filter(function (p) { return p.foto; });
+      return nodo.foto || ((l.filter(function (p) { return !p.nuevo; })[0] || l[0] || {}).foto) || '';
+    };
+
+    if (v === 'Todo') {
+      var po = tiendaCargada.portada || {};
+      var destino = po.cat && nodoMenu(po.cat) ? po.cat : (menu[0] || {}).handle;
+      caja.innerHTML =
+        '<section class="tv-portada"' + (po.foto ? ' style="--foto:url(&quot;' + esc(po.foto) + '&quot;)"' : '') + '>' +
+          videoHtml(po.video, po.foto, 'tv-video') +
+          '<button type="button" class="tv-menu" data-menu aria-label="Categorías">' + iconoMenu() + '</button>' +
+          '<div class="tv-portada-pie"><b class="tv-marca">VDH</b>' +
+            (po.texto ? '<span class="tv-portada-txt">' + esc(po.texto) + '</span>' : '') +
+            (destino ? '<button type="button" class="tv-ver" data-cat="cat:' + esc(destino) + '">Ver la colección' + icono('flecha') + '</button>' : '') +
+          '</div>' +
+        '</section>' +
+        menu.map(function (m) {
+          /* El SALE dice hasta cuánto: es lo único que se dice con números. */
+          var off = deCategoria(todos, m).reduce(function (x, p) { return Math.max(x, offDe(p)); }, 0);
+          var foto = fotoDe(m);
+          return '<button type="button" class="tv-sec" data-cat="cat:' + esc(m.handle) + '"' +
+            (foto ? ' style="--foto:url(&quot;' + esc(foto) + '&quot;)"' : '') + '>' +
+            '<span class="tv-sec-nom">' + esc(m.nombre) + (/sale/i.test(m.nombre) && off ? '<small>Hasta ' + off + '% OFF</small>' : '') + '</span>' +
+          '</button>';
+        }).join('') +
+        '<div class="tv-pie">' + nivelLinea() + toda + '</div>';
+    } else {
+      var n = nodoMenu(v.slice(4)), nodo = n.nodo, padre = n.padre;
+      var lista = deCategoria(todos, nodo);
+      var m = lista.reduce(function (x, p) { return Math.max(x, offDe(p)); }, 0);
+      /* Las subcategorías: las del nodo, o las de su padre si es una. */
+      var grupo = padre || (nodo.hijos && nodo.hijos.length ? nodo : null);
+      caja.innerHTML =
+        '<div class="tv-barra"><button type="button" class="tz-volver" data-cat="Todo">' + icono('volver') + 'Tienda</button>' +
+          '<button type="button" class="tv-menu" data-menu aria-label="Categorías">' + iconoMenu() + '</button></div>' +
+        (padre ? '<div class="tv-arriba">' + esc(padre.nombre) + '</div>' : '') +
+        '<h2 class="tz-titulo">' + esc(nodo.nombre) + '</h2>' +
+        '<p class="tz-sub">' + lista.length + ' producto' + (lista.length === 1 ? '' : 's') +
+          (m ? ' · <em class="tz-off">hasta ' + m + '% OFF</em>' : '') + '</p>' +
+        (grupo ? '<div class="tv-chips">' +
+          [{ nombre: 'Todo', handle: grupo.handle }].concat(grupo.hijos).map(function (h) {
+            return '<button type="button" class="tv-chip" data-cat="cat:' + esc(h.handle) + '" aria-pressed="' + (h.handle === nodo.handle) + '">' + esc(h.nombre) + '</button>';
+          }).join('') + '</div>' : '') +
+        (lista.length ? '<div class="tz-grilla">' + lista.map(function (p, k) { return unProducto(p, todos.indexOf(p), k % 5 === 0); }).join('') + '</div>'
+                      : '<p class="vacio">Por ahora no hay productos acá.</p>') +
+        '<div class="tv-pie">' + toda + '</div>';
+    }
+
+    Array.prototype.forEach.call(caja.querySelectorAll('[data-cat]'), function (b) {
+      b.onclick = function () { irATienda(b.dataset.cat); };
+    });
+    Array.prototype.forEach.call(caja.querySelectorAll('[data-prod]'), function (b) {
+      b.onclick = function () { abrirProducto(todos[Number(b.dataset.prod)]); };
+    });
+    Array.prototype.forEach.call(caja.querySelectorAll('[data-menu]'), function (b) { b.onclick = abrirMenuTienda; });
+    arrancarVideos(caja);
+  }
+
+  /* ☰: el menú de la tienda, con sus subcategorías y la línea del nivel. */
+  function abrirMenuTienda() {
+    var menu = (tiendaCargada && tiendaCargada.menu) || [];
+    var capa = $('tvCajon');
+    if (!capa) {
+      capa = document.createElement('div'); capa.id = 'tvCajon'; capa.className = 'tv-cajon'; capa.hidden = true;
+      document.body.appendChild(capa);
+    }
+    capa.innerHTML = '<div class="tv-cajon-velo" data-cerrar></div>' +
+      '<nav class="tv-cajon-panel" aria-label="Categorías de la tienda">' +
+        '<div class="tv-cajon-cab"><b>Tienda</b><button type="button" data-cerrar aria-label="Cerrar">' + icono('cruz') + '</button></div>' +
+        '<ul>' + menu.map(function (m) {
+          return '<li><button type="button" class="tv-cajon-item" data-ir="cat:' + esc(m.handle) + '">' + esc(m.nombre) + '</button>' +
+            ((m.hijos || []).length ? '<ul>' + m.hijos.map(function (h) {
+              return '<li><button type="button" class="tv-cajon-item" data-ir="cat:' + esc(h.handle) + '">' + esc(h.nombre) + '</button></li>';
+            }).join('') + '</ul>' : '') + '</li>';
+        }).join('') + '</ul>' +
+        '<div class="tv-cajon-nivel">' + nivelLinea() + '</div>' +
+      '</nav>';
+    capa.hidden = false;
+    Array.prototype.forEach.call(capa.querySelectorAll('[data-cerrar]'), function (b) { b.onclick = function () { capa.hidden = true; }; });
+    Array.prototype.forEach.call(capa.querySelectorAll('[data-ir]'), function (b) {
+      b.onclick = function () { capa.hidden = true; irATienda(b.dataset.ir); };
+    });
+  }
+
   /* tiendaCat: 'Todo' (la portada), un tipo ("Remeras"), 'sale' (todo lo
      rebajado) o 'c:' + una campaña de la tienda. */
   function dibujarTienda() {
@@ -4244,6 +4464,9 @@
     if (!caja || !tiendaCargada) { return; }
     var todos = tiendaCargada.productos || [];
     if (!todos.length) { caja.innerHTML = tiendaAfuera('La tienda se está cargando'); return; }
+    /* Con el menú de la tienda (SQL 45), la Tienda nueva. Sin él, la de antes. */
+    if ((tiendaCargada.menu || []).length) { dibujarTiendaV3(caja, todos); return; }
+    if ($('vTienda')) { $('vTienda').classList.remove('en-v3'); }
     var nv = (socioCodigo || {}).nivel || {};
     var multi = Number(nv.multiplica) || 1;
     var tipos = TIPOS_ORDEN.filter(function (t) { return todos.some(function (p) { return p.tipo === t; }); });
@@ -4320,6 +4543,7 @@
     tiendaCat = cat;
     try {
       if (antes === 'Todo' && cat !== 'Todo') { history.pushState({ v: 'tienda', cat: cat }, '', '#tienda'); }
+      else if (antes !== 'Todo' && cat !== 'Todo' && history.state && history.state.cat) { history.replaceState({ v: 'tienda', cat: cat }, '', '#tienda'); }
     } catch (e) {}
     dibujarTienda();
     window.scrollTo(0, 0);
