@@ -910,8 +910,9 @@
       var(--foto);
   }
   /* Sin foto: carbón, y no tan alta (una pantalla negra entera es un
-     agujero, no una portada). */
-  .promo-hero.sin-foto { height: auto; min-height: 46svh; padding-top: 70px; }
+     agujero, no una portada). "en-carbon" y no "sin-foto": ése es de los
+     premios, que pintan el texto gris, y el título quedaba gris sobre negro. */
+  .promo-hero.en-carbon { height: auto; min-height: 46svh; padding-top: 70px; }
   .promo-hero .promo-marcas { z-index: 2; top: 16px; left: 20px; right: 20px; }
   /* Toda la foto se toca; los botones de abajo van por encima. */
   .hero-toque { position: absolute; inset: 0; z-index: 1; display: block; background: none; border: 0; padding: 0; cursor: pointer; }
@@ -1868,7 +1869,7 @@
   </button>
 
   <button type="button" class="tab" data-vista="promos">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2c0 .5.2 1 .6 1.4l8.8 8.8a2 2 0 0 0 2.8 0l7.2-7.2a2 2 0 0 0 0-2.8Z"/><circle cx="7.5" cy="7.5" r="1.3"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3.5c.7 4.4 2.4 6.1 6.8 6.8-4.4.7-6.1 2.4-6.8 6.8-.7-4.4-2.4-6.1-6.8-6.8 4.4-.7 6.1-2.4 6.8-6.8Z"/><path d="M18.5 15c.3 1.8 1 2.5 2.8 2.8-1.8.3-2.5 1-2.8 2.8-.3-1.8-1-2.5-2.8-2.8 1.8-.3 2.5-1 2.8-2.8Z"/></svg>
     Novedades
   </button>
 
@@ -2175,21 +2176,22 @@
       }).join('') + '</div></div>';
   }
 
-  /* El puntito rojo en Promos mientras haya una novedad que no vio. La
-     clave va adentro y no en un var de afuera: irA('promos') puede correr
-     al arrancar, antes de que un var de más abajo tenga su valor. */
-  function claveNove() {
-    var n = socioCodigo && socioCodigo.novedad;
-    return n && n.titulo ? String(n.titulo) + '|' + String(n.imagen || '') : '';
-  }
+  /* El puntito en Novedades mientras haya una promo que el socio todavía no
+     vio (03/10/2026; antes era por la "Novedad" suelta, que se fue). Se
+     guardan las que vio: que una termine no prende el puntito, que entre
+     una nueva sí. vista: entró a la pestaña, ya las vio todas. */
   function marcarPromos(vista) {
-    var K = 'vdh_club_nove_vista', k = claveNove(), visto = '';
-    try { visto = localStorage.getItem(K) || ''; } catch (e) {}
-    if (vista && k) { try { localStorage.setItem(K, k); } catch (e) {} visto = k; }
+    var K = 'vdh_club_promos_vistas', vistas = [];
+    var ids = (promoCargada || []).map(function (p) { return String(p.id); });
+    try { vistas = JSON.parse(localStorage.getItem(K) || '[]') || []; } catch (e) { vistas = []; }
+    if (vista && ids.length) {
+      vistas = ids.concat(vistas.filter(function (x) { return ids.indexOf(x) < 0; })).slice(0, 60);
+      try { localStorage.setItem(K, JSON.stringify(vistas)); } catch (e) {}
+    }
     var tab = document.querySelector('.tab[data-vista="promos"]');
     if (!tab) { return; }
     var punto = tab.querySelector('.tab-punto');
-    var hay = !!k && k !== visto;
+    var hay = ids.some(function (x) { return vistas.indexOf(x) < 0; });
     if (hay && !punto) { tab.insertAdjacentHTML('beforeend', '<span class="tab-punto" aria-hidden="true"></span>'); }
     if (!hay && punto) { punto.remove(); }
   }
@@ -2581,28 +2583,6 @@
             'empezás a sumar: cada $100 es un punto.</p>') +
       '</div>' +
     '</div>';
-  }
-
-  /* La novedad de Inicio: foto apaisada y el texto abajo. La carga Mauricio
-     desde Configuración; si no hay, la sección no va. */
-  function novedadHtml(n) {
-    if (!n || !n.imagen || !n.titulo) { return ''; }
-    return '<div class="promos-sec">Lo último</div><div class="promos-feed"><article class="promo-hero con-foto" style="--foto:url(&quot;' + esc(n.imagen) + '&quot;)">' +
-      (n.enlace ? '<a class="hero-toque" target="_blank" rel="noopener" href="' + esc(n.enlace) + '" aria-label="' + esc(n.titulo) + '"></a>' : '') +
-      '<div class="hero-pie">' + (n.bajada && !/^(novedad(es)?|lo último)$/i.test(String(n.bajada).trim()) ? '<span class="hero-sobre">' + esc(n.bajada) + '</span>' : '') +
-        '<div class="hero-tit">' + esc(n.titulo) + '</div>' +
-        (n.enlace ? '<div class="hero-info"><div class="hero-acciones"><a class="hero-accion" target="_blank" rel="noopener" href="' + esc(n.enlace) + '">Ver más' + icono('flecha') + '</a></div></div>' : '') +
-      '</div></article></div>';
-    var abre = n.enlace
-      ? '<a class="nove toca" target="_blank" rel="noopener" href="' + esc(n.enlace) + '">'
-      : '<div class="nove">';
-    return '<div><div class="sec-cab"><h2>Novedades</h2></div>' + abre +
-      '<img src="' + esc(n.imagen) + '" alt="' + esc(n.titulo) + '" loading="lazy" decoding="async">' +
-      '<span class="nove-pie"><span>' +
-        (n.bajada ? '<small>' + esc(n.bajada) + '</small>' : '') +
-        '<b>' + esc(n.titulo) + '</b></span>' +
-        (n.enlace ? '<span class="nove-ir">Ver más' + icono('flecha') + '</span>' : '') +
-      '</span>' + (n.enlace ? '</a>' : '</div>') + '</div>';
   }
 
   /* "Tu opinión nos importa". Después de una compra, la pregunta directa
@@ -3055,7 +3035,7 @@
 
   function precargarPromo() {
     club.promos()
-      .then(function (l) { promoCargada = l || []; })
+      .then(function (l) { promoCargada = l || []; marcarPromos(!!($('vPromos') && !$('vPromos').hidden)); })
       .catch(function () { /* sin promos, la tarjeta es la tarjeta */ });
   }
 
@@ -4029,7 +4009,7 @@
       (gal ? '<button type="button" class="hero-accion" data-coleccion="' + i + '">Ver la colección' + icono('flecha') + '</button>'
            : p.enlace ? '<a class="hero-accion" target="_blank" rel="noopener" href="' + esc(p.enlace) + '">Ver más' + icono('flecha') + '</a>' : '') +
       (p.condiciones ? '<button type="button" class="hero-accion" data-cond="' + i + '">Ver condiciones</button>' : '');
-    return '<article class="promo-hero ' + (p.imagen ? 'con-foto' : 'sin-foto') + '"' + estilo + '>' + toque +
+    return '<article class="promo-hero ' + (p.imagen ? 'con-foto' : 'en-carbon') + '"' + estilo + '>' + toque +
       (solo || cuenta ? '<div class="promo-marcas">' + solo + cuenta + '</div>' : '') +
       '<div class="hero-pie">' +
         (p.sobre ? '<span class="hero-sobre">' + esc(p.sobre) + '</span>' : '') +
@@ -4128,15 +4108,12 @@
     if (!caja) return;
 
     var pintar = function (lista) {
-      /* Primero las ofertas y la novedad DESPUÉS, con su título y aire
-         arriba (29/09/2026, Mauricio: con la novedad arriba, "Nueva
-         colección" ocupaba casi toda la primera pantalla y la promo quedaba
-         abajo, que es a lo que se entra acá).
+      /* Sólo las promos (la "Novedad" suelta se fue el 03/10/2026: una
+         promo con foto y colección hace lo mismo y mejor).
 
          Nada más: sin "Mostrá tu tarjeta en la caja…" ni el botón "Ver mi
          tarjeta" al final. Lo pidió él el mismo día, "para no ser
          repetitivo": la tarjeta está en la barra de abajo, a un toque. */
-      var nove = novedadHtml(socioCodigo && socioCodigo.novedad);
       /* Primero las de su nivel, después las de socios, después el resto, y
          en cada grupo la que termina antes. Al final, las de un nivel que
          todavía no tiene: se ven (son un motivo para subir) pero no le
@@ -4160,8 +4137,7 @@
           : extrasCargados.length ? ''
           : '<div class="caja"><h2>No hay promociones activas</h2>' +
             '<p class="vacio">Cuando haya una, te la mostramos acá. Mientras tanto, tus ' +
-            'compras siguen sumando puntos.</p></div>') +
-        nove;
+            'compras siguen sumando puntos.</p></div>');
     };
 
     /* Los puntos extra se piden cada vez que se entra: una hora feliz
@@ -4174,7 +4150,7 @@
     if (promoCargada) { pintar(promoCargada); return; }
     caja.innerHTML = '<p class="vacio">Buscando…</p>';
     club.promos()
-      .then(function (l) { promoCargada = l || []; pintar(promoCargada); })
+      .then(function (l) { promoCargada = l || []; pintar(promoCargada); marcarPromos(true); })
       .catch(function () {
         caja.innerHTML = '<p class="vacio">No se pudo cargar. Fijate la señal y probá de nuevo.</p>';
       });
