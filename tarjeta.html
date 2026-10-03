@@ -1141,6 +1141,8 @@
     flex: none; padding: 8px 14px; border: 1px solid var(--linea); border-radius: 999px; background: var(--hoja);
     color: var(--txt-2); font: 600 13px var(--sans); cursor: pointer;
   }
+  .tv-aviso { margin: -8px 0 16px; font-size: 12.5px; line-height: 1.45; color: var(--txt-3); }
+  .pz { text-decoration: none; }
   .tv-chip[aria-pressed="true"] { background: var(--txt); border-color: var(--txt); color: var(--hoja); }
   /* El menú: un panel desde la izquierda, como en Zara. */
   .tv-cajon { position: fixed; inset: 0; z-index: 75; }
@@ -4077,11 +4079,13 @@
       : p.enlace
       ? '<a class="hero-toque" target="_blank" rel="noopener" href="' + esc(p.enlace) + '" aria-label="' + esc(p.texto) + '"></a>'
       : p.condiciones ? '<button type="button" class="hero-toque" data-cond="' + i + '" aria-label="Condiciones de ' + esc(p.texto) + '"></button>' : '';
+    /* Sin "Mostrar mi código" (03/10/2026): acá se mira, no se está en la
+       caja. Con colección, sólo "Ver la colección": las condiciones están
+       al final de la revista. */
     var acciones =
-      (solo && llega && p.donde !== 'online' ? '<button type="button" class="hero-accion llena" data-codigo>' + icono('barras') + 'Mostrar mi código</button>' : '') +
       (gal ? '<button type="button" class="hero-accion" data-coleccion="' + i + '">Ver la colección' + icono('flecha') + '</button>'
            : p.enlace ? '<a class="hero-accion" target="_blank" rel="noopener" href="' + esc(p.enlace) + '">Ver más' + icono('flecha') + '</a>' : '') +
-      (p.condiciones ? '<button type="button" class="hero-accion" data-cond="' + i + '">Ver condiciones</button>' : '');
+      (p.condiciones && !gal ? '<button type="button" class="hero-accion" data-cond="' + i + '">Ver condiciones</button>' : '');
     /* Con video (SQL 45): de fondo, con la foto mientras carga y su velo. */
     var vid = videoHtml(p.video, p.imagen, 'hero-video');
     return '<article class="promo-hero ' + (p.imagen || vid ? 'con-foto' : 'en-carbon') + '"' + estilo + '>' +
@@ -4112,32 +4116,39 @@
     }
     var prods = (tiendaCargada && tiendaCargada.productos) || [];
     var deId = function (id) { return prods.filter(function (x) { return String(x.id) === String(id); })[0]; };
+    /* ¿Vale online? Si no, las fotos no llevan a comprar (sería otro
+       precio) y la revista termina en los locales. */
+    var online = /online/.test(p.donde || '');
     capa.innerHTML =
       '<div class="col-cab"><button type="button" id="colX" aria-label="Volver">' + icono('volver') + '</button><b>Colección</b></div>' +
       '<div class="col-portada" style="background-image:url(&quot;' + esc(p.imagen || p.galeria[0].foto) + '&quot;)"><div>' +
         (p.sobre ? '<small>' + esc(p.sobre) + '</small>' : '') + '<b>' + esc(p.texto) + '</b></div></div>' +
       '<div class="col-grilla">' + p.galeria.map(function (g, k) {
         /* El ritmo: una a lo ancho, dos juntas. */
-        var ancho = k % 3 === 0, pr = g.producto && deId(g.producto);
+        var ancho = k % 3 === 0, pr = online && g.producto && deId(g.producto);
         return '<button type="button" class="col-foto' + (ancho ? ' ancho' : '') + '"' + (pr ? ' data-prod="' + esc(g.producto) + '" aria-label="' + esc(pr.nombre) + '"' : ' tabindex="-1"') +
           ' style="background-image:url(&quot;' + esc(g.foto) + '&quot;)">' + (pr ? '<span class="col-mas">' + icono('mas') + '</span>' : '') + '</button>';
       }).join('') + '</div>' +
       '<div class="col-pie"><p>' + esc(dondeTexto(p)) + (p.hasta ? ' · Hasta el ' + fecha(p.hasta) : '') + '.</p>' +
-        '<button type="button" class="btn" id="colTienda">Ver la colección en la Tienda</button>' +
-        (p.condiciones ? '<button type="button" class="btn btn-claro" data-cond="' + promosPintadas.indexOf(p) + '">Ver condiciones</button>' : '') +
+        (p.condiciones ? '<p>' + esc(p.condiciones) + '</p>' : '') +
+        (online && p.enlace ? '<a class="btn btn-tienda" target="_blank" rel="noopener" href="' + esc(p.enlace) + '">Comprar online' + icono('flecha') + '</a>' : '') +
+        (p.donde !== 'online' ? '<button type="button" class="btn' + (online && p.enlace ? ' btn-claro' : '') + '" id="colLocales">Ver locales</button>' : '') +
       '</div>';
     capa.hidden = false; capa.scrollTop = 0;
     try { history.pushState({ v: vistaActual(), coleccion: true }, '', location.pathname + location.search + location.hash); } catch (e) {}
     $('colX').onclick = function () { cerrarColeccion(false); };
-    /* A la Tienda: la entrada de la colección pasa a ser la de la Tienda,
-       así el "atrás" de ahí vuelve a Promos. */
-    $('colTienda').onclick = function () {
-      capa.hidden = true;
-      try { if (history.state && history.state.coleccion) { history.replaceState({ v: 'tienda' }, '', '#tienda'); } } catch (e) {}
-      irA('tienda', false);
-    };
+    /* A los locales: la entrada de la colección pasa a ser la de Locales,
+       así el "atrás" de ahí vuelve a Novedades. */
+    if ($('colLocales')) {
+      $('colLocales').onclick = function () {
+        capa.hidden = true;
+        try { if (history.state && history.state.coleccion) { history.replaceState({ v: 'locales' }, '', '#locales'); } } catch (e) {}
+        irA('locales', false);
+      };
+    }
+    /* Una foto con producto (sólo en las promos online): a comprarlo. */
     Array.prototype.forEach.call(capa.querySelectorAll('[data-prod]'), function (b) {
-      b.onclick = function () { abrirProducto(deId(b.dataset.prod)); };
+      b.onclick = function () { var x = deId(b.dataset.prod); if (x && x.url) { window.open(x.url, '_blank', 'noopener'); } };
     });
   }
 
@@ -4308,15 +4319,24 @@
 
   /* Un producto, editorial: la foto manda, y abajo nombre, precio y los
      puntos. El grande (uno de cada cinco) dice además las cuotas. */
+  /* Tocarlo lleva a su página en vdh.com.ar, lista para comprar: como en
+     Zara, el producto se compra donde se toca (03/10/2026: antes abría una
+     ficha en el medio, un paso de más). Un enlace de verdad: se puede
+     mantener apretado y abrir en otra pestaña. */
   function unProducto(p, i, grande) {
-    return '<button type="button" class="pz' + (grande ? ' grande' : '') + ' toca" data-prod="' + i + '">' +
+    return '<a class="pz' + (grande ? ' grande' : '') + ' toca" target="_blank" rel="noopener" href="' + esc(p.url) + '">' +
       '<span class="pz-foto"' + (p.foto ? ' style="background-image:url(&quot;' + esc(p.foto) + '&quot;)"' : '') + '></span>' +
       '<span class="pz-info">' +
         '<span class="pz-nom">' + esc(p.nombre) + '</span>' + precioHtml(p) +
         '<span class="pz-pts">+' + miles(puntosDe(p)) + ' puntos</span>' +
-        (grande && cuotasTienda() > 1 ? '<span class="pz-cuotas">' + cuotasTienda() + ' cuotas sin interés de $' + miles(cuotaDe(p)) + '</span>' : '') +
       '</span>' +
-    '</button>';
+    '</a>';
+  }
+  /* La línea de arriba de cada categoría: los precios son los de la tienda
+     online (los locales de calle son un 15% más baratos), y la compra suma
+     sólo si se hace con los datos de la tarjeta. */
+  function avisoTienda() {
+    return '<p class="tv-aviso">Precios de vdh.com.ar · Para sumar puntos, comprá con el mismo mail o teléfono de tu tarjeta.</p>';
   }
 
   /* Sin productos (la base todavía no los trajo, o no hay señal): la
@@ -4412,6 +4432,7 @@
         '<h2 class="tz-titulo">' + esc(nodo.nombre) + '</h2>' +
         '<p class="tz-sub">' + lista.length + ' producto' + (lista.length === 1 ? '' : 's') +
           (m ? ' · <em class="tz-off">hasta ' + m + '% OFF</em>' : '') + '</p>' +
+        avisoTienda() +
         (grupo ? '<div class="tv-chips">' +
           [{ nombre: 'Todo', handle: grupo.handle }].concat(grupo.hijos).map(function (h) {
             return '<button type="button" class="tv-chip" data-cat="cat:' + esc(h.handle) + '" aria-pressed="' + (h.handle === nodo.handle) + '">' + esc(h.nombre) + '</button>';
@@ -4519,7 +4540,7 @@
         '<button type="button" class="tz-volver" data-cat="Todo">' + icono('volver') + 'Tienda</button>' +
         '<h2 class="tz-titulo">' + esc(nombre) + '</h2>' +
         '<p class="tz-sub">' + lista.length + ' producto' + (lista.length === 1 ? '' : 's') +
-          (m ? ' · <em class="tz-off">hasta ' + m + '% OFF</em>' : '') + '</p>' +
+          (m ? ' · <em class="tz-off">hasta ' + m + '% OFF</em>' : '') + '</p>' + avisoTienda() +
         '<div class="tz-grilla">' + lista.map(function (p, k) { return unProducto(p, todos.indexOf(p), k % 5 === 0); }).join('') + '</div>' +
         toda;
     }
