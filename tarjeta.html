@@ -1056,6 +1056,61 @@
     font: 600 14px var(--sans); color: var(--txt-2); text-decoration: none;
   }
   .tienda-toda svg { width: 16px; height: 16px; }
+
+  /* ── La Tienda editorial (03/10/2026) ── */
+  .tz-nivel { display: flex; align-items: center; gap: 7px; margin: -8px 0 18px; font-size: 13.5px; color: var(--txt-2); }
+  .tz-nivel svg { width: 16px; height: 16px; flex: none; color: var(--ok); }
+  .tz-nivel b { color: var(--ok); }
+  /* SALE: una franja negra de borde a borde, la palabra enorme. */
+  .tz-sale, .tz-camp {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    width: calc(100% + 40px); margin: 0 -20px 3px; padding: 18px 20px;
+    border: 0; background: #111; color: #fff; cursor: pointer; text-align: left;
+  }
+  .tz-sale b { font: 800 46px/.9 var(--display); letter-spacing: -1.6px; }
+  .tz-sale span, .tz-camp span { font: 600 13px/1.35 var(--sans); text-align: right; opacity: .92; }
+  .tz-camp { background: #2A2926; padding: 15px 20px; }
+  .tz-camp b { font: 700 17px/1.2 var(--sans); letter-spacing: .02em; text-transform: uppercase; }
+  .tz-tit { font: 700 22px/1.2 var(--display); letter-spacing: -.4px; margin: 30px 0 12px; }
+  .tz-fila {
+    display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 20px; margin: 0 -20px; padding: 0 20px;
+  }
+  .tz-fila::-webkit-scrollbar { display: none; }
+  .tz-fila .pz { flex: 0 0 68%; scroll-snap-align: start; }
+  .tz-fila .pz-info { padding-left: 0; padding-right: 0; }
+  /* Una categoría: la foto de borde a borde y abajo el nombre enorme. */
+  .tz-cat { display: block; width: calc(100% + 40px); margin: 0 -20px 26px; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
+  .tz-cat-foto { display: block; aspect-ratio: 5 / 6; background: var(--fondo-foto) center 22% / cover no-repeat; }
+  .tz-cat-pie { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding: 12px 20px 0; }
+  .tz-cat-pie b { flex: 1 0 100%; font: 800 32px/1 var(--display); letter-spacing: -.9px; text-transform: uppercase; }
+  .tz-cat-pie span { font-size: 13.5px; color: var(--txt-2); }
+  .tz-cat-pie i { margin-left: auto; font: 700 12.5px var(--sans); font-style: normal; letter-spacing: .08em; text-transform: uppercase; }
+  .tz-off { font-style: normal; font-weight: 700; color: var(--mal-txt); }
+  /* Adentro de una categoría. */
+  #vTienda.en-categoria > h1, #vTienda.en-categoria > .vista-sub { display: none; }
+  .tz-volver { display: inline-flex; align-items: center; gap: 2px; margin: 0 0 10px -4px; padding: 4px; border: 0; background: none; font: 600 14px var(--sans); color: var(--txt-2); cursor: pointer; }
+  .tz-volver svg { width: 18px; height: 18px; }
+  .tz-titulo { font: 800 clamp(32px, 10vw, 46px)/1 var(--display); letter-spacing: -1.3px; text-transform: uppercase; }
+  .tz-sub { margin: 6px 0 16px; font-size: 13.5px; color: var(--txt-2); }
+  .tz-grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 2px; margin: 0 -20px; }
+  /* Un producto: la foto manda; abajo, lo justo. */
+  .pz { display: block; min-width: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .pz.grande { grid-column: 1 / -1; }
+  .pz-foto { display: block; aspect-ratio: 3 / 4; background: var(--fondo-foto) center / cover no-repeat; }
+  .pz.grande .pz-foto { aspect-ratio: 4 / 5; }
+  .pz-info { display: grid; gap: 3px; padding: 10px 12px 0; }
+  .pz.grande .pz-info { padding: 12px 20px 0; }
+  .pz-nom { font: 500 13.5px/1.3 var(--sans); }
+  .pz.grande .pz-nom { font: 600 16px/1.3 var(--sans); }
+  .pz-precio { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 7px; font-variant-numeric: tabular-nums; }
+  .pz-precio b { font: 700 14.5px var(--sans); }
+  .pz.grande .pz-precio b { font-size: 17px; }
+  .pz-precio s { font-size: 12.5px; color: var(--txt-3); }
+  .pz-precio em { font: 700 12.5px var(--sans); font-style: normal; color: var(--mal-txt); }
+  .pz-pts { font: 600 12.5px var(--sans); color: var(--ok); }
+  .pz-cuotas { font-size: 12.5px; color: var(--txt-2); }
+  .ficha-precio em { margin-left: 8px; font: 700 15px var(--sans); font-style: normal; color: var(--mal-txt); }
   .btn-tienda svg { width: 18px; height: 18px; }
   .promo-nove { margin-top: 32px; }
   .promo-nove:first-child { margin-top: 0; }
@@ -3750,6 +3805,10 @@
     if (hoja && !hoja.hidden) { cerrarCodigo(true); return; }
     if (cerrarCanje(true)) { return; }
     if (cerrarColeccion(true)) { return; }
+    if (((e.state && e.state.v) || (location.hash || '').replace('#', '')) === 'tienda') {
+      var cat = (e.state && e.state.cat) || 'Todo';
+      if (cat !== tiendaCat) { tiendaCat = cat; if ($('vTienda') && !$('vTienda').hidden) { dibujarTienda(); window.scrollTo(0, 0); return; } }
+    }
     irA((e.state && e.state.v) || (location.hash || '').replace('#', '') || 'inicio', false);
   });
 
@@ -4156,16 +4215,28 @@
                            : a + '<path d="M3 10 12 4l9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>';
   }
 
-  function unProducto(p, i) {
-    var off = Number(p.oferta) > 0 ? Math.round((1 - p.oferta / p.precio) * 100) : 0;
-    return '<button type="button" class="prod toca" data-prod="' + i + '">' +
-      '<div class="prod-foto"' + (p.foto ? ' style="background-image:url(&quot;' + esc(p.foto) + '&quot;)"' : '') + '>' +
-        (off ? '<span class="prod-off">-' + off + '%</span>' : '') + '</div>' +
-      '<div class="prod-nom">' + esc(p.nombre) + '</div>' +
-      '<div class="prod-precio">$' + miles(precioDe(p)) + (off ? '<s>$' + miles(p.precio) + '</s>' : '') + '</div>' +
-      '<span class="prod-pts">' + icono('estrella') + '+' + miles(puntosDe(p)) + ' puntos</span>' +
-      (cuotasTienda() > 1 ? '<div class="prod-pago"><b>' + cuotasTienda() + ' x $' + miles(cuotaDe(p)) + '</b> sin interés</div>' : '') +
-      (transfTienda() > 0 ? '<div class="prod-pago"><b>$' + miles(transferenciaDe(p)) + '</b> con transferencia</div>' : '') +
+  /* Cuánto se descuenta, en %: el de antes contra el de ahora. */
+  function offDe(p) {
+    return Number(p.oferta) > 0 && Number(p.precio) > Number(p.oferta) ? Math.round((1 - p.oferta / p.precio) * 100) : 0;
+  }
+  /* El precio, con el de antes tachado y el %: el detalle que pidió
+     Mauricio ("tendría que estar el descuento en algún lado"). */
+  function precioHtml(p) {
+    var off = offDe(p);
+    return '<span class="pz-precio"><b>$' + miles(precioDe(p)) + '</b>' +
+      (off ? '<s>$' + miles(p.precio) + '</s><em>-' + off + '%</em>' : '') + '</span>';
+  }
+
+  /* Un producto, editorial: la foto manda, y abajo nombre, precio y los
+     puntos. El grande (uno de cada cinco) dice además las cuotas. */
+  function unProducto(p, i, grande) {
+    return '<button type="button" class="pz' + (grande ? ' grande' : '') + ' toca" data-prod="' + i + '">' +
+      '<span class="pz-foto"' + (p.foto ? ' style="background-image:url(&quot;' + esc(p.foto) + '&quot;)"' : '') + '></span>' +
+      '<span class="pz-info">' +
+        '<span class="pz-nom">' + esc(p.nombre) + '</span>' + precioHtml(p) +
+        '<span class="pz-pts">+' + miles(puntosDe(p)) + ' puntos</span>' +
+        (grande && cuotasTienda() > 1 ? '<span class="pz-cuotas">' + cuotasTienda() + ' cuotas sin interés de $' + miles(cuotaDe(p)) + '</span>' : '') +
+      '</span>' +
     '</button>';
   }
 
@@ -4192,6 +4263,8 @@
     dibujarTienda();
   }
 
+  /* tiendaCat: 'Todo' (la portada), un tipo ("Remeras"), 'sale' (todo lo
+     rebajado) o 'c:' + una campaña de la tienda. */
   function dibujarTienda() {
     var caja = $('tiendaTodo');
     if (!caja || !tiendaCargada) { return; }
@@ -4199,52 +4272,81 @@
     if (!todos.length) { caja.innerHTML = tiendaAfuera('La tienda se está cargando'); return; }
     var nv = (socioCodigo || {}).nivel || {};
     var multi = Number(nv.multiplica) || 1;
-    var cats = ['Todo'].concat(TIPOS_ORDEN.filter(function (t) { return todos.some(function (p) { return p.tipo === t; }); }));
-    /* Una campaña abierta entera ("c:" + su nombre), si todavía existe. */
-    var campana = /^c:/.test(tiendaCat) && (tiendaCargada.campanas || []).indexOf(tiendaCat.slice(2)) >= 0 ? tiendaCat.slice(2) : null;
-    if (!campana && cats.indexOf(tiendaCat) < 0) { tiendaCat = 'Todo'; }
+    var tipos = TIPOS_ORDEN.filter(function (t) { return todos.some(function (p) { return p.tipo === t; }); });
+    var campanas = tiendaCargada.campanas || [];
     var deCampana = function (c) { return todos.filter(function (p) { return (p.campanas || []).indexOf(c) >= 0; }); };
-    /* Una fila: hasta 10, y si hay más, "Ver los N" al final. */
-    var fila = function (titulo, l, clave) {
-      if (!l.length) { return ''; }
-      var mas = clave && l.length > 10;
-      return '<div class="tienda-tit">' + esc(titulo) + '</div><div class="tienda-fila">' +
-        (mas ? l.slice(0, 10) : l).map(function (p) { return unProducto(p, todos.indexOf(p)); }).join('') +
-        (mas ? '<button type="button" class="prod-mas toca" data-ver="' + esc(clave) + '">' + icono('flecha') + 'Ver los ' + l.length + '</button>' : '') +
-        '</div>';
-    };
-    var novedades = todos.filter(function (p) { return p.nuevo; });
-    /* Las campañas de la tienda ("2DA AL 50% OFF", "Últimos talles"), cada
-       una en su fila, sólo mientras tengan productos: lo decide la base. */
-    var campanas = (tiendaCargada.campanas || []).map(function (c) { return fila(c, deCampana(c), 'c:' + c); }).join('');
-    /* Con Novedades arriba, abajo va el resto: repetirlas es relleno. */
-    var lista = campana ? deCampana(campana)
-              : todos.filter(function (p) { return tiendaCat === 'Todo' ? !(novedades.length && p.nuevo) : p.tipo === tiendaCat; });
-    caja.innerHTML =
-      '<div class="tienda-nivel">' + icono('estrella') + '<span>Sos <b>' + esc(nv.nombre || 'Plata') + '</b>: en vdh.com.ar cada $100 te suma ' +
-        (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + ', igual que en el local.</span></div>' +
-      '<div class="tienda-cats">' + cats.map(function (c) {
-        return '<button type="button" class="tienda-cat" data-cat="' + esc(c) + '" aria-pressed="' + (c === tiendaCat) + '">' + esc(c) + '</button>';
-      }).join('') + '</div>' +
-      (tiendaCat === 'Todo' ? fila('Novedades', novedades) + campanas + (lista.length ? '<div class="tienda-tit">Más para vos</div>' : '') : '') +
-      (campana ? '<div class="tienda-tit">' + esc(campana) + ' · ' + lista.length + '</div>' : '') +
-      '<div class="tienda-grilla">' + lista.map(function (p) { return unProducto(p, todos.indexOf(p)); }).join('') + '</div>' +
-      '<a class="tienda-toda" target="_blank" rel="noopener" href="https://vdh.com.ar/">Ver toda la tienda en vdh.com.ar' + icono('flecha') + '</a>';
+    var deTipo = function (t) { return todos.filter(function (p) { return p.tipo === t; }); };
+    var porOff = function (l) { return l.slice().sort(function (a, b) { return offDe(b) - offDe(a); }); };
+    var maxOff = function (l) { return l.reduce(function (m, p) { return Math.max(m, offDe(p)); }, 0); };
+    var rebajados = porOff(todos.filter(function (p) { return offDe(p) > 0; }));
+
+    /* Lo que se pidió puede no existir más (una campaña que terminó). */
+    var v = tiendaCat;
+    if ((v === 'sale' && !rebajados.length) || (/^c:/.test(v) && campanas.indexOf(v.slice(2)) < 0) ||
+        (v !== 'Todo' && v !== 'sale' && !/^c:/.test(v) && tipos.indexOf(v) < 0)) { v = tiendaCat = 'Todo'; }
+    var toda = '<a class="tienda-toda" target="_blank" rel="noopener" href="https://vdh.com.ar/">Ver toda la tienda en vdh.com.ar' + icono('flecha') + '</a>';
+    /* Adentro de una categoría manda su nombre grande: el "Tienda" de
+       arriba y su bajada se esconden. */
+    if ($('vTienda')) { $('vTienda').classList.toggle('en-categoria', v !== 'Todo'); }
+
+    if (v === 'Todo') {
+      var novedades = todos.filter(function (p) { return p.nuevo; });
+      caja.innerHTML =
+        '<p class="tz-nivel">' + icono('estrella') + '<span>Sos <b>' + esc(nv.nombre || 'Plata') + '</b> · cada $100 te suma ' +
+          (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + '</span></p>' +
+        (rebajados.length ? '<button type="button" class="tz-sale toca" data-cat="sale"><b>SALE</b><span>Hasta ' + maxOff(rebajados) +
+          '% OFF<br>' + rebajados.length + ' productos ›</span></button>' : '') +
+        campanas.map(function (c) {
+          return '<button type="button" class="tz-camp toca" data-cat="c:' + esc(c) + '"><b>' + esc(c) + '</b><span>Ver ' + deCampana(c).length + ' ›</span></button>';
+        }).join('') +
+        (novedades.length ? '<h2 class="tz-tit">Novedades</h2><div class="tz-fila">' +
+          novedades.map(function (p) { return unProducto(p, todos.indexOf(p), false); }).join('') + '</div>' : '') +
+        '<h2 class="tz-tit">Categorías</h2>' +
+        tipos.map(function (t) {
+          /* La foto: la primera que no esté en Novedades (si no, se ve dos
+             veces seguidas); si son todas nuevas, la primera. */
+          var l = deTipo(t), m = maxOff(l), conFoto = l.filter(function (p) { return p.foto; });
+          var foto = ((conFoto.filter(function (p) { return !p.nuevo; })[0]) || conFoto[0] || {}).foto;
+          return '<button type="button" class="tz-cat toca" data-cat="' + esc(t) + '">' +
+            '<span class="tz-cat-foto"' + (foto ? ' style="background-image:url(&quot;' + esc(foto) + '&quot;)"' : '') + '></span>' +
+            '<span class="tz-cat-pie"><b>' + esc(t) + '</b><span>' + (m ? '<em class="tz-off">Hasta ' + m + '% OFF</em> · ' : '') +
+              l.length + ' producto' + (l.length === 1 ? '' : 's') + '</span><i>Ver más ›</i></span>' +
+          '</button>';
+        }).join('') + toda;
+    } else {
+      var lista = v === 'sale' ? rebajados : /^c:/.test(v) ? deCampana(v.slice(2)) : deTipo(v);
+      var nombre = v === 'sale' ? 'Sale' : /^c:/.test(v) ? v.slice(2) : v, m = maxOff(lista);
+      caja.innerHTML =
+        '<button type="button" class="tz-volver" data-cat="Todo">' + icono('volver') + 'Tienda</button>' +
+        '<h2 class="tz-titulo">' + esc(nombre) + '</h2>' +
+        '<p class="tz-sub">' + lista.length + ' producto' + (lista.length === 1 ? '' : 's') +
+          (m ? ' · <em class="tz-off">hasta ' + m + '% OFF</em>' : '') + '</p>' +
+        '<div class="tz-grilla">' + lista.map(function (p, k) { return unProducto(p, todos.indexOf(p), k % 5 === 0); }).join('') + '</div>' +
+        toda;
+    }
+
     Array.prototype.forEach.call(caja.querySelectorAll('[data-cat]'), function (b) {
-      b.onclick = function () { tiendaCat = b.dataset.cat; dibujarTienda(); };
+      b.onclick = function () { irATienda(b.dataset.cat); };
     });
     Array.prototype.forEach.call(caja.querySelectorAll('[data-prod]'), function (b) {
       b.onclick = function () { abrirProducto(todos[Number(b.dataset.prod)]); };
     });
-    /* "Ver los 46": la campaña entera en la grilla, desde arriba. "Todo"
-       en las pastillas vuelve. */
-    Array.prototype.forEach.call(caja.querySelectorAll('[data-ver]'), function (b) {
-      b.onclick = function () {
-        tiendaCat = b.dataset.ver; dibujarTienda();
-        var t = caja.querySelector('.tienda-cats');
-        if (t) { window.scrollTo(0, t.getBoundingClientRect().top + window.scrollY - 16); }
-      };
-    });
+  }
+
+  /* Entrar a una categoría deja una entrada en el historial: el "atrás" del
+     celular vuelve a la portada de la Tienda, no a otra pestaña. Volver con
+     "‹ Tienda" saca esa entrada. */
+  function irATienda(cat) {
+    var antes = tiendaCat;
+    if (cat === 'Todo' && antes !== 'Todo' && history.state && history.state.cat) {
+      try { history.back(); return; } catch (e) {}
+    }
+    tiendaCat = cat;
+    try {
+      if (antes === 'Todo' && cat !== 'Todo') { history.pushState({ v: 'tienda', cat: cat }, '', '#tienda'); }
+    } catch (e) {}
+    dibujarTienda();
+    window.scrollTo(0, 0);
   }
 
   function abrirProducto(p) {
@@ -4259,7 +4361,7 @@
     $('canjeCuerpo').innerHTML =
       (p.foto ? '<div class="ficha-foto" style="background-image:url(&quot;' + esc(p.foto) + '&quot;)"></div>' : '') +
       '<div><div class="ficha-nom">' + esc(p.nombre) + '</div>' +
-        '<div class="ficha-precio">$' + miles(precioDe(p)) + (off ? '<s>$' + miles(p.precio) + '</s>' : '') + '</div></div>' +
+        '<div class="ficha-precio">$' + miles(precioDe(p)) + (off ? '<s>$' + miles(p.precio) + '</s><em>-' + offDe(p) + '%</em>' : '') + '</div></div>' +
       '<div class="ficha-pts">' + icono('estrella') + '<div><b>Sumás ' + miles(pts) + ' puntos</b>' +
         '<span>Con tu nivel ' + esc(nv.nombre || 'Plata') + '.' +
         /* Lo que le falta para el próximo nivel, si hay próximo: con esta
