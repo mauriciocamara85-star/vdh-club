@@ -886,10 +886,6 @@
   }
   .promo-ver svg { width: 15px; height: 15px; }
 
-  /* Varias promos, una abajo de la otra, y GRANDES. Es pedido de Mauricio y
-     se sostiene: con una foto cada una, scrollear se parece a mirar un feed
-     de prendas y no a leer carteles. */
-  .promos-lista { display: grid; gap: 22px; }
 
   /* ── La promo destacada, estilo Zara (02/10/2026) ──
      La foto manda: de borde a borde de la pantalla (sale del margen de la
@@ -897,10 +893,12 @@
      dónde y hasta cuándo. Tocarla abre el enlace o las condiciones. */
   .promos-sec { font: 700 12px var(--sans); letter-spacing: .6px; text-transform: uppercase; color: var(--txt-3); margin: 26px 0 10px; }
   .promos-sec:first-child { margin-top: 0; }
+  /* Una abajo de la otra, pegadas, de borde a borde (salen del margen de la
+     hoja). Una rayita de fondo entre foto y foto, como en Zara. */
+  .promos-feed { display: grid; gap: 3px; margin: 0 -20px 26px; }
   .promo-hero {
     position: relative; overflow: hidden;
     display: flex; flex-direction: column; justify-content: flex-end;
-    margin: 0 -20px 26px;
     height: 74svh; min-height: 440px; max-height: 760px;
     background: linear-gradient(158deg, #34332F 0%, #1A1A18 78%) center / cover no-repeat;
     color: #fff;
@@ -911,13 +909,20 @@
       linear-gradient(to top, rgba(10, 11, 12, .84) 0%, rgba(10, 11, 12, .5) 24%, rgba(10, 11, 12, 0) 50%),
       var(--foto);
   }
+  /* Sin foto: carbón, y no tan alta (una pantalla negra entera es un
+     agujero, no una portada). */
+  .promo-hero.sin-foto { height: auto; min-height: 46svh; padding-top: 70px; }
   .promo-hero .promo-marcas { z-index: 2; top: 16px; left: 20px; right: 20px; }
   /* Toda la foto se toca; los botones de abajo van por encima. */
   .hero-toque { position: absolute; inset: 0; z-index: 1; display: block; background: none; border: 0; padding: 0; cursor: pointer; }
   .hero-pie { position: relative; z-index: 2; padding: 0 22px 26px; pointer-events: none; }
   .hero-tit { font: 700 clamp(34px, 10.5vw, 48px)/1.04 var(--display); letter-spacing: -1.4px; text-wrap: balance; }
   .hero-dato { margin-top: 10px; font: 500 14px/1.45 var(--sans); opacity: .94; }
+  .hero-dato { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .hero-dato + .hero-dato { margin-top: 4px; }
   .hero-dato b { font-weight: 700; }
+  .hero-dato b.urge { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .hero-dato svg { width: 16px; height: 16px; flex: none; }
   .hero-acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; pointer-events: auto; }
   .hero-accion {
     display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px;
@@ -3894,90 +3899,42 @@
   /* Las promos a la vista, para abrir sus condiciones por el número. */
   var promosPintadas = [];
 
-  /** Una promoción: la foto grande y abajo lo que hay que saber. */
+  /** Una promoción, estilo Zara (02/10/2026): la foto de borde a borde y a
+      pantalla completa, y encima sólo lo justo — qué es, dónde, hasta
+      cuándo — y los botones. Todas iguales, una abajo de la otra: scrollear
+      Promos se parece a mirar la portada de una tienda, no a leer carteles.
+
+      Tocar la foto abre el enlace si tiene; si no, las condiciones. Los
+      botones van por encima de ese toque. El enlace va en un <a> de verdad
+      (con rel="noopener", que no es opcional: sin eso la página que se abre
+      puede manipular a la que la abrió). */
   function unaPromo(p, i) {
-    /* La dirección de la foto va en una variable CSS y no pegada en el
-       style: así el velo oscuro que hace legible el texto queda escrito UNA
-       vez en la hoja de estilos, con su explicación al lado. Se escapan las
-       comillas porque la escribe una persona. */
-    var clase = 'promo-grande' + (p.imagen ? ' con-foto' : '');
     var estilo = p.imagen ? ' style="--foto:url(&quot;' + esc(p.imagen) + '&quot;)"' : '';
-
-    /* Con enlace el cartel entero es un enlace; sin enlace sigue siendo un
-       div. Se usa <a> y no un onclick para que funcione lo que la gente ya
-       sabe hacer sin que nadie se lo explique: mantener apretado para abrir
-       en otra pestaña, o copiar la dirección.
-
-       rel="noopener" no es opcional: sin eso, la página que se abre puede
-       manipular a la que la abrió. */
-    var abre = p.enlace ? '<a class="promo-enlace" target="_blank" rel="noopener" href="' +
-                          esc(p.enlace) + '">' : '<div>';
-    var cierra = p.enlace ? '</a>' : '</div>';
-
-    /* La cuenta regresiva, si en Configuración la prendieron para esta
-       promo (SQL 35): arriba a la izquierda, sobre la foto. */
+    /* La cuenta regresiva, si en Configuración la prendieron (SQL 35). */
     var cuenta = p.cuenta && p.termina && faltaMs(p.termina) > 0
       ? '<span class="promo-reloj">' + icono('reloj') + '<span>Termina en ' + reloj(p.termina) + '</span></span>' : '';
-    /* "Sólo socios" (SQL 38) o "Socios Oro y Platino" (SQL 39): lo que hace
-       que ser del Club, y subir de nivel, valga la pena. */
-    var solo = rotuloPromo(p);
-    var llega = llegaNivel(p);
-    var urge = quedan(p.hasta);
-
-    return '<article class="promo">' + abre +
-      '<div class="' + clase + '"' + estilo + '>' +
-        (solo || cuenta ? '<div class="promo-marcas">' + solo + cuenta + '</div>' : '') +
-        esc(p.texto) +
-        (p.enlace ? '<span class="promo-ver">Ver más ' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
-          'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-          '<path d="m9 18 6-6-6-6"/></svg></span>' : '') +
-      '</div>' +
-      cierra +
-      /* Lo que hay que saber va AFUERA del enlace: tocar "Ver condiciones" y
-         que encima te lleve a otra página es lo contrario de lo que se
-         quiso hacer. */
-      '<div class="promo-info">' +
-        '<div class="promo-dato">' + icono('pin') + '<span>' + esc(dondeTexto(p)) + '</span></div>' +
-        (p.hasta ? '<div class="promo-dato">' + icono('calendario') + '<span>Hasta el ' + fecha(p.hasta) +
-          (urge ? ' · <b' + (/Último|mañana/.test(urge) ? ' class="urge"' : '') + '>' + urge + '</b>' : '') + '</span></div>' : '') +
-        /* La de un nivel que todavía no tiene: cuánto le falta. Es el
-           motivo para volver a comprar. */
-        (!llega ? '<div class="promo-dato">' + icono('candado') + '<span>Te faltan <b>' + miles(faltaNivel(p)) +
-          ' puntos</b> para llegar a ' + esc(p.desde_nivel) + '</span></div>' : '') +
-        (solo || p.condiciones
-          ? '<div class="promo-acciones">' +
-              (solo && llega && p.donde !== 'online' ? '<button type="button" class="promo-accion" data-codigo>' + icono('barras') + 'Mostrar mi código</button>' : '') +
-              (p.condiciones ? '<button type="button" class="promo-accion" data-cond="' + i + '">Ver condiciones' + icono('flecha') + '</button>' : '') +
-            '</div>'
-          : '') +
-      '</div>' +
-    '</article>';
-  }
-
-  /* La destacada, a pantalla completa (estilo Zara). Sólo llega acá una que
-     el socio puede usar: las de un nivel que no tiene van con candado en la
-     lista, no de portada. */
-  function promoHero(p, i) {
-    var estilo = p.imagen ? ' style="--foto:url(&quot;' + esc(p.imagen) + '&quot;)"' : '';
-    var cuenta = p.cuenta && p.termina && faltaMs(p.termina) > 0
-      ? '<span class="promo-reloj">' + icono('reloj') + '<span>Termina en ' + reloj(p.termina) + '</span></span>' : '';
-    var solo = rotuloPromo(p), urge = quedan(p.hasta);
-    /* Tocar la foto: el enlace si tiene, si no las condiciones. */
+    /* "Sólo socios" (SQL 38) o "Socios Oro y Platino" (SQL 39). */
+    var solo = rotuloPromo(p), llega = llegaNivel(p), urge = quedan(p.hasta);
     var toque = p.enlace
       ? '<a class="hero-toque" target="_blank" rel="noopener" href="' + esc(p.enlace) + '" aria-label="' + esc(p.texto) + '"></a>'
       : p.condiciones ? '<button type="button" class="hero-toque" data-cond="' + i + '" aria-label="Condiciones de ' + esc(p.texto) + '"></button>' : '';
     var acciones =
-      (solo && p.donde !== 'online' ? '<button type="button" class="hero-accion llena" data-codigo>' + icono('barras') + 'Mostrar mi código</button>' : '') +
+      (solo && llega && p.donde !== 'online' ? '<button type="button" class="hero-accion llena" data-codigo>' + icono('barras') + 'Mostrar mi código</button>' : '') +
       (p.enlace ? '<a class="hero-accion" target="_blank" rel="noopener" href="' + esc(p.enlace) + '">Ver más' + icono('flecha') + '</a>' : '') +
-      (p.condiciones ? '<button type="button" class="hero-accion" data-cond="' + i + '">Condiciones</button>' : '');
-    return '<article class="promo-hero' + (p.imagen ? ' con-foto' : '') + '"' + estilo + '>' + toque +
+      (p.condiciones ? '<button type="button" class="hero-accion" data-cond="' + i + '">Ver condiciones</button>' : '');
+    return '<article class="promo-hero ' + (p.imagen ? 'con-foto' : 'sin-foto') + '"' + estilo + '>' + toque +
       (solo || cuenta ? '<div class="promo-marcas">' + solo + cuenta + '</div>' : '') +
       '<div class="hero-pie">' +
         '<div class="hero-tit">' + esc(p.texto) + '</div>' +
-        '<div class="hero-dato">' + esc(dondeTexto(p)) + (p.hasta ? ' · Hasta el ' + fecha(p.hasta) : '') +
-          (urge ? ' · <b>' + urge + '</b>' : '') + '</div>' +
-        (acciones ? '<div class="hero-acciones">' + acciones + '</div>' : '') +
+        '<div class="hero-info">' +
+          '<div class="hero-dato">' + esc(dondeTexto(p)) + (p.hasta ? ' · Hasta el ' + fecha(p.hasta) : '') +
+            (urge ? ' · <b' + (/Último|mañana/.test(urge) ? ' class="urge"' : '') + '>' + urge + '</b>' : '') + '</div>' +
+          /* La de un nivel que todavía no tiene: cuánto le falta. Es el
+             motivo para volver a comprar. */
+          (!llega ? '<div class="hero-dato">' + icono('candado') + 'Te faltan <b>' + miles(faltaNivel(p)) +
+            ' puntos</b> para llegar a ' + esc(p.desde_nivel) + '</div>' : '') +
+          (acciones ? '<div class="hero-acciones">' + acciones + '</div>' : '') +
+        '</div>' +
       '</div>' +
     '</article>';
   }
@@ -4033,10 +3990,12 @@
       var hero = promosPintadas.filter(function (p) { return p.destacada && llegaNivel(p); })[0] ||
                  promosPintadas.filter(function (p) { return p.imagen && llegaNivel(p); })[0];
       var resto = promosPintadas.filter(function (p) { return p !== hero; });
-      caja.innerHTML = (hero ? promoHero(hero, promosPintadas.indexOf(hero)) : '') + paraVosHtml() + extrasHtml() +
+      var feed = function (l) {
+        return '<div class="promos-feed">' + l.map(function (p) { return unaPromo(p, promosPintadas.indexOf(p)); }).join('') + '</div>';
+      };
+      caja.innerHTML = (hero ? feed([hero]) : '') + paraVosHtml() + extrasHtml() +
         (promosPintadas.length
-          ? (resto.length ? (hero ? '<div class="promos-sec">Todas las promos</div>' : '') + '<div class="promos-lista">' +
-              resto.map(function (p) { return unaPromo(p, promosPintadas.indexOf(p)); }).join('') + '</div>' : '')
+          ? (resto.length ? (hero ? '<div class="promos-sec">Todas las promos</div>' : '') + feed(resto) : '')
           /* Con puntos extra arriba, "no hay promociones" se contradice con
              lo que el cliente acaba de leer: el cartel vacío no va. */
           : extrasCargados.length ? ''
