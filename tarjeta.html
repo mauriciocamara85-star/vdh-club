@@ -931,6 +931,38 @@
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   }
   .hero-accion.llena { background: #fff; border-color: #fff; color: #16181B; }
+  .hero-sobre { display: block; font: 600 12px var(--sans); letter-spacing: .18em; text-transform: uppercase; margin-bottom: 8px; opacity: .9; }
+
+  /* ── La colección, en formato revista (como "Novedades" de zara.com) ──
+     Pantalla entera encima de todo. El ritmo es fijo y no se elige: una a
+     lo ancho, dos juntas, una a lo ancho… Pegadas, sin texto encima: las
+     fotos hablan solas. Las que tienen producto llevan un "+" chiquito. */
+  .col { position: fixed; inset: 0; z-index: 70; background: #fff; overflow-y: auto; overscroll-behavior: contain; }
+  .col[hidden] { display: none; }
+  .col-cab {
+    position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px;
+    padding: calc(env(safe-area-inset-top) + 10px) 12px 10px; background: rgba(255, 255, 255, .94);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  }
+  .col-cab button { width: 40px; height: 40px; border: 0; background: none; display: grid; place-items: center; cursor: pointer; color: var(--txt); }
+  .col-cab svg { width: 24px; height: 24px; }
+  .col-cab b { font: 600 13px var(--sans); letter-spacing: .16em; text-transform: uppercase; }
+  .col-portada { position: relative; height: 82svh; background: #ddd center / cover no-repeat; display: flex; align-items: flex-end; color: #fff; }
+  .col-portada::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,11,12,.7) 0%, rgba(10,11,12,0) 45%); }
+  .col-portada div { position: relative; padding: 0 22px 26px; }
+  .col-portada b { display: block; font: 700 clamp(34px, 10.5vw, 48px)/1.04 var(--display); letter-spacing: -1.4px; }
+  .col-portada small { display: block; font: 600 12px var(--sans); letter-spacing: .18em; text-transform: uppercase; margin-bottom: 8px; opacity: .9; }
+  .col-grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 2px; }
+  .col-foto { position: relative; display: block; border: 0; padding: 0; background: #e9e7e3 center / cover no-repeat; aspect-ratio: 2 / 3; cursor: default; }
+  .col-foto.ancho { grid-column: 1 / -1; aspect-ratio: 4 / 5; }
+  .col-foto[data-prod] { cursor: pointer; }
+  .col-mas {
+    position: absolute; right: 10px; bottom: 10px; width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255,255,255,.92); color: #16181B; display: grid; place-items: center;
+  }
+  .col-mas svg { width: 16px; height: 16px; }
+  .col-pie { padding: 26px 22px calc(env(safe-area-inset-bottom) + 34px); display: grid; gap: 12px; }
+  .col-pie p { font-size: 14.5px; color: var(--txt-2); line-height: 1.5; }
   .hero-accion svg { width: 16px; height: 16px; }
 
   /* ── La tienda (02/10/2026) ──
@@ -1585,6 +1617,7 @@
                       display: grid; place-items: center; font: 600 13px var(--sans); }
   .pasos b { color: var(--txt); }
   .canje .btn { margin-top: 0; }
+  .canje { z-index: 80; }
 </style>
 </head>
 <body>
@@ -2501,6 +2534,12 @@
      desde Configuración; si no hay, la sección no va. */
   function novedadHtml(n) {
     if (!n || !n.imagen || !n.titulo) { return ''; }
+    return '<div class="promos-sec">Novedades</div><div class="promos-feed"><article class="promo-hero con-foto" style="--foto:url(&quot;' + esc(n.imagen) + '&quot;)">' +
+      (n.enlace ? '<a class="hero-toque" target="_blank" rel="noopener" href="' + esc(n.enlace) + '" aria-label="' + esc(n.titulo) + '"></a>' : '') +
+      '<div class="hero-pie">' + (n.bajada && !/^novedad(es)?$/i.test(String(n.bajada).trim()) ? '<span class="hero-sobre">' + esc(n.bajada) + '</span>' : '') +
+        '<div class="hero-tit">' + esc(n.titulo) + '</div>' +
+        (n.enlace ? '<div class="hero-info"><div class="hero-acciones"><a class="hero-accion" target="_blank" rel="noopener" href="' + esc(n.enlace) + '">Ver más' + icono('flecha') + '</a></div></div>' : '') +
+      '</div></article></div>';
     var abre = n.enlace
       ? '<a class="nove toca" target="_blank" rel="noopener" href="' + esc(n.enlace) + '">'
       : '<div class="nove">';
@@ -2697,8 +2736,14 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-premio], [data-cond], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
+             ev.target.closest('[data-codigo], [data-premio], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
     if (!el) { return; }
+    if (el.hasAttribute('data-coleccion')) {
+      var pc = promosPintadas[Number(el.getAttribute('data-coleccion'))];
+      if (!tiendaCargada) { club.tienda().then(function (t) { tiendaCargada = t || {}; abrirColeccion(pc); }).catch(function () { abrirColeccion(pc); }); }
+      else { abrirColeccion(pc); }
+      return;
+    }
     if (el.hasAttribute('data-cond')) { abrirCondiciones(promosPintadas[Number(el.getAttribute('data-cond'))]); return; }
     if (el.id === 'canjeListo') { cerrarCanje(false); return; }
     if (el.hasAttribute('data-cartel-x')) { sacarCartel(el.closest('[data-cartel]'), 1); return; }
@@ -3704,6 +3749,7 @@
     var hoja = $('hojaCodigo');
     if (hoja && !hoja.hidden) { cerrarCodigo(true); return; }
     if (cerrarCanje(true)) { return; }
+    if (cerrarColeccion(true)) { return; }
     irA((e.state && e.state.v) || (location.hash || '').replace('#', '') || 'inicio', false);
   });
 
@@ -3787,7 +3833,7 @@
       if (ev.target === hoja) { cerrarCodigo(false); }
     };
     document.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Escape') { cerrarCodigo(false); cerrarCanje(false); }
+      if (ev.key === 'Escape') { cerrarCodigo(false); if (!cerrarCanje(false)) { cerrarColeccion(false); } }
     });
   })();
 
@@ -3915,16 +3961,21 @@
       ? '<span class="promo-reloj">' + icono('reloj') + '<span>Termina en ' + reloj(p.termina) + '</span></span>' : '';
     /* "Sólo socios" (SQL 38) o "Socios Oro y Platino" (SQL 39). */
     var solo = rotuloPromo(p), llega = llegaNivel(p), urge = quedan(p.hasta);
-    var toque = p.enlace
+    var gal = p.galeria && p.galeria.length;
+    var toque = gal
+      ? '<button type="button" class="hero-toque" data-coleccion="' + i + '" aria-label="Ver la colección"></button>'
+      : p.enlace
       ? '<a class="hero-toque" target="_blank" rel="noopener" href="' + esc(p.enlace) + '" aria-label="' + esc(p.texto) + '"></a>'
       : p.condiciones ? '<button type="button" class="hero-toque" data-cond="' + i + '" aria-label="Condiciones de ' + esc(p.texto) + '"></button>' : '';
     var acciones =
       (solo && llega && p.donde !== 'online' ? '<button type="button" class="hero-accion llena" data-codigo>' + icono('barras') + 'Mostrar mi código</button>' : '') +
-      (p.enlace ? '<a class="hero-accion" target="_blank" rel="noopener" href="' + esc(p.enlace) + '">Ver más' + icono('flecha') + '</a>' : '') +
+      (gal ? '<button type="button" class="hero-accion" data-coleccion="' + i + '">Ver la colección' + icono('flecha') + '</button>'
+           : p.enlace ? '<a class="hero-accion" target="_blank" rel="noopener" href="' + esc(p.enlace) + '">Ver más' + icono('flecha') + '</a>' : '') +
       (p.condiciones ? '<button type="button" class="hero-accion" data-cond="' + i + '">Ver condiciones</button>' : '');
     return '<article class="promo-hero ' + (p.imagen ? 'con-foto' : 'sin-foto') + '"' + estilo + '>' + toque +
       (solo || cuenta ? '<div class="promo-marcas">' + solo + cuenta + '</div>' : '') +
       '<div class="hero-pie">' +
+        (p.sobre ? '<span class="hero-sobre">' + esc(p.sobre) + '</span>' : '') +
         '<div class="hero-tit">' + esc(p.texto) + '</div>' +
         '<div class="hero-info">' +
           '<div class="hero-dato">' + esc(dondeTexto(p)) + (p.hasta ? ' · Hasta el ' + fecha(p.hasta) : '') +
@@ -3937,6 +3988,57 @@
         '</div>' +
       '</div>' +
     '</article>';
+  }
+
+  function abrirColeccion(p) {
+    if (!p || !p.galeria) { return; }
+    var capa = $('coleccion');
+    if (!capa) {
+      capa = document.createElement('div'); capa.id = 'coleccion'; capa.className = 'col'; capa.hidden = true;
+      document.body.appendChild(capa);
+    }
+    var prods = (tiendaCargada && tiendaCargada.productos) || [];
+    var deId = function (id) { return prods.filter(function (x) { return String(x.id) === String(id); })[0]; };
+    capa.innerHTML =
+      '<div class="col-cab"><button type="button" id="colX" aria-label="Volver">' + icono('volver') + '</button><b>Colección</b></div>' +
+      '<div class="col-portada" style="background-image:url(&quot;' + esc(p.imagen || p.galeria[0].foto) + '&quot;)"><div>' +
+        (p.sobre ? '<small>' + esc(p.sobre) + '</small>' : '') + '<b>' + esc(p.texto) + '</b></div></div>' +
+      '<div class="col-grilla">' + p.galeria.map(function (g, k) {
+        /* El ritmo: una a lo ancho, dos juntas. */
+        var ancho = k % 3 === 0, pr = g.producto && deId(g.producto);
+        return '<button type="button" class="col-foto' + (ancho ? ' ancho' : '') + '"' + (pr ? ' data-prod="' + esc(g.producto) + '" aria-label="' + esc(pr.nombre) + '"' : ' tabindex="-1"') +
+          ' style="background-image:url(&quot;' + esc(g.foto) + '&quot;)">' + (pr ? '<span class="col-mas">' + icono('mas') + '</span>' : '') + '</button>';
+      }).join('') + '</div>' +
+      '<div class="col-pie"><p>' + esc(dondeTexto(p)) + (p.hasta ? ' · Hasta el ' + fecha(p.hasta) : '') + '.</p>' +
+        '<button type="button" class="btn" id="colTienda">Ver la colección en la Tienda</button>' +
+        (p.condiciones ? '<button type="button" class="btn btn-claro" data-cond="' + promosPintadas.indexOf(p) + '">Ver condiciones</button>' : '') +
+      '</div>';
+    capa.hidden = false; capa.scrollTop = 0;
+    try { history.pushState({ v: vistaActual(), coleccion: true }, '', location.pathname + location.search + location.hash); } catch (e) {}
+    $('colX').onclick = function () { cerrarColeccion(false); };
+    /* A la Tienda: la entrada de la colección pasa a ser la de la Tienda,
+       así el "atrás" de ahí vuelve a Promos. */
+    $('colTienda').onclick = function () {
+      capa.hidden = true;
+      try { if (history.state && history.state.coleccion) { history.replaceState({ v: 'tienda' }, '', '#tienda'); } } catch (e) {}
+      irA('tienda', false);
+    };
+    Array.prototype.forEach.call(capa.querySelectorAll('[data-prod]'), function (b) {
+      b.onclick = function () { abrirProducto(deId(b.dataset.prod)); };
+    });
+  }
+
+  /* desdeAtras: la cerró el "atrás", que ya sacó su entrada del historial.
+     Si la cerró la flecha, hay que sacarla a mano (como el código). */
+  function cerrarColeccion(desdeAtras) {
+    var capa = $('coleccion');
+    if (!capa || capa.hidden) { return false; }
+    capa.hidden = true;
+    if (!desdeAtras && history.state && history.state.coleccion) {
+      atrasPropio = true;
+      try { history.back(); } catch (e) { atrasPropio = false; }
+    }
+    return true;
   }
 
   /* Las condiciones, en la hoja que sube desde abajo: qué, para quién,
@@ -4002,7 +4104,7 @@
           : '<div class="caja"><h2>No hay promociones activas</h2>' +
             '<p class="vacio">Cuando haya una, te la mostramos acá. Mientras tanto, tus ' +
             'compras siguen sumando puntos.</p></div>') +
-        (nove ? '<div class="promo-nove">' + nove + '</div>' : '');
+        nove;
     };
 
     /* Los puntos extra se piden cada vez que se entra: una hora feliz
