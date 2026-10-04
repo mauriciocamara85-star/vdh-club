@@ -1594,26 +1594,41 @@
      así se ve parejo aunque las fotos vengan de lugares distintos. */
   .premio-foto { width: 100%; aspect-ratio: 1; border-radius: 0; }
 
-  /* ── Canjeá: el catálogo entero, de a dos ──
-     Como la app de King: la foto manda y el estado va encima, en una
-     pastilla abajo al centro. Verde si alcanza; oscura con lo que falta. */
-  .catalogo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .cat-premio { display: flex; flex-direction: column; width: 100%; padding: 0; text-align: left;
-                background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r);
-                overflow: hidden; font: inherit; color: inherit; cursor: pointer; }
-  .cat-foto { position: relative; display: block; }
-  .cat-premio.agotado .premio-foto { filter: grayscale(1); opacity: .55; }
-  .cat-estado { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
-                max-width: calc(100% - 14px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-                padding: 5px 11px; border-radius: 999px; font: 600 12px/1.3 var(--sans);
-                background: rgba(28, 28, 26, .84); color: #fff; }
-  /* En un teléfono angosto "Faltan 18.000 puntos" no entra en la foto:
-     se va la palabra, que abajo ya dice "20.700 puntos". */
-  @media (max-width: 374px) { .cat-pal { display: none; } }
-  .cat-estado.si { background: var(--ok); }
-  .cat-estado.ya { background: rgba(255, 255, 255, .94); color: var(--txt); }
-  .cat-txt { padding: 10px 12px 12px; display: grid; gap: 3px; }
-  .cat-nom { font: 600 14.5px/1.25 var(--sans); }
+  /* ── Canjeá, como revista (04/10/2026) ──
+     Arriba "Tu próximo premio" a todo el ancho, con la barra y la cuenta en
+     plata: pasar los puntos a pesos es lo que da ganas de juntarlos. Abajo
+     las fotos verticales, pegadas con la rayita como en la colección, sin
+     recuadros; el estado va fino abajo de cada una. */
+  .cat-hero { position: relative; display: block; width: calc(100% + 40px); margin: 4px -20px 3px; padding: 0; border: 0;
+              aspect-ratio: 4 / 5; max-height: 72svh; overflow: hidden; cursor: pointer; text-align: left; color: #fff;
+              background: #1C1C1A center / cover no-repeat; background-image: var(--foto); isolation: isolate; }
+  .cat-hero::before { content: ''; position: absolute; inset: 0; z-index: -1;
+                      background: linear-gradient(to top, rgba(10, 11, 12, .86) 0%, rgba(10, 11, 12, .45) 28%, rgba(10, 11, 12, 0) 55%); }
+  .cat-hero.sin-foto { aspect-ratio: auto; height: 260px; }
+  .cat-hero-pie { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 22px 24px; display: grid; gap: 6px; }
+  .cat-hero-pie small { font: 600 11.5px var(--sans); letter-spacing: .18em; text-transform: uppercase; opacity: .9; }
+  .cat-hero-pie b { font: 700 clamp(32px, 9.5vw, 44px)/1.04 var(--display); letter-spacing: -1.2px; }
+  .cat-hero-dato { font: 500 14.5px/1.4 var(--sans); opacity: .95; }
+  .cat-hero-dato strong { font-weight: 700; }
+  .cat-hero .barra { height: 4px; margin-top: 6px; background: rgba(255, 255, 255, .28); }
+  .cat-hero .barra i { background: #fff; }
+  .cat-grilla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; margin: 0 -20px; }
+  .cat-item { display: flex; flex-direction: column; min-width: 0; padding: 0; border: 0; background: none;
+              text-align: left; font: inherit; color: inherit; cursor: pointer; }
+  .cat-item-foto { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; background: var(--fondo-foto); }
+  .cat-item-foto.sin-foto { display: grid; place-content: center; justify-items: center; gap: 10px; padding: 16px;
+                            background: #1C1C1A; color: #F5F3EE; text-align: center; font: 700 19px/1.15 var(--sans); }
+  .cat-item-foto.sin-foto svg { width: 30px; height: 30px; opacity: .7; }
+  .cat-item.agotado .cat-item-foto { filter: grayscale(1); opacity: .55; }
+  .cat-item-txt { display: grid; gap: 3px; padding: 10px 14px 18px; }
+  .cat-item-txt b { font: 600 15px/1.25 var(--sans); }
+  .cat-item-pts { font: 500 12.5px/1.35 var(--sans); color: var(--txt-2); font-variant-numeric: tabular-nums; }
+  .cat-item-estado { display: flex; align-items: center; gap: 6px; margin-top: 3px; font: 600 12.5px/1.3 var(--sans); color: var(--txt); }
+  .cat-item-estado.si { color: var(--ok); }
+  .cat-item-estado.si::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+  .cat-item-estado.ya { color: var(--txt-3); font-weight: 500; }
+  .cat-item .barra { height: 3px; margin-top: 6px; }
+  .cat-item .barra i { background: var(--txt); }
   .cat-pts { font-size: 13px; color: var(--txt-2); font-variant-numeric: tabular-nums; }
 
   /* ── Movimientos: los tres últimos y "Ver todos" ── */
@@ -2603,14 +2618,46 @@
     }
     /* Los índices son los de premiosPintados (el mismo t.premios), que es
        lo que lee el click de data-premio. */
-    $('premiosCuerpo').innerHTML = '<div class="catalogo">' + ordenPremios(l).map(function (p) {
-      var estado = p.agotado ? '<span class="cat-estado ya">Ya canjeado</span>'
-                 : p.alcanzado ? '<span class="cat-estado si">Te alcanza</span>'
-                 : '<span class="cat-estado">Faltan ' + miles(p.falta) + '<span class="cat-pal"> puntos</span></span>';
-      return '<button type="button" class="cat-premio toca' + (p.agotado ? ' agotado' : '') + '" data-premio="' + premiosPintados.indexOf(p) + '">' +
-        '<span class="cat-foto">' + fotoPremio(p, 'miniatura premio-foto') + estado + '</span>' +
-        '<span class="cat-txt"><span class="cat-nom">' + esc(p.nombre) + '</span>' +
-          '<span class="cat-pts">' + miles(p.puntos) + ' puntos</span></span>' +
+    var orden = ordenPremios(l);
+    var avance = function (p) { return Math.max(0, Math.min(100, Math.round((p.puntos - p.falta) * 100 / (p.puntos || 1)))); };
+
+    /* "Tu próximo premio": el primero que todavía no le alcanza. Si ya le
+       alcanzan todos, el más caro de los que puede llevarse. */
+    var proximo = orden.filter(function (p) { return !p.alcanzado && !p.agotado; })[0];
+    var tuyos = orden.filter(function (p) { return p.alcanzado && !p.agotado; });
+    var hero = proximo || tuyos[tuyos.length - 1];
+    var multi = Number(((t.nivel || {}).multiplica)) || 1;
+    var heroHtml = '';
+    if (hero) {
+      /* Los puntos que faltan, en pesos de compra: cada $100 suman "multi"
+         puntos. Redondeado a mil para arriba: es una idea, no una cuenta. */
+      var pesos = proximo ? Math.ceil(proximo.falta / multi * 100 / 1000) * 1000 : 0;
+      heroHtml = '<button type="button" class="cat-hero' + (hero.imagen ? '' : ' sin-foto') + '" data-premio="' + premiosPintados.indexOf(hero) + '"' +
+          (hero.imagen ? ' style="--foto:url(&quot;' + esc(hero.imagen) + '&quot;)"' : '') + '>' +
+        '<span class="cat-hero-pie">' +
+          '<small>' + (proximo ? 'Tu próximo premio' : 'Ya es tuyo') + '</small>' +
+          '<b>' + esc(hero.nombre) + '</b>' +
+          '<span class="cat-hero-dato">' + (proximo
+            ? 'Te faltan <strong>' + miles(proximo.falta) + ' puntos</strong>: con una compra de unos $' + miles(pesos) + ' es tuyo.'
+            : 'Te alcanza: pedilo en la caja de cualquier local.') + '</span>' +
+          (proximo ? '<span class="barra"><i style="width:' + avance(proximo) + '%"></i></span>' : '') +
+        '</span>' +
+      '</button>';
+    }
+
+    $('premiosCuerpo').innerHTML = heroHtml + '<div class="cat-grilla">' + orden.filter(function (p) { return p !== hero; }).map(function (p) {
+      var foto = p.imagen
+        ? '<img class="cat-item-foto" src="' + esc(p.imagen) + '" alt="" loading="lazy" decoding="async" onerror="this.style.visibility=\'hidden\'">'
+        : '<span class="cat-item-foto sin-foto">' + icono('regalo') + '<span>' + esc(p.nombre) + '</span></span>';
+      var estado = p.agotado ? '<span class="cat-item-estado ya">Ya canjeado este año</span>'
+                 : p.alcanzado ? '<span class="cat-item-estado si">Te alcanza</span>'
+                 : '<span class="barra"><i style="width:' + avance(p) + '%"></i></span>' +
+                   '<span class="cat-item-estado">Te faltan ' + miles(p.falta) + '</span>';
+      return '<button type="button" class="cat-item' + (p.agotado ? ' agotado' : '') + '" data-premio="' + premiosPintados.indexOf(p) + '">' +
+        foto +
+        '<span class="cat-item-txt"><b>' + esc(p.nombre) + '</b>' +
+          '<span class="cat-item-pts">' + miles(p.puntos) + ' puntos' + (p.valor ? '<br>Vale $' + miles(p.valor) : '') + '</span>' +
+          estado + '</span>' +
       '</button>';
     }).join('') + '</div>';
   }
