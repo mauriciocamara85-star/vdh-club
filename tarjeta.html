@@ -378,6 +378,106 @@
   }
   .btn-codigo svg { width: 22px; height: 22px; }
 
+  /* ── La tarjeta que brilla y se da vuelta (04/10/2026) ──
+     Como una tarjeta de crédito de metal. Con el celular en la mano el
+     reflejo se mueve cuando lo inclinás (Android); en la compu o en
+     iPhone, siguiendo el mouse o el dedo. Tocarla la da vuelta: atrás van
+     la banda negra, el código de barras en su tira blanca (tocarlo lo
+     agranda) y un mensaje para el socio, distinto cada vez.
+     Tres capas: la escena da la perspectiva, .carnet-giro se inclina con
+     el celular y .carnet-caras gira para darla vuelta. Separadas, porque
+     la inclinación cambia 60 veces por segundo y el giro tiene su
+     transición: en el mismo elemento se pisarían. */
+  .carnet-escena { perspective: 1100px; }
+  .carnet-giro { transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+  .carnet-caras { position: relative; aspect-ratio: 1.586; transform-style: preserve-3d; border-radius: 20px;
+                  transition: transform .7s cubic-bezier(.2, .8, .2, 1); cursor: pointer; outline: none;
+                  -webkit-tap-highlight-color: transparent; }
+  .carnet-caras:focus-visible { box-shadow: 0 0 0 3px var(--txt); }
+  .carnet-caras.vuelta { transform: rotateY(180deg); }
+  .carnet-caras > .carnet { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto;
+                            -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+  .carnet-dorso { transform: rotateY(180deg); }
+  .carnet-caras:not(.vuelta) .carnet-dorso, .carnet-caras.vuelta .carnet-frente { pointer-events: none; }
+  /* El reflejo: una banda de luz y un punto más brillante, que se mueven
+     con --bx, --lx y --ly (los pone el script según la inclinación). */
+  .carnet-luz { position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none;
+    background:
+      radial-gradient(circle at var(--lx, 30%) var(--ly, 20%), rgba(255, 255, 255, .30) 0%, rgba(255, 255, 255, 0) 42%),
+      linear-gradient(112deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, .26) 48%, rgba(255, 255, 255, .06) 54%, rgba(255, 255, 255, 0) 62%)
+        var(--bx, 50%) 0 / 260% 100% no-repeat; }
+  /* El nombre y el número, grabados en el plástico. */
+  .carnet-frente .carnet-nom, .carnet-frente .carnet-num { text-shadow: 0 1px 0 rgba(255, 255, 255, .28), 0 -1px 0 rgba(0, 0, 0, .12); }
+  .carnet.nv-platino .carnet-nom, .carnet.nv-platino .carnet-num { text-shadow: 0 -1px 0 rgba(0, 0, 0, .5), 0 1px 0 rgba(255, 255, 255, .08); }
+  /* El dorso: medidas en % para que entre igual en un celular angosto. */
+  .dorso-banda { position: absolute; left: 0; right: 0; top: 9%; height: 17%; background: linear-gradient(180deg, #2B2A27, #0F0F0E); }
+  .dorso-codigo { position: absolute; left: 6%; right: 6%; top: 32%; height: 38%; z-index: 2;
+                  display: grid; grid-template-rows: 1fr auto; justify-items: center; gap: 3px;
+                  padding: 7px 14px 6px; border: 0; border-radius: 10px; background: #fff; color: #111; cursor: pointer; }
+  .dorso-codigo svg { display: block; width: 100%; height: 100%; }
+  .dorso-num { font: 600 10.5px/1 var(--sans); letter-spacing: .18em; font-variant-numeric: tabular-nums; }
+  .dorso-msj { position: absolute; left: 6%; right: 6%; bottom: 5%; height: 21%; z-index: 2;
+               display: flex; align-items: center; gap: 10px; font: 500 12.5px/1.3 var(--sans); }
+  .dorso-msj img { width: 34px; height: 34px; flex: none; border-radius: 8px; object-fit: cover; background: #fff; }
+  .dorso-msj b { font-weight: 700; }
+  @media (prefers-reduced-motion: reduce) {
+    .carnet-caras { transition: none; }
+    .carnet-giro { transform: none; }
+  }
+
+  /* ── Los festejos (04/10/2026) ──
+     Un aviso arriba y papelitos con los colores de la marca: sumaste
+     puntos, subiste de nivel, te llevaste un premio, tu cumple. Una vez
+     por cosa, nunca al abrir sin novedades. */
+  .festejo { position: fixed; z-index: 120; left: 50%; top: calc(12px + env(safe-area-inset-top));
+             width: min(360px, calc(100% - 32px)); transform: translate(-50%, -150%);
+             display: grid; grid-template-columns: auto 1fr; gap: 1px 12px; align-items: center;
+             padding: 12px 16px; border-radius: 16px; background: #1C1C1A; color: #F5F3EE;
+             box-shadow: 0 14px 34px -12px rgba(0, 0, 0, .5); cursor: pointer;
+             transition: transform .5s cubic-bezier(.2, .9, .25, 1.12); }
+  .festejo.ve { transform: translate(-50%, 0); }
+  .festejo-ico { grid-row: span 2; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+                 background: linear-gradient(135deg, #EED79E, #B8872E); color: #1A1406; }
+  .festejo-ico svg { width: 20px; height: 20px; }
+  .festejo b { font: 700 15px/1.25 var(--sans); }
+  .festejo > span:last-child:not(.festejo-ico) { font: 400 13px/1.35 var(--sans); color: rgba(245, 243, 238, .75); }
+  .papelitos { position: fixed; inset: 0; z-index: 119; pointer-events: none; }
+
+  /* ── Al cambiar de pantalla, un fundido corto (04/10/2026) ──
+     Sólo opacidad: un transform en la vista cambiaría la referencia de lo
+     que va fijo adentro de ella. */
+  .vista.entra { animation: vista-entra .24s ease-out; }
+  @keyframes vista-entra { from { opacity: 0; } }
+  /* ── Mientras carga, la forma de lo que viene (siluetas) ── */
+  .esq-caja { display: grid; gap: 12px; }
+  .esq-caja[hidden] { display: none; }
+  .cargando.esq-caja { padding: 0; text-align: left; }
+  .esq { display: block; border-radius: var(--r);
+         background: linear-gradient(90deg, rgba(28, 28, 26, .06) 25%, rgba(28, 28, 26, .11) 50%, rgba(28, 28, 26, .06) 75%) 0 0 / 200% 100%;
+         animation: esq 1.3s linear infinite; }
+  @keyframes esq { to { background-position: -200% 0; } }
+  .esq-ti { height: 190px; }
+  .esq-btn { height: 52px; border-radius: var(--r-sm); }
+  .esq-fila { height: 220px; }
+  .esq-carnet { aspect-ratio: 1.586; border-radius: 20px; }
+  .esq-dos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .esq-num { height: 128px; }
+  /* ── Las fotos grandes, con un zoom muy lento (04/10/2026) ──
+     El ::before hereda el fondo entero (la foto y su velo) y es lo único
+     que se agranda: el texto queda quieto. z-index -1 con isolation lo
+     deja arriba del fondo y abajo del texto. Corre sólo mientras la foto
+     está a la vista (.kb-on, lo pone zoomFotos). */
+  .promo-hero.con-foto, .promo-grande.con-foto, .tv-portada, .tv-sec { isolation: isolate; overflow: hidden; }
+  .promo-hero.con-foto::before, .promo-grande.con-foto::before, .tv-portada::before, .tv-sec::before {
+    content: ''; position: absolute; inset: 0; z-index: -1; background: inherit; pointer-events: none;
+    transform-origin: 50% 40%; animation: kb 16s ease-in-out infinite alternate; animation-play-state: paused; }
+  .kb-on::before { animation-play-state: running !important; }
+  @keyframes kb { from { transform: scale(1); } to { transform: scale(1.07); } }
+  @media (prefers-reduced-motion: reduce) {
+    .vista.entra, .esq { animation: none; }
+    .promo-hero.con-foto::before, .promo-grande.con-foto::before, .tv-portada::before, .tv-sec::before { animation: none; }
+  }
+
   /* Google Wallet (04/10/2026): el botón OFICIAL de Google, el de dos
      renglones en español latino ("Agregar a la Billetera de Google"). Sus
      reglas no dejan hacer uno propio ni cambiarle color, letra o bordes, y
@@ -1845,12 +1945,12 @@
   <!-- Inicio: el resumen. Se abre acá; "Mostrar código" está arriba de
        todo, igual que en Mi tarjeta, así que el código sigue a un toque. -->
   <section class="vista" id="vInicio" hidden>
-    <div class="pila" id="inicioTodo"><p class="cargando">Abriendo tu tarjeta…</p></div>
+    <div class="pila" id="inicioTodo"><div class="esq-caja" aria-busy="true"><span class="solo-lector">Abriendo tu tarjeta…</span><span class="esq esq-ti"></span><span class="esq esq-btn"></span><span class="esq esq-fila"></span></div></div>
   </section>
 
   <section class="vista" id="vTarjeta" hidden>
     <div class="pila" id="todo" hidden></div>
-    <p class="cargando" id="cargando">Abriendo tu tarjeta…</p>
+    <div class="cargando esq-caja" id="cargando" aria-busy="true"><span class="solo-lector">Abriendo tu tarjeta…</span><span class="esq esq-carnet"></span><span class="esq esq-btn"></span><span class="esq-dos"><span class="esq esq-num"></span><span class="esq esq-num"></span></span></div>
   </section>
 
   <section class="vista" id="vTienda" hidden>
@@ -2112,6 +2212,7 @@
       var vieja = ultimaGuardada(codigo);
       if (vieja) { pintar(vieja); sinSenal(); return; }
       irA('tarjeta', false);
+      $('cargando').className = 'cargando';
       $('cargando').textContent = 'No se pudo abrir. Fijate la señal y recargá.';
     });
 
@@ -2131,7 +2232,7 @@
      Las dos pantallas salen de la misma respuesta de la base y se pintan
      juntas: cambiar de pestaña es instantáneo y anda sin señal.
 
-     Mi tarjeta: la tarjeta grande con el material del nivel, el código,
+     Mi tarjeta: la tarjeta grande con el material del nivel (se da vuelta y atrás está el código),
      los dos números con su nombre, los premios y el nivel en un renglón
      cada uno, y los movimientos.
 
@@ -2264,6 +2365,7 @@
     if ($('vNiveles') && !$('vNiveles').hidden) { pintarNiveles(); }
     if ($('vPremios') && !$('vPremios').hidden) { pintarPremios(); }
     if (abrirCodigoYa && t.codigo) { abrirCodigoYa = false; abrirCodigo(); }
+    mirarFestejos(t);
   }
 
   /* ═══ La tarjeta de Inicio: los accesos, las misiones y las vistas ═════
@@ -2659,24 +2761,247 @@
     });
   }
 
-  /* La tarjeta grande. Es un botón entero: tocarla abre el código. Adentro
-     van <span> y no <div>, que un botón no puede llevar bloques.
-
-     Sin el botón "Mostrar código" abajo (29/09/2026, Mauricio: "la gente va
-     a tocar la tarjeta ahí"). Lo que avisa que se toca es el dibujito de
-     barras al lado del número, sin texto. En Inicio el botón sigue: es
-     donde abre la app y el camino rápido en la caja. */
+  /* La tarjeta grande, con frente y dorso (04/10/2026). Tocarla la da
+     vuelta (girarTarjeta); el código de barras está atrás, en su tira
+     blanca, y tocarlo lo abre grande. Antes tocarla abría el código
+     directo: el dibujito de barras del frente sigue diciendo que el código
+     está ahí. Es un div con role=button y no un <button>, porque el dorso
+     lleva otro botón adentro (el del código) y un botón no puede llevar
+     otro. */
   function carnetHtml(t, nv) {
     var cod = String(t.codigo || '');
-    return '<div class="carnet-bloque">' +
-      '<button type="button" class="carnet toca ' + claseNivel(nv.nombre) + '" data-codigo aria-label="Mostrar mi código">' +
-        '<span class="carnet-arriba"><span><span class="carnet-vdh">VDH</span><span class="carnet-club">Club</span></span>' +
-          '<span class="carnet-nivel">' + esc(nv.nombre) + '</span></span>' +
-        '<span class="carnet-abajo"><span><span class="carnet-nom">' + esc(t.nombre) + '</span>' +
-          '<span class="carnet-desde">Socio desde ' + mesAnio(t.desde) + '</span></span>' +
-          '<span class="carnet-num">•••• ' + esc(cod.slice(-4)) + '<span class="carnet-barras">' + icono('barras') + '</span></span></span>' +
-      '</button>' +
-    '</div>';
+    var cls = claseNivel(nv.nombre);
+    return '<div class="carnet-bloque"><div class="carnet-escena"><div class="carnet-giro" id="carnetGiro">' +
+      '<div class="carnet-caras" role="button" tabindex="0" data-girar aria-pressed="false" aria-label="Dar vuelta la tarjeta">' +
+        '<div class="carnet carnet-frente ' + cls + '">' +
+          '<span class="carnet-arriba"><span><span class="carnet-vdh">VDH</span><span class="carnet-club">Club</span></span>' +
+            '<span class="carnet-nivel">' + esc(nv.nombre) + '</span></span>' +
+          '<span class="carnet-abajo"><span><span class="carnet-nom">' + esc(t.nombre) + '</span>' +
+            '<span class="carnet-desde">Socio desde ' + mesAnio(t.desde) + '</span></span>' +
+            '<span class="carnet-num">•••• ' + esc(cod.slice(-4)) + '<span class="carnet-barras">' + icono('barras') + '</span></span></span>' +
+          '<span class="carnet-luz"></span>' +
+        '</div>' +
+        '<div class="carnet carnet-dorso ' + cls + '" aria-hidden="true">' +
+          '<span class="dorso-banda"></span>' +
+          '<button type="button" class="dorso-codigo" data-codigo aria-label="Agrandar el código" tabindex="-1">' +
+            codigoDeBarras(cod, 60) + '<span class="dorso-num">' + esc(codigoBonito(cod)) + '</span></button>' +
+          '<span class="dorso-msj"></span>' +
+          '<span class="carnet-luz"></span>' +
+        '</div>' +
+      '</div>' +
+    '</div></div></div>';
+  }
+
+  /* El mensaje del dorso: cosas del socio, útiles, una distinta cada vez
+     que la da vuelta. Si el mensaje es de un premio, va con su foto. */
+  function mensajesDorso(t) {
+    var nv = t.nivel || {}, l = [];
+    var premios = ordenPremios(t.premios || []);
+    var alcanza = premios.filter(function (p) { return p.alcanzado && !p.agotado; });
+    var proximo = premios.filter(function (p) { return !p.alcanzado && !p.agotado; })[0];
+    if (alcanza.length) {
+      var p = alcanza[alcanza.length - 1];
+      l.push({ img: p.imagen, txt: 'Con tus puntos ya te llevás <b>' + esc(p.nombre) + '</b>.' });
+    }
+    if (proximo) { l.push({ img: proximo.imagen, txt: 'Te faltan <b>' + miles(proximo.falta) + ' puntos</b> para ' + esc(proximo.nombre) + '.' }); }
+    l.push({ txt: nv.sigue ? 'Te faltan <b>' + miles(nv.falta_xp) + '</b> puntos de compras para ser <b>' + esc(nv.sigue) + '</b>.'
+                           : 'Estás en el nivel más alto del Club.' });
+    var multi = Number(nv.multiplica) || 1;
+    l.push({ txt: 'Cada $100 de compra sumás <b>' + (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + '</b>.' });
+    if (nv.regalo_cumple) { l.push({ txt: 'En tu cumple: <b>' + esc(nv.regalo_cumple) + '</b>.' }); }
+    var cup = (t.cupones || [])[0];
+    if (cup && cup.pct) {
+      l.push({ txt: 'Tenés un cupón del <b>' + esc(cup.pct) + '%</b>' +
+        (cup.dias != null ? ' que vence en ' + cup.dias + (Number(cup.dias) === 1 ? ' día' : ' días') : '') + '.' });
+    }
+    l.push({ txt: 'Socio desde ' + mesAnio(t.desde) + '. Gracias por elegirnos.' });
+    return l;
+  }
+
+  var K_DORSO = 'vdh_club_dorso';
+  function girarTarjeta(el) {
+    var caras = el.closest('.carnet-caras') || el;
+    var vuelta = !caras.classList.contains('vuelta');
+    if (vuelta) {
+      var l = mensajesDorso(socioCodigo || {}), i = 0;
+      try { i = Number(localStorage.getItem(K_DORSO)) || 0; localStorage.setItem(K_DORSO, String(i + 1)); } catch (e) {}
+      var m = l.length ? l[i % l.length] : null;
+      var caja = caras.querySelector('.dorso-msj');
+      if (caja) {
+        caja.innerHTML = m ? (m.img ? '<img src="' + esc(m.img) + '" alt="" onerror="this.remove()">' : '') + '<span>' + m.txt + '</span>' : '';
+      }
+    }
+    caras.classList.toggle('vuelta', vuelta);
+    caras.setAttribute('aria-pressed', vuelta ? 'true' : 'false');
+    var dorso = caras.querySelector('.carnet-dorso'), frente = caras.querySelector('.carnet-frente');
+    if (dorso) { dorso.setAttribute('aria-hidden', vuelta ? 'false' : 'true'); }
+    if (frente) { frente.setAttribute('aria-hidden', vuelta ? 'true' : 'false'); }
+    var b = caras.querySelector('.dorso-codigo');
+    if (b) { b.tabIndex = vuelta ? 0 : -1; }
+    vibrar(10);
+    /* Si en Android el sensor todavía no mandó nada, se pide con el toque
+       (Chrome contesta que sí sin mostrar nada). En iPhone no. */
+    if (!brillo.sensor && !brillo.pedido && !esIOS() && window.DeviceOrientationEvent &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      brillo.pedido = true;
+      try { DeviceOrientationEvent.requestPermission().catch(function () {}); } catch (e) {}
+    }
+  }
+
+  /* Una vibración cortita (sólo Android; el navegador la ignora si el
+     socio todavía no tocó nada). */
+  function vibrar(ms) { try { if (navigator.vibrate) { navigator.vibrate(ms); } } catch (e) {} }
+
+  /* ── El reflejo que sigue al celular ──
+     La inclinación se mide contra una "posición de reposo" que se va
+     acomodando sola: lo que mueve el reflejo es el movimiento, no el
+     ángulo en que cada uno sostiene el teléfono. */
+  var brillo = { rx: 0, ry: 0, orx: 0, ory: 0, base: null, raf: 0, sensor: false, quieto: false };
+  try { brillo.quieto = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  function apuntarBrillo(rx, ry) {
+    brillo.orx = Math.max(-8, Math.min(8, rx));
+    brillo.ory = Math.max(-8, Math.min(8, ry));
+    if (!brillo.raf) { brillo.raf = requestAnimationFrame(pasoBrillo); }
+  }
+  function pasoBrillo() {
+    brillo.raf = 0;
+    var g = $('carnetGiro');
+    if (!g) { return; }
+    brillo.rx += (brillo.orx - brillo.rx) * 0.18;
+    brillo.ry += (brillo.ory - brillo.ry) * 0.18;
+    g.style.setProperty('--rx', brillo.rx.toFixed(2) + 'deg');
+    g.style.setProperty('--ry', brillo.ry.toFixed(2) + 'deg');
+    g.style.setProperty('--bx', (50 - brillo.ry * 6).toFixed(1) + '%');
+    g.style.setProperty('--lx', (50 + brillo.ry * 5).toFixed(1) + '%');
+    g.style.setProperty('--ly', (40 - brillo.rx * 5).toFixed(1) + '%');
+    if (Math.abs(brillo.orx - brillo.rx) > 0.05 || Math.abs(brillo.ory - brillo.ry) > 0.05) {
+      brillo.raf = requestAnimationFrame(pasoBrillo);
+    }
+  }
+  /* En iPhone el sensor pide un permiso con un cartel del sistema: no se
+     pide, ahí el reflejo sigue al dedo. Ojo: Chrome también tiene
+     DeviceOrientationEvent.requestPermission, así que lo que decide es que
+     sea iPhone, no que exista esa función (04/10/2026: con esa condición el
+     sensor no se enganchaba en Chrome). */
+  if (!brillo.quieto && window.DeviceOrientationEvent && !esIOS()) {
+    window.addEventListener('deviceorientation', function (e) {
+      if (e.beta == null || e.gamma == null) { return; }
+      var g = $('carnetGiro');
+      if (!g || !g.offsetParent) { brillo.base = null; return; }
+      brillo.sensor = true;
+      if (!brillo.base) { brillo.base = { b: e.beta, g: e.gamma }; }
+      brillo.base.b += (e.beta - brillo.base.b) * 0.015;
+      brillo.base.g += (e.gamma - brillo.base.g) * 0.015;
+      apuntarBrillo((e.beta - brillo.base.b) * -0.45, (e.gamma - brillo.base.g) * 0.45);
+    });
+  }
+  if (!brillo.quieto) {
+    document.addEventListener('pointermove', function (e) {
+      if (brillo.sensor && e.pointerType === 'touch') { return; }
+      var g = e.target && e.target.closest && e.target.closest('#carnetGiro');
+      if (!g) { return; }
+      var r = g.getBoundingClientRect();
+      apuntarBrillo(-((e.clientY - r.top) / r.height - 0.5) * 12, ((e.clientX - r.left) / r.width - 0.5) * 12);
+    });
+    document.addEventListener('pointerout', function (e) {
+      var g = e.target && e.target.closest && e.target.closest('#carnetGiro');
+      if (g && !(e.relatedTarget && g.contains(e.relatedTarget)) && !brillo.sensor) { apuntarBrillo(0, 0); }
+    });
+  }
+
+  /* ── Los festejos ──
+     Se compara con lo último que vio este celular (puntos y nivel). La
+     primera vez sólo se anota: no hay nada que festejar todavía. */
+  var K_FESTEJO = 'vdh_club_festejo';
+  var RANGO_NIVEL = { plata: 0, oro: 1, platino: 2 };
+  function mirarFestejos(t) {
+    if (!t || !t.codigo) { return; }
+    var antes = null;
+    try { antes = JSON.parse(localStorage.getItem(K_FESTEJO) || 'null'); } catch (e) {}
+    var nivel = (t.nivel && t.nivel.nombre) || 'Plata';
+    var puntos = Number(t.puntos) || 0;
+    try { localStorage.setItem(K_FESTEJO, JSON.stringify({ codigo: t.codigo, puntos: puntos, nivel: nivel })); } catch (e) {}
+
+    var c = t.cumple || {};
+    if (c.vale && c.es_hoy) {
+      var k = 'vdh_club_festejo_cumple_' + new Date().getFullYear();
+      var ya = false;
+      try { ya = !!localStorage.getItem(k); localStorage.setItem(k, '1'); } catch (e) {}
+      if (!ya) { festejar('¡Feliz cumple!', 'Tu regalo te espera en cualquier local.'); return; }
+    }
+    if (!antes || antes.codigo !== t.codigo) { return; }
+    var r0 = RANGO_NIVEL[String(antes.nivel || '').toLowerCase()], r1 = RANGO_NIVEL[nivel.toLowerCase()];
+    if (r0 != null && r1 != null && r1 > r0) {
+      var multi = Number(t.nivel.multiplica) || 1;
+      festejar('¡Subiste a ' + nivel + '!', 'Desde ahora sumás ' + (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + ' por cada $100.');
+      return;
+    }
+    var d = puntos - (Number(antes.puntos) || 0);
+    var ult = (t.ultimas || [])[0];
+    if (d > 0) {
+      festejar('Sumaste ' + miles(d) + (d === 1 ? ' punto' : ' puntos'), ult && Number(ult.puntos) > 0 ? tituloMov(ult) : '');
+    } else if (d < 0 && ult && ult.tipo === 'canje') {
+      festejar('¡Que lo disfrutes!', 'Te llevaste: ' + (ult.obs || 'un premio'));
+    }
+  }
+
+  function festejar(titulo, texto) {
+    var viejo = document.querySelector('.festejo');
+    if (viejo) { viejo.remove(); }
+    var f = document.createElement('div');
+    f.className = 'festejo';
+    f.setAttribute('role', 'status');
+    f.innerHTML = '<span class="festejo-ico">' + icono('estrella') + '</span><b>' + esc(titulo) + '</b>' +
+      (texto ? '<span>' + esc(texto) + '</span>' : '');
+    document.body.appendChild(f);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { f.classList.add('ve'); }); });
+    var irse = function () {
+      f.classList.remove('ve');
+      setTimeout(function () { if (f.parentNode) { f.parentNode.removeChild(f); } }, 500);
+    };
+    f.onclick = irse;
+    setTimeout(irse, 4500);
+    papelitos();
+    vibrar([12, 70, 12]);
+  }
+
+  /* Papelitos con los colores de la marca, desde donde aparece el aviso.
+     Un canvas que se borra solo a los 2,6 segundos. */
+  function papelitos() {
+    var quieto = false;
+    try { quieto = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    if (quieto || !window.requestAnimationFrame) { return; }
+    var cv = document.createElement('canvas');
+    var cx = cv.getContext && cv.getContext('2d');
+    if (!cx) { return; }
+    var dpr = Math.min(2, window.devicePixelRatio || 1), W = window.innerWidth, H = window.innerHeight;
+    cv.className = 'papelitos';
+    cv.width = W * dpr; cv.height = H * dpr;
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    document.body.appendChild(cv);
+    cx.scale(dpr, dpr);
+    var colores = ['#E6C47A', '#C99A3E', '#1C1C1A', '#A9AEB6', '#2F6B4F', '#EED79E'];
+    var ps = [];
+    for (var i = 0; i < 110; i++) {
+      ps.push({ x: W / 2 + (Math.random() - 0.5) * 80, y: 70, vx: (Math.random() - 0.5) * 10, vy: Math.random() * 5 - 1,
+                g: 0.16 + Math.random() * 0.08, w: 6 + Math.random() * 5, h: 3 + Math.random() * 3,
+                a: Math.random() * 6.28, va: (Math.random() - 0.5) * 0.3, c: colores[i % colores.length] });
+    }
+    var t0 = null, DURA = 2600;
+    var paso = function (ts) {
+      if (!t0) { t0 = ts; }
+      var dt = ts - t0;
+      cx.clearRect(0, 0, W, H);
+      cx.globalAlpha = Math.max(0, 1 - Math.max(0, dt - 1600) / 1000);
+      ps.forEach(function (p) {
+        p.vx *= 0.985; p.vy = p.vy * 0.985 + p.g; p.x += p.vx; p.y += p.vy; p.a += p.va;
+        cx.save(); cx.translate(p.x, p.y); cx.rotate(p.a); cx.fillStyle = p.c;
+        cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.a * 2)) + 1);
+        cx.restore();
+      });
+      if (dt < DURA) { requestAnimationFrame(paso); } else if (cv.parentNode) { cv.parentNode.removeChild(cv); }
+    };
+    requestAnimationFrame(paso);
   }
 
   /* La foto del premio, o su ícono en el mismo cuadrado y sobre el mismo
@@ -2766,7 +3091,8 @@
      gris lo que resta. Un canje no es una mala noticia — es el premio. Los
      tres últimos a la vista y el resto a un toque. */
   /* Un movimiento en un renglón: qué fue, cuándo y los puntos. */
-  function filaMov(m) {
+  /* Qué fue un movimiento, en palabras. Lo usan la fila y el festejo. */
+  function tituloMov(m) {
     var titulo;
     if (m.tipo === 'compra' && m.local === 'TIENDA ONLINE') { titulo = 'Compra en la tienda online'; }
     else if (m.tipo === 'compra') { titulo = 'Compra en ' + nombreLocal(m.local); }
@@ -2779,6 +3105,10 @@
       titulo = 'Misión: ' + String(m.obs || '').replace(/^Misión cumplida:\s*/, '');
     }
     else { titulo = m.obs || 'Ajuste'; }
+    return titulo;
+  }
+  function filaMov(m) {
+    var titulo = tituloMov(m);
     var n = Number(m.puntos) || 0;
     return '<div class="mov"><div><b>' + esc(titulo) + '</b>' +
              '<span>' + fecha(m.cuando) + '</span></div>' +
@@ -3039,7 +3369,7 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-wallet], [data-premio], [data-mapa], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
+             ev.target.closest('[data-codigo], [data-wallet], [data-premio], [data-mapa], [data-girar], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
     if (!el) { return; }
     if (el.hasAttribute('data-coleccion')) {
       var pc = promosPintadas[Number(el.getAttribute('data-coleccion'))];
@@ -3056,6 +3386,7 @@
     if (el.hasAttribute('data-copiar')) { copiarCupon(el); return; }
     if (el.id === 'btnMisDatos') { irA('datos', true); return; }
     if (el.id === 'canjeX' || el.id === 'canjeVelo') { cerrarCanje(false); return; }
+    if (el.hasAttribute('data-girar')) { girarTarjeta(el); return; }
     if (el.hasAttribute('data-codigo')) { abrirCodigo(); return; }
     if (el.hasAttribute('data-wallet')) { agregarWallet(el); return; }
     if (el.hasAttribute('data-premio')) { abrirCanje(premiosPintados[Number(el.getAttribute('data-premio'))]); return; }
@@ -3063,6 +3394,13 @@
       var abierta = el.getAttribute('aria-expanded') === 'true';
       el.setAttribute('aria-expanded', abierta ? 'false' : 'true');
       if ($('listaDudas')) { $('listaDudas').hidden = abierta; }
+    }
+  });
+
+  /* La tarjeta es un div con role=button: Enter y espacio la dan vuelta. */
+  document.addEventListener('keydown', function (ev) {
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target && ev.target.hasAttribute && ev.target.hasAttribute('data-girar')) {
+      ev.preventDefault(); girarTarjeta(ev.target);
     }
   });
 
@@ -4006,6 +4344,10 @@
       var s = $(VISTAS[k]);
       if (s) s.hidden = (k !== v);
     });
+    /* El fundido de la que entra (04/10/2026). Se saca y se vuelve a
+       poner la clase, con un reflow en el medio, para que corra cada vez. */
+    var entra = $(VISTAS[v]);
+    if (entra) { entra.classList.remove('entra'); void entra.offsetWidth; entra.classList.add('entra'); }
     Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
       if (b.dataset.vista === pestania) b.setAttribute('aria-current', 'page');
       else b.removeAttribute('aria-current');
@@ -4505,6 +4847,23 @@
       v.muted = true; v.playsInline = true;
       try { var p = v.play(); if (p && p.catch) { p.catch(function () {}); } } catch (e) {}
     });
+    zoomFotos(caja);
+  }
+  /* El zoom lento de las fotos grandes corre sólo mientras se ven: con la
+     Tienda entera animándose fuera de la pantalla se gastaría batería. */
+  var obsZoom = null;
+  function zoomFotos(caja) {
+    var els = (caja || document).querySelectorAll('.promo-hero.con-foto, .promo-grande.con-foto, .tv-portada, .tv-sec');
+    if (!window.IntersectionObserver) {
+      Array.prototype.forEach.call(els, function (el) { el.classList.add('kb-on'); });
+      return;
+    }
+    if (!obsZoom) {
+      obsZoom = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { e.target.classList.toggle('kb-on', e.isIntersecting); });
+      }, { threshold: 0.15 });
+    }
+    Array.prototype.forEach.call(els, function (el) { obsZoom.observe(el); });
   }
 
   /* Cuánto se descuenta, en %: el de antes contra el de ahora. */
