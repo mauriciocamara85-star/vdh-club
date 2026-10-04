@@ -1610,7 +1610,8 @@
   @keyframes llenar { from { width: 0; } }
   .pila > * { margin-top: 0; }
   /* Una sección nueva (04/10/2026): el doble de aire antes, porque sin
-     cajas es el espacio el que dice dónde empieza otra cosa. */
+     cajas es el espacio el que dice dónde empieza otra cosa. Sólo en Mi
+     tarjeta (Últimos movimientos): en Inicio Mauricio lo prefirió sin. */
   .pila > .seccion { margin-top: 22px; }
   .caja h2, .sec-cab h2 { font: 600 17px/1.3 var(--sans); letter-spacing: -.1px; }
   .sec-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
@@ -1761,8 +1762,7 @@
      puntos, en verde, a la derecha. Sólo las que faltan. */
   /* Sin cajas (04/10/2026): renglones con una línea finita, y los puntos
      en una pastilla verde "+250". */
-  .misiones { display: grid; }
-  .misiones > .mision:last-child { border-bottom: 0; }
+  .misiones { display: grid; border-top: 1px solid var(--linea); }
   .mision { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; width: 100%;
             padding: 14px 2px; background: none; border: 0; border-bottom: 1px solid var(--linea); border-radius: 0;
             text-align: left; font: inherit; color: var(--txt); cursor: pointer; }
@@ -1877,8 +1877,7 @@
   .btn-claro svg { width: 20px; height: 20px; }
 
   /* Sin cajas (04/10/2026): uno abajo del otro, con una línea finita. */
-  .renglones { display: grid; }
-  .renglones > :last-child { border-bottom: 0 !important; }
+  .renglones { display: grid; border-top: 1px solid var(--linea); }
   .renglones > .renglon { background: none; border: 0; border-bottom: 1px solid var(--linea); border-radius: 0; padding: 14px 2px; }
   .renglones > .dudas { background: none; border: 0; border-bottom: 1px solid var(--linea); border-radius: 0; padding: 0 2px 6px; }
   .renglon {
@@ -2566,7 +2565,7 @@
     });
     if (!pend.length) { return ''; }
     var hechas = todas.filter(function (m) { return m.hecha; }).length;
-    return '<div class="seccion"><div class="sec-cab"><h2>Sumá más puntos</h2>' +
+    return '<div><div class="sec-cab"><h2>Sumá más puntos</h2>' +
         (hechas ? '<span class="sec-nota">' + hechas + ' de ' + todas.length + ' hechas</span>' : '') + '</div>' +
       '<div class="misiones">' + pend.slice(0, 3).map(function (m) {
         return '<button type="button" class="mision toca" data-mision="' + esc(m.accion) + '">' +
@@ -3314,7 +3313,7 @@
      Inicio, de costado y con la foto grande. */
   function carruselPremios(t, premios) {
     var orden = ordenPremios(premios);
-    return '<div class="carru-caja seccion"><div class="sec-cab"><h2>Canjeá tus puntos</h2>' +
+    return '<div class="carru-caja"><div class="sec-cab"><h2>Canjeá tus puntos</h2>' +
         '<button type="button" class="movs-ver" data-atajo="premios">Ver todos</button></div>' +
       '<div class="carru" tabindex="0" aria-label="Premios">' +
         orden.map(function (p) {
@@ -4353,7 +4352,7 @@
     /* Cada renglón con su ícono a la izquierda, para que "Mis datos" (que
        lo pide) no sea el único distinto. */
     var ico = function (n) { return '<span class="renglon-ico">' + icono(n) + '</span>'; };
-    return '<div class="renglones seccion">' +
+    return '<div class="renglones">' +
       /* "Mis datos", primero del grupo: es de la cuenta, como las
          preguntas. Instagram queda último porque es lo único que saca de
          la app. Sólo acá: no se repite en Mi tarjeta ni en otra sección. */
