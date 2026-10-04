@@ -373,6 +373,18 @@
   }
   .btn-codigo svg { width: 22px; height: 22px; }
 
+  /* Google Wallet (03/10/2026): el botón como lo pide Google —negro, la
+     billetera de cuatro colores y "Agregar a Google Wallet"— para que se
+     reconozca de las otras apps. Va siempre negro, también en modo oscuro. */
+  .btn-wallet {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; min-height: 48px; border: 1px solid #747775; border-radius: 999px;
+    background: #1F1F1F; color: #fff; font: 500 15px Roboto, var(--sans); cursor: pointer;
+  }
+  .btn-wallet svg { width: 24px; height: 20px; flex: none; }
+  .btn-wallet[disabled] { opacity: .7; cursor: default; }
+  .wallet-error { margin: -4px 0 0; text-align: center; font-size: 13px; color: var(--txt-2, #5A5750); }
+
   .barras {
     background: #fff;
     border-radius: var(--r-sm);
@@ -2142,7 +2154,7 @@
     var primerNombre = String(t.nombre || '').split(' ')[0];
     var inicio =
       '<h1 class="hola">Hola, ' + esc(primerNombre) + '</h1>' +
-      '<div class="carnet-bloque">' + tarjetaInicio(t, nv) + botonCodigo() + '</div>' +
+      '<div class="carnet-bloque">' + tarjetaInicio(t, nv) + botonCodigo() + botonWallet() + '</div>' +
       bonus +
       (destacado
         ? '<div><div class="sec-cab"><h2>' + (destacado.alcanzado ? 'Ya podés canjear' : 'Tu próximo premio') +
@@ -2520,6 +2532,47 @@
     return '<button type="button" class="btn-codigo toca" data-codigo>' + icono('barras') + 'Mostrar código</button>';
   }
 
+  /* ═══ Google Wallet (03/10/2026) ══════════════════════════════════════
+     La tarjeta en la billetera del celular: se muestra en la caja sin abrir
+     la app, los puntos se actualizan solos y cerca de un local avisa. El
+     pase lo arma la Edge Function club-wallet (la llave de Google no puede
+     viajar acá). En iPhone no: Google Wallet es de Android. Ya guardada,
+     el mismo botón dice "Ver en Google Wallet" y abre el pase. */
+  var K_WALLET = 'vdh_club_wallet';
+  function walletGuardada() { try { return localStorage.getItem(K_WALLET) === '1'; } catch (e) { return false; } }
+  function botonWallet() {
+    if (esIOS()) { return ''; }
+    return '<button type="button" class="btn-wallet toca" data-wallet>' +
+      '<svg viewBox="0 0 24 20" aria-hidden="true">' +
+        '<rect x="1" y="1" width="22" height="8" rx="2.5" fill="#34A853"/>' +
+        '<rect x="1" y="4.5" width="22" height="8" rx="2.5" fill="#FBBC04"/>' +
+        '<rect x="1" y="8" width="22" height="8" rx="2.5" fill="#EA4335"/>' +
+        '<path d="M1 12h6.2a4.8 3.4 0 0 0 9.6 0H23v4.6a2.4 2.4 0 0 1-2.4 2.4H3.4A2.4 2.4 0 0 1 1 16.6z" fill="#4285F4"/>' +
+      '</svg>' + (walletGuardada() ? 'Ver en Google Wallet' : 'Agregar a Google Wallet') + '</button>';
+  }
+  function agregarWallet(b) {
+    var t = socioCodigo || {};
+    if (!t.codigo || b.disabled) { return; }
+    var antes = b.lastChild.textContent;
+    b.disabled = true; b.lastChild.textContent = 'Abriendo Google Wallet…';
+    var viejo = b.parentNode.querySelector('.wallet-error');
+    if (viejo) { viejo.remove(); }
+    fetch(BASE + '/functions/v1/club-wallet', {
+      method: 'POST',
+      headers: { apikey: CLAVE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'enlace', codigo: t.codigo })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j.ok || !j.url) { throw new Error((j && j.porque) || ''); }
+      try { localStorage.setItem(K_WALLET, '1'); } catch (e) {}
+      location.href = j.url;
+      /* Si vuelve con "atrás", el botón tiene que andar otra vez. */
+      setTimeout(function () { b.disabled = false; b.lastChild.textContent = 'Ver en Google Wallet'; }, 2500);
+    }).catch(function () {
+      b.disabled = false; b.lastChild.textContent = antes;
+      b.insertAdjacentHTML('afterend', '<p class="wallet-error">No se pudo abrir Google Wallet. Probá de nuevo en un rato.</p>');
+    });
+  }
+
   /* La tarjeta grande. Es un botón entero: tocarla abre el código. Adentro
      van <span> y no <div>, que un botón no puede llevar bloques.
 
@@ -2844,7 +2897,7 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-premio], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
+             ev.target.closest('[data-codigo], [data-wallet], [data-premio], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
     if (!el) { return; }
     if (el.hasAttribute('data-coleccion')) {
       var pc = promosPintadas[Number(el.getAttribute('data-coleccion'))];
@@ -2861,6 +2914,7 @@
     if (el.id === 'btnMisDatos') { irA('datos', true); return; }
     if (el.id === 'canjeX' || el.id === 'canjeVelo') { cerrarCanje(false); return; }
     if (el.hasAttribute('data-codigo')) { abrirCodigo(); return; }
+    if (el.hasAttribute('data-wallet')) { agregarWallet(el); return; }
     if (el.hasAttribute('data-premio')) { abrirCanje(premiosPintados[Number(el.getAttribute('data-premio'))]); return; }
     if (el.id === 'btnDudas') {
       var abierta = el.getAttribute('aria-expanded') === 'true';
