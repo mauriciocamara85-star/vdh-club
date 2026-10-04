@@ -1431,6 +1431,11 @@
   .num-uni { font-size: 13px; color: var(--txt-2); margin-top: 4px; line-height: 1.4; }
   .num .barra { height: 6px; margin-top: 8px; }
   .aclara { font-size: 13px; color: var(--txt-2); margin: 8px 2px 0; line-height: 1.45; }
+  /* "Puntos para canjear" se toca y abre los premios (03/10/2026: la fila
+     de premios se fue de Mi tarjeta, que los repetía). */
+  .num-ir { font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
+  .num-ir .num-uni { display: inline-flex; align-items: center; gap: 4px; color: var(--txt); font-weight: 600; }
+  .num-ir .num-uni svg { width: 14px; height: 14px; flex: none; }
 
   /* ── El premio que ya se puede llevar ──
      Fondo oliva y la acción a la vista. Si todavía no alcanza, blanco y
@@ -1455,29 +1460,9 @@
   .chip-falta { background: var(--bg); color: var(--txt); }
   .btn-oliva { background: var(--ok); }
 
-  /* ── Premios: la foto de protagonista ──
-     Todas cuadradas y sobre el mismo fondo, así la fila se ve pareja aunque
-     las fotos vengan de lugares distintos. Se desliza de costado; el
-     deslizamiento vertical que arranca encima mueve la página (probado con
-     el dedo en un teléfono de 390). */
-  .premios-fila {
-    display: grid; grid-auto-flow: column; grid-auto-columns: 44%; gap: 12px;
-    overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 20px;
-    overscroll-behavior-x: contain; scrollbar-width: none;
-    margin: 0 -20px; padding: 2px 20px 4px;
-  }
-  .premios-fila::-webkit-scrollbar { display: none; }
-  .premio-card {
-    scroll-snap-align: start; display: flex; flex-direction: column; width: 100%;
-    background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r);
-    overflow: hidden; text-align: left; font: inherit; color: inherit; padding: 0; cursor: pointer;
-  }
+  /* La foto del premio en el catálogo: cuadrada y sobre el mismo fondo,
+     así se ve parejo aunque las fotos vengan de lugares distintos. */
   .premio-foto { width: 100%; aspect-ratio: 1; border-radius: 0; }
-  .premio-card.agotado .premio-foto { filter: grayscale(1); opacity: .55; }
-  .premio-txt { padding: 10px 12px 12px; display: grid; gap: 5px; }
-  .premio-card .premio-nom { font: 600 14.5px/1.25 var(--sans); }
-  .premio-pts { font-size: 13px; color: var(--txt-2); font-variant-numeric: tabular-nums; }
-  .premio-card .barra { height: 4px; margin-top: 2px; }
 
   /* ── Canjeá: el catálogo entero, de a dos ──
      Como la app de King: la foto manda y el estado va encima, en una
@@ -1638,7 +1623,7 @@
   /* El puntito de "hay algo nuevo" en la pestaña Promos. */
   .tab-punto { position: absolute; top: 6px; left: calc(50% + 8px); width: 9px; height: 9px; border-radius: 50%;
                background: var(--mal-txt); box-shadow: 0 0 0 2px var(--bg); }
-  #cajaPremios, #cajaMovs, .nivel-caja { scroll-margin-top: 76px; }
+  #cajaMovs, .nivel-caja { scroll-margin-top: 76px; }
 
   /* La novedad: foto apaisada arriba y el texto abajo, no encima — encima
      tapaba justo la prenda. Toda la tarjeta es el enlace. */
@@ -2136,8 +2121,9 @@
      juntas: cambiar de pestaña es instantáneo y anda sin señal.
 
      Mi tarjeta: la tarjeta grande con el material del nivel, el código,
-     los dos números con su nombre, el premio que ya se puede llevar, los
-     premios con foto, el nivel y los movimientos.
+     los dos números con su nombre, el nivel y los movimientos. Los
+     premios se ven en Inicio y en el catálogo ("Puntos para canjear" lleva
+     ahí).
 
      Inicio: el resumen. El saludo con los puntos y el código, la novedad,
      el premio, la reseña y la ayuda. Corto a propósito. */
@@ -2166,9 +2152,9 @@
        regalos no cuentan— y canjear no los baja. */
     var dosNumeros =
       '<div><h2 class="solo-lector">Tus puntos</h2><div class="dos">' +
-        '<div class="num"><span class="num-rot">Puntos para canjear</span>' +
+        '<button type="button" class="num num-ir toca" data-atajo="premios"><span class="num-rot">Puntos para canjear</span>' +
           '<span class="num-val" data-cuenta="' + puntos + '">' + miles(puntos) + '</span>' +
-          '<span class="num-uni">Se usan para los premios</span></div>' +
+          '<span class="num-uni">Ver los premios' + icono('flecha') + '</span></button>' +
         '<div class="num num-2"><span class="num-rot">Puntos para subir de nivel</span>' +
           '<span class="num-val">' + miles(t.xp) +
             (nv.hasta_xp ? ' <small>de ' + miles(nv.hasta_xp) + '</small>' : '') + '</span>' +
@@ -2187,15 +2173,16 @@
         icono('flecha') +
       '</button>';
 
-    /* Mi tarjeta, simple: la tarjeta, los dos números, los premios, el
-       nivel y los últimos movimientos. Los carteles (subiste de nivel,
-       cumple, puntos dobles) y "Ya podés canjear" viven en Inicio: acá se
-       repetían. */
+    /* Mi tarjeta, simple: la tarjeta, los dos números, el nivel y los
+       últimos movimientos. Los carteles (subiste de nivel, cumple, puntos
+       dobles) viven en Inicio: acá se repetían. La fila de premios también
+       se fue (03/10/2026): estaban en el carrusel de Inicio y en el
+       catálogo, y acá eran la tercera vez. "Puntos para canjear" lleva al
+       catálogo. */
     var todo =
       carnetHtml(t, nv) +
       botonWallet() +
       dosNumeros +
-      (premios.length ? filaPremios(premios) : '') +
       nivelHtml +
       movimientosHtml(t) +
       /* Un renglón, no una tarjeta. El aviso de instalar aparece solo al
@@ -2447,11 +2434,11 @@
     }
     /* Los índices son los de premiosPintados (el mismo t.premios), que es
        lo que lee el click de data-premio. */
-    $('premiosCuerpo').innerHTML = '<div class="catalogo">' + l.map(function (p, i) {
+    $('premiosCuerpo').innerHTML = '<div class="catalogo">' + ordenPremios(l).map(function (p) {
       var estado = p.agotado ? '<span class="cat-estado ya">Ya canjeado</span>'
                  : p.alcanzado ? '<span class="cat-estado si">Te alcanza</span>'
                  : '<span class="cat-estado">Faltan ' + miles(p.falta) + '<span class="cat-pal"> puntos</span></span>';
-      return '<button type="button" class="cat-premio toca' + (p.agotado ? ' agotado' : '') + '" data-premio="' + i + '">' +
+      return '<button type="button" class="cat-premio toca' + (p.agotado ? ' agotado' : '') + '" data-premio="' + premiosPintados.indexOf(p) + '">' +
         '<span class="cat-foto">' + fotoPremio(p, 'miniatura premio-foto') + estado + '</span>' +
         '<span class="cat-txt"><span class="cat-nom">' + esc(p.nombre) + '</span>' +
           '<span class="cat-pts">' + miles(p.puntos) + ' puntos</span></span>' +
@@ -2522,7 +2509,7 @@
     var avance = nv.hasta_xp
       ? '<div class="caja niv-avance" style="margin-top:0">' +
           '<div class="sec-cab" style="margin:0"><h2>' + miles(xp) + ' <small style="font-weight:500;color:var(--txt-2)">de ' +
-            miles(nv.hasta_xp) + '</small></h2><span class="sec-nota">puntos de compras</span></div>' +
+            miles(nv.hasta_xp) + ' puntos de compras</small></h2></div>' +
           '<span class="barra"><i style="width:' + Math.max(0, Math.min(100, Math.round(xp * 100 / nv.hasta_xp))) + '%"></i></span>' +
           '<p class="vacio">Te faltan <b>' + miles(nv.falta_xp) + '</b> para llegar a <b>' + esc(nv.sigue) + '</b>.</p>' +
         '</div>'
@@ -2702,16 +2689,20 @@
     '</div>';
   }
 
-  /* "Canjeá tus puntos" (03/10/2026, sobre Kong): todos los premios en
-     Inicio, de costado y con la foto grande. Primero los que le alcanzan
-     (el más caro adelante), después los que le faltan (el más cerca
-     adelante) y al final los que ya se llevó este año. */
-  function carruselPremios(t, premios) {
-    var orden = premios.slice().sort(function (a, b) {
-      var ga = a.agotado ? 2 : a.alcanzado ? 0 : 1, gb = b.agotado ? 2 : b.alcanzado ? 0 : 1;
-      if (ga !== gb) { return ga - gb; }
-      return ga === 0 ? b.puntos - a.puntos : (a.falta || 0) - (b.falta || 0);
+  /* El orden de los premios, el mismo en Inicio y en el catálogo
+     (03/10/2026): de menor a mayor, como una escalera —primero quedan los
+     que le alcanzan, y el primero que le falta es su próxima meta— y al
+     final los que ya se llevó este año. */
+  function ordenPremios(premios) {
+    return premios.slice().sort(function (a, b) {
+      return ((a.agotado ? 1 : 0) - (b.agotado ? 1 : 0)) || (Number(a.puntos) - Number(b.puntos));
     });
+  }
+
+  /* "Canjeá tus puntos" (03/10/2026, sobre Kong): todos los premios en
+     Inicio, de costado y con la foto grande. */
+  function carruselPremios(t, premios) {
+    var orden = ordenPremios(premios);
     return '<div class="carru-caja"><div class="sec-cab"><h2>Canjeá tus puntos</h2>' +
         '<button type="button" class="movs-ver" data-atajo="premios">Ver todos</button></div>' +
       '<div class="carru" tabindex="0" aria-label="Premios">' +
@@ -2728,33 +2719,6 @@
           '</button>';
         }).join('') +
       '</div></div>';
-  }
-
-  /* Los premios, de costado y con foto. Cada uno se toca y abre su hoja.
-     "Ver todos" abre el catálogo entero (29/09/2026: antes decía "Deslizá
-     para ver más", que no se podía tocar). */
-  function filaPremios(premios) {
-    return '<div id="cajaPremios">' +
-      '<div class="sec-cab"><h2>Premios</h2>' +
-        '<button type="button" class="movs-ver" data-atajo="premios">Ver todos</button>' +
-      '</div>' +
-      '<div class="premios-fila" tabindex="0" aria-label="Premios">' +
-        premios.map(function (p, i) {
-          var av = Math.max(0, Math.min(100, Math.round((p.puntos - p.falta) * 100 / p.puntos)));
-          return '<button type="button" class="premio-card toca' + (p.agotado ? ' agotado' : '') +
-                 '" data-premio="' + i + '">' +
-            fotoPremio(p, 'miniatura premio-foto') +
-            '<span class="premio-txt">' +
-              '<span class="premio-nom">' + esc(p.nombre) + '</span>' +
-              '<span class="premio-pts">' + miles(p.puntos) + ' puntos</span>' +
-              (!p.agotado && !p.alcanzado ? '<span class="barra"><i style="width:' + av + '%"></i></span>' : '') +
-              '<span>' + estadoPremio(p) + '</span>' +
-            '</span>' +
-          '</button>';
-        }).join('') +
-      '</div>' +
-      '<p class="aclara">Se piden en la caja de cualquier local.</p>' +
-    '</div>';
   }
 
   /* Lo que entró y lo que salió, con el signo y en color: verde lo que suma,
