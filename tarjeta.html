@@ -2316,15 +2316,16 @@
       '<p class="letra-chica">Tu código es sólo tuyo: no lo compartas.<br>' +
       'Si perdés esta página, en cualquier local te la vuelven a abrir con tu teléfono.</p>';
 
-    /* Inicio (29/09/2026, sobre la app de King Of The Kongo): el saludo, la
-       tarjeta con los puntos y los cuatro accesos, y el código abajo, a todo
-       el ancho. Todo lo de arriba es del socio. La novedad de la marca vive
+    /* Inicio (29/09/2026, sobre la app de King Of The Kongo): el saludo y la
+       tarjeta con los puntos y los cuatro accesos. Todo lo de arriba es del
+       socio. "Mostrar código" se fue el 04/10/2026 (Mauricio: hacía ruido):
+       el código está arriba, al lado de la campana, en todas las pantallas. La novedad de la marca vive
        sólo en Promos, arriba de todo (29/09/2026, Mauricio: "la sacaría de
        inicio"); lo que avisa que hay una es el puntito en la pestaña. */
     var primerNombre = String(t.nombre || '').split(' ')[0];
     var inicio =
       '<h1 class="hola">Hola, ' + esc(primerNombre) + '</h1>' +
-      '<div class="carnet-bloque">' + tarjetaInicio(t, nv) + botonCodigo() + '</div>' +
+      '<div class="carnet-bloque">' + tarjetaInicio(t, nv) + '</div>' +
       bonus +
       (premios.length ? carruselPremios(t, premios) : '') +
       misionesHtml(t) +
