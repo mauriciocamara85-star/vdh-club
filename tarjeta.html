@@ -1012,8 +1012,6 @@
      La foto manda: de borde a borde de la pantalla (sale del margen de la
      hoja), alta, sin esquinas ni marco, y encima sólo lo justo: qué es,
      dónde y hasta cuándo. Tocarla abre el enlace o las condiciones. */
-  .promos-sec { font: 700 12px var(--sans); letter-spacing: .6px; text-transform: uppercase; color: var(--txt-3); margin: 26px 0 10px; }
-  .promos-sec:first-child { margin-top: 0; }
   /* Una abajo de la otra, pegadas, de borde a borde (salen del margen de la
      hoja). Una rayita de fondo entre foto y foto, como en Zara. */
   .promos-feed { display: grid; gap: 3px; margin: 0 -20px 26px; }
@@ -4788,9 +4786,15 @@
         hero = promosPintadas.filter(function (p) { return (p.imagen || p.video) && llegaNivel(p); })[0];
         resto = promosPintadas.filter(function (p) { return p !== hero; });
       }
-      caja.innerHTML = (hero ? feed([hero]) : '') + paraVosHtml() + extrasHtml() +
+      /* Sin "Todas las promos" (04/10/2026, Mauricio): la destacada y las
+         demás van pegadas, con la misma rayita finita que hay entre foto y
+         foto. Si en el medio hay algo (su regalo, puntos extra), eso queda
+         entre la destacada y el resto. */
+      var medio = paraVosHtml() + extrasHtml();
+      var juntas = hero && resto.length && !medio;
+      caja.innerHTML = (juntas ? feed([hero].concat(resto)) : (hero ? feed([hero]) : '') + medio) +
         (promosPintadas.length
-          ? (resto.length ? (hero ? '<div class="promos-sec">Todas las promos</div>' : '') + feed(resto) : '')
+          ? (resto.length && !juntas ? feed(resto) : '')
           /* Con puntos extra arriba, "no hay promociones" se contradice con
              lo que el cliente acaba de leer: el cartel vacío no va. */
           : extrasCargados.length ? ''
