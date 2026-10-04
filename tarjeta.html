@@ -1771,6 +1771,19 @@
   .canje.ficha .canje-x { background: rgba(20, 20, 18, .72); color: #fff; width: 44px; height: 44px; }
   .canje.ficha .canje-hoja { display: flex; flex-direction: column; }
   .canje.ficha #canjeCuerpo { gap: 0 !important; flex: 1 0 auto; grid-template-rows: auto 1fr auto; }
+  /* El mapa de los 14 (03/10/2026): también a pantalla completa, pero con
+     el título y la X en su renglón, porque arriba del mapa están los
+     botones de Google. */
+  .canje.mapa .canje-hoja { top: 0; max-height: none; border-radius: 0; gap: 0; overflow: hidden;
+                            padding: calc(10px + env(safe-area-inset-top)) 0 env(safe-area-inset-bottom);
+                            display: flex; flex-direction: column; }
+  .canje.mapa .canje-asa { display: none; }
+  .canje.mapa .canje-cab { padding: 0 12px 10px 20px; }
+  .canje.mapa #canjeCuerpo { flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden; background: var(--bg); }
+  /* La barra de arriba del "Mis Mapas" (66 px: la foto y el nombre de
+     Mauricio, que es el dueño del mapa) queda corrida para arriba, fuera
+     de la vista. El logo y los términos de Google, abajo, se ven. */
+  .mapa-marco { position: absolute; left: 0; right: 0; top: -66px; bottom: 0; width: 100%; height: calc(100% + 66px); border: 0; display: block; }
   .pf-foto { display: block; width: 100%; aspect-ratio: 1 / 1; max-height: 58vh; object-fit: cover; background: var(--fondo-foto); }
   .pf-foto.sin-foto { display: grid; place-content: center; justify-items: center; gap: 12px; background: #1C1C1A; color: #F5F3EE; font: 700 30px/1.15 var(--sans); padding: 24px; text-align: center; }
   .pf-foto.sin-foto svg { width: 44px; height: 44px; opacity: .7; }
@@ -1906,18 +1919,20 @@
     <h1>Nuestros locales</h1>
     <p class="vista-sub">Encontrá tu local VDH. Mostrá tu tarjeta en cualquiera.</p>
 
-    <!-- Ver los 14 juntos. Es lo único bueno que tenía el mapa de la
-         competencia —saber cuál queda más cerca— y se resuelve abriendo la
-         app de Maps, que además sabe dónde está el cliente y navega. Un mapa
-         incrustado acá no podría hacer ninguna de las dos cosas, y encima
-         pediría una clave de Google en un repositorio público.
+    <!-- Ver los 14 juntos. Es un "Mis Mapas" de Google (el de las chinches
+         que Mauricio corrigió a mano), compartido en público.
 
-         Es un "Mis Mapas" de Google (maps/d/viewer), que es lo que está
-         hecho para compartir en público — antes era una lista guardada de la
-         cuenta de Mauricio, que funcionaba pero dependía de un permiso suyo.
+         Hasta el 03/10/2026 abría la app de Maps, y la app con un "Mis
+         Mapas" falla la primera vez: "No se pudo abrir el mapa", y con
+         "Volver a intentar" anda. Ahora se abre ADENTRO del Club, en la hoja
+         a pantalla completa (abrirMapa): la versión incrustada del "Mis
+         Mapas" no pide ninguna clave. El href queda por si el JS no corre.
+         "Cómo llegar" de cada local sigue yendo a la app, que sabe dónde
+         está el cliente y navega.
+
          Si algún día deja de andar, mirar primero que el mapa siga
          compartido, no el código. -->
-    <a class="local-mapa" target="_blank" rel="noopener"
+    <a class="local-mapa" target="_blank" rel="noopener" data-mapa="1y8koZ_-YOh37JwyQhBwsMvZJ2EZJans"
        href="https://www.google.com/maps/d/viewer?mid=1y8koZ_-YOh37JwyQhBwsMvZJ2EZJans">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>
       Ver los 14 en el mapa
@@ -2926,14 +2941,54 @@
   var ICONO_ATENCION = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
     '<circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 17h.01"/></svg>';
 
+  /* Dónde arranca el mapa. Sin esto mostraba todo el país, con trece
+     chinches amontonadas en Buenos Aires y una en Mar del Plata. El local
+     de referencia es el más cercano si el cliente compartió dónde está; si
+     no, el de su última compra. Si queda lejos de Buenos Aires (Mar del
+     Plata), el mapa arranca ahí, cerca; si no, en Buenos Aires con los
+     trece a la vista. */
+  var MAPA_BSAS = { lat: -34.61, lng: -58.565 };
+  function centroMapa() {
+    var ref = null;
+    if (miPosicion) {
+      var km = Infinity;
+      LOCALES_VDH.forEach(function (l) {
+        var d = distanciaKm(miPosicion.lat, miPosicion.lng, l.lat, l.lng);
+        if (d < km) { km = d; ref = l; }
+      });
+    } else {
+      var compra = ((socioCodigo || {}).ultimas || []).filter(function (m) {
+        return m.tipo === 'compra' && m.local && m.local !== 'TIENDA ONLINE';
+      })[0];
+      ref = compra ? datosLocal(compra.local) : null;
+    }
+    if (ref && ref.lat && distanciaKm(MAPA_BSAS.lat, MAPA_BSAS.lng, ref.lat, ref.lng) > 100) {
+      return '&ll=' + ref.lat + '%2C' + ref.lng + '&z=13';
+    }
+    return '&ll=' + MAPA_BSAS.lat + '%2C' + MAPA_BSAS.lng + '&z=10';
+  }
+
+  /* Los 14 locales en el mapa, sin salir del Club (ver el comentario de
+     "Ver los 14 en el mapa"). */
+  function abrirMapa(mid) {
+    if (!$('canje') || !mid) { return false; }
+    $('canjeTit').textContent = 'Los 14 locales';
+    $('canjeCuerpo').innerHTML = '<iframe class="mapa-marco" title="Los locales VDH en el mapa" allowfullscreen ' +
+      'src="https://www.google.com/maps/d/embed?mid=' + encodeURIComponent(mid) + '&ehbc=1C1C1A' + centroMapa() + '"></iframe>';
+    subirHoja('mapa');
+    return true;
+  }
+
   /* La hoja que sube desde abajo. La usan "Cómo canjear" y las condiciones
      de una promo: lo de adentro lo pone cada una. */
   function subirHoja(ficha) {
     var capa = $('canje');
     if (!capa || !capa.hidden) { return; }
-    /* ficha: la del premio, a pantalla completa. Las condiciones de una
-       promo siguen siendo la hoja de abajo. */
-    capa.classList.toggle('ficha', !!ficha);
+    /* ficha: true es la del premio, a pantalla completa; 'mapa', el mapa de
+       los locales. Las condiciones de una promo siguen siendo la hoja de
+       abajo. */
+    capa.classList.toggle('ficha', ficha === true);
+    capa.classList.toggle('mapa', ficha === 'mapa');
     capa.hidden = false;
     /* Dos cuadros: el primero pinta la hoja abajo de todo y el segundo la
        sube. En uno solo el navegador junta los dos y no hay animación. */
@@ -2979,7 +3034,7 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-wallet], [data-premio], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
+             ev.target.closest('[data-codigo], [data-wallet], [data-premio], [data-mapa], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
     if (!el) { return; }
     if (el.hasAttribute('data-coleccion')) {
       var pc = promosPintadas[Number(el.getAttribute('data-coleccion'))];
@@ -2987,6 +3042,7 @@
       else { abrirColeccion(pc); }
       return;
     }
+    if (el.hasAttribute('data-mapa')) { if (abrirMapa(el.getAttribute('data-mapa'))) { ev.preventDefault(); } return; }
     if (el.hasAttribute('data-cond')) { abrirCondiciones(promosPintadas[Number(el.getAttribute('data-cond'))]); return; }
     if (el.id === 'canjeListo') { cerrarCanje(false); return; }
     if (el.hasAttribute('data-cartel-x')) { sacarCartel(el.closest('[data-cartel]'), 1); return; }
