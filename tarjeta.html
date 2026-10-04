@@ -2725,38 +2725,61 @@
   }
   /* En Mi tarjeta, con una línea que dice para qué sirve: el que no sabe
      qué es la Billetera no toca un botón que no entiende. */
+  /* Sólo mientras no la guardó (04/10/2026, Mauricio): guardada, la
+     tarjeta se abre desde la Billetera misma —o desde la pantalla
+     bloqueada—, nadie entra al Club para ir a la Billetera. Ahí queda en
+     Mis datos. */
   function walletMiTarjeta() {
+    if (walletGuardada()) { return ''; }
     var b = botonWallet();
     if (!b) { return ''; }
-    return '<div class="wallet-caja">' + b +
-      (walletGuardada() ? '' : '<p class="wallet-nota">Tu tarjeta en el celular, sin abrir la app.</p>') + '</div>';
+    return '<div class="wallet-caja">' + b + '<p class="wallet-nota">Tu tarjeta en el celular, sin abrir la app.</p></div>';
   }
-  /* Guardada: todos los botones pasan a "Ver en la Billetera". */
+  /* Guardada: el de Mi tarjeta se va y los demás pasan a "Ver en la
+     Billetera". */
   function marcarWalletGuardada() {
     Array.prototype.forEach.call(document.querySelectorAll('[data-wallet]'), function (b) {
+      var caja = b.closest('.wallet-caja');
+      if (caja) { caja.remove(); return; }
       b.setAttribute('aria-label', 'Ver en la Billetera de Google');
       var img = b.querySelector('img'); if (img) { img.src = 'wallet-ver.svg'; }
-      var nota = b.parentNode.querySelector('.wallet-nota'); if (nota) { nota.remove(); }
     });
+  }
+  /* El enlace directo al pase guardado. */
+  var K_WALLET_VER = 'vdh_club_wallet_ver';
+  function walletVer() {
+    try { var u = localStorage.getItem(K_WALLET_VER) || ''; return /^https:\/\/pay\.google\.com\//.test(u) ? u : ''; }
+    catch (e) { return ''; }
   }
   function agregarWallet(b) {
     var t = socioCodigo || {};
     if (!t.codigo || b.disabled) { return; }
+    /* Ya guardada y con el enlace directo: se abre al instante. */
+    if (walletGuardada() && walletVer()) { location.href = walletVer(); return; }
     b.disabled = true;
     var viejo = b.parentNode.querySelector('.wallet-error');
     if (viejo) { viejo.remove(); }
+    /* Armar el pase lleva un par de segundos (Google): se dice. */
+    b.insertAdjacentHTML('afterend', '<p class="wallet-nota wallet-abriendo">Abriendo la Billetera de Google…</p>');
+    var sacarAbriendo = function () { var a = b.parentNode && b.parentNode.querySelector('.wallet-abriendo'); if (a) { a.remove(); } };
     fetch(BASE + '/functions/v1/club-wallet', {
       method: 'POST',
       headers: { apikey: CLAVE, 'Content-Type': 'application/json' },
       body: JSON.stringify({ accion: 'enlace', codigo: t.codigo })
     }).then(function (r) { return r.json(); }).then(function (j) {
       if (!j || !j.ok || !j.url) { throw new Error((j && j.porque) || ''); }
-      try { localStorage.setItem(K_WALLET, '1'); } catch (e) {}
-      location.href = j.url;
+      var yaEstaba = walletGuardada();
+      try {
+        localStorage.setItem(K_WALLET, '1');
+        if (j.ver) { localStorage.setItem(K_WALLET_VER, j.ver); }
+      } catch (e) {}
+      /* Si ya la tenía guardada, al pase directo; si no, a guardarla. */
+      location.href = yaEstaba && j.ver ? j.ver : j.url;
       /* Si vuelve con "atrás", el botón tiene que andar otra vez. */
-      setTimeout(function () { b.disabled = false; marcarWalletGuardada(); }, 2500);
+      setTimeout(function () { b.disabled = false; sacarAbriendo(); marcarWalletGuardada(); }, 2500);
     }).catch(function () {
       b.disabled = false;
+      sacarAbriendo();
       b.insertAdjacentHTML('afterend', '<p class="wallet-error">No se pudo abrir Google Wallet. Probá de nuevo en un rato.</p>');
     });
   }
