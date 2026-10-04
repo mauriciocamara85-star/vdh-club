@@ -1379,6 +1379,60 @@
     text-decoration: none;
   }
   .local-mapa svg { width: 19px; height: 19px; }
+  button.local-mapa { border: 0; cursor: pointer; }
+
+  /* ── Locales en el mapa (04/10/2026) ──
+     El mapa va fijo entre la cabecera (--lm-top) y el fondo de la
+     pantalla; la barra de abajo lo tapa, y las tarjetas van arriba de la
+     barra (--barra). Lo ponen las dos medidas el script, que las mide. */
+  #vLocales.en-mapa > h1, #vLocales.en-mapa > .vista-sub, #vLocales.en-mapa > .loc-botones, #vLocales.en-mapa > #listaLocales { display: none; }
+  .lm { position: fixed; left: 0; right: 0; top: var(--lm-top, 76px); bottom: 0; z-index: 5; background: #ECEAE5; overflow: hidden; }
+  .lm[hidden] { display: none; }
+  /* .lm > y no sólo .lm-lienzo: el CSS de MapLibre (que llega después) le
+     pone position: relative a .maplibregl-map, y el mapa quedaba de 0 px. */
+  .lm > .lm-lienzo { position: absolute; inset: 0; }
+  .lm-cargando { position: absolute; top: 38%; left: 0; right: 0; text-align: center; font: 500 14px var(--sans); color: var(--txt-3); }
+  .lm-botones { position: absolute; top: 12px; right: 12px; z-index: 3; display: grid; gap: 8px; justify-items: end; }
+  .lm-boton { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 15px; border: 0; border-radius: 999px;
+              background: var(--hoja); color: var(--txt); font: 600 13.5px var(--sans); cursor: pointer;
+              box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .4); }
+  .lm-boton svg { width: 18px; height: 18px; }
+  .lm-boton[disabled] { opacity: .7; }
+  .lm-tarjetas { position: absolute; left: 0; right: 0; bottom: calc(var(--barra, 70px) + 12px); z-index: 3;
+                 display: grid; grid-auto-flow: column; grid-auto-columns: 84%; gap: 10px;
+                 overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+                 padding: 18px 8% 6px; }
+  .lm-tarjetas::-webkit-scrollbar { display: none; }
+  .lm-tarjeta { position: relative; scroll-snap-align: center; display: grid; gap: 7px; align-content: start;
+                padding: 24px 16px 14px; background: var(--hoja); border-radius: var(--r); cursor: pointer;
+                box-shadow: 0 14px 32px -16px rgba(0, 0, 0, .5); }
+  /* El nombre en una pastilla negra, montada sobre el borde, como en King. */
+  .lm-nom { position: absolute; top: -13px; left: 14px; max-width: calc(100% - 28px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            padding: 6px 14px; border-radius: 999px; background: #1C1C1A; color: #fff; font: 700 14px/1.2 var(--sans); }
+  .lm-zona { font-size: 12.5px; color: var(--txt-3); margin-top: -2px; }
+  .lm-dato { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.4; color: var(--txt-2); }
+  .lm-dato svg { width: 17px; height: 17px; flex: none; margin-top: 2px; color: var(--txt-3); }
+  .lm-dato small { font-size: 12.5px; color: var(--txt-3); }
+  .lm-estado { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--txt-2); }
+  .lm-estado::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+  .lm-estado.si { color: var(--ok); }
+  .lm-pie { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 3px; }
+  .lm-ir { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 999px;
+           background: #1C1C1A; color: #fff; font: 700 13.5px var(--sans); text-decoration: none; }
+  .lm-ir svg { width: 15px; height: 15px; }
+  .lm-dist { font: 600 13px var(--sans); color: var(--txt-2); }
+  /* Las chinches: una gota negra con el logo; la del local elegido, dorada
+     y más grande. La gota está girada: la punta queda 7 px abajo de la
+     caja, por eso el marcador lleva un offset de -7. */
+  .lm-pin { width: 34px; height: 34px; cursor: pointer; }
+  .lm-pin i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50% 50% 50% 0;
+              background: #1C1C1A; transform: rotate(-45deg); box-shadow: 0 5px 12px -5px rgba(0, 0, 0, .55);
+              transition: transform .25s ease, background .25s ease; }
+  .lm-pin img { width: 24px; height: 24px; border-radius: 50%; transform: rotate(45deg); }
+  .lm-pin.activo i { background: linear-gradient(135deg, #EED79E, #B8872E); transform: rotate(-45deg) scale(1.28); }
+  .lm-yo { width: 16px; height: 16px; border-radius: 50%; background: #2F6FED; border: 3px solid #fff;
+           box-shadow: 0 0 0 7px rgba(47, 111, 237, .18), 0 2px 6px rgba(0, 0, 0, .3); }
+  .lm .maplibregl-ctrl-attrib { font-size: 10px; }
 
   /* El botón de la ubicación. El permiso se pide CUANDO SE TOCA, no al
      abrir: pedirlo de entrada —como hace la app de la competencia, con un
@@ -1466,13 +1520,11 @@
     vertical-align: middle;
   }
 
-  .local {
-    background: var(--hoja);
-    border: 1px solid var(--linea);
-    border-radius: var(--r-sm);
-    padding: 16px 17px;
-    margin-bottom: 11px;
-  }
+  /* Sin cajas (04/10/2026): uno abajo del otro, con una línea. */
+  #listaLocales { border-top: 1px solid var(--linea); }
+  .local { padding: 18px 2px; border-bottom: 1px solid var(--linea); }
+  .local-estado { font-weight: 600; color: var(--txt-2); }
+  .local-estado.si { color: var(--ok); }
   .local b { display: block; font: 700 17px/1.2 var(--display); letter-spacing: -.3px; }
   .local-zona { font-size: 12.5px; color: var(--txt-3); margin-top: 2px; }
   .local-dato {
@@ -1922,19 +1974,6 @@
   .canje.ficha .canje-x { background: rgba(20, 20, 18, .72); color: #fff; width: 44px; height: 44px; }
   .canje.ficha .canje-hoja { display: flex; flex-direction: column; }
   .canje.ficha #canjeCuerpo { gap: 0 !important; flex: 1 0 auto; grid-template-rows: auto 1fr auto; }
-  /* El mapa de los 14 (03/10/2026): también a pantalla completa, pero con
-     el título y la X en su renglón, porque arriba del mapa están los
-     botones de Google. */
-  .canje.mapa .canje-hoja { top: 0; max-height: none; border-radius: 0; gap: 0; overflow: hidden;
-                            padding: calc(10px + env(safe-area-inset-top)) 0 env(safe-area-inset-bottom);
-                            display: flex; flex-direction: column; }
-  .canje.mapa .canje-asa { display: none; }
-  .canje.mapa .canje-cab { padding: 0 12px 10px 20px; }
-  .canje.mapa #canjeCuerpo { flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden; background: var(--bg); }
-  /* La barra de arriba del "Mis Mapas" (66 px: la foto y el nombre de
-     Mauricio, que es el dueño del mapa) queda corrida para arriba, fuera
-     de la vista. El logo y los términos de Google, abajo, se ven. */
-  .mapa-marco { position: absolute; left: 0; right: 0; top: -66px; bottom: 0; width: 100%; height: calc(100% + 66px); border: 0; display: block; }
   .pf-foto { display: block; width: 100%; aspect-ratio: 1 / 1; max-height: 58vh; object-fit: cover; background: var(--fondo-foto); }
   .pf-foto.sin-foto { display: grid; place-content: center; justify-items: center; gap: 12px; background: #1C1C1A; color: #F5F3EE; font: 700 30px/1.15 var(--sans); padding: 24px; text-align: center; }
   .pf-foto.sin-foto svg { width: 44px; height: 44px; opacity: .7; }
@@ -2078,30 +2117,37 @@
     <h1>Nuestros locales</h1>
     <p class="vista-sub">Encontrá tu local VDH. Mostrá tu tarjeta en cualquiera.</p>
 
-    <!-- Ver los 14 juntos. Es un "Mis Mapas" de Google (el de las chinches
-         que Mauricio corrigió a mano), compartido en público.
-
-         Hasta el 03/10/2026 abría la app de Maps, y la app con un "Mis
-         Mapas" falla la primera vez: "No se pudo abrir el mapa", y con
-         "Volver a intentar" anda. Ahora se abre ADENTRO del Club, en la hoja
-         a pantalla completa (abrirMapa): la versión incrustada del "Mis
-         Mapas" no pide ninguna clave. El href queda por si el JS no corre.
-         "Cómo llegar" de cada local sigue yendo a la app, que sabe dónde
-         está el cliente y navega.
-
-         Si algún día deja de andar, mirar primero que el mapa siga
-         compartido, no el código. -->
-    <a class="local-mapa" target="_blank" rel="noopener" data-mapa="1y8koZ_-YOh37JwyQhBwsMvZJ2EZJans"
-       href="https://www.google.com/maps/d/viewer?mid=1y8koZ_-YOh37JwyQhBwsMvZJ2EZJans">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>
-      Ver en el mapa
-    </a>
-
-    <button type="button" class="local-cerca" id="btnCerca">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
-      ¿Cuál me queda más cerca?
-    </button>
+    <!-- Locales (04/10/2026): arranca en el MAPA (#locMapa), a pantalla
+         completa, con las tarjetas abajo. La lista es la otra forma de
+         verlo ("Lista" en el mapa, "Ver en el mapa" acá) y es también la
+         red: si el mapa no carga, se ve la lista. Antes era un "Mis Mapas"
+         de Google en una hoja; se fue con esto. -->
+    <div class="loc-botones">
+      <button type="button" class="local-mapa toca" id="btnVerMapa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>
+        Ver en el mapa
+      </button>
+      <button type="button" class="local-cerca" id="btnCerca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+        ¿Cuál me queda más cerca?
+      </button>
+    </div>
     <div id="listaLocales"></div>
+
+    <div class="lm" id="locMapa" hidden>
+      <div class="lm-lienzo" id="lmLienzo" role="region" aria-label="Mapa de los locales VDH"><span class="lm-cargando">Cargando el mapa…</span></div>
+      <div class="lm-botones">
+        <button type="button" class="lm-boton" id="lmCerca">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+          <span>Cerca mío</span>
+        </button>
+        <button type="button" class="lm-boton" id="lmLista">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>
+          <span>Lista</span>
+        </button>
+      </div>
+      <div class="lm-tarjetas" id="lmTarjetas" role="list" aria-label="Los locales"></div>
+    </div>
   </section>
 </main>
 
@@ -3464,54 +3510,14 @@
   var ICONO_ATENCION = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
     '<circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 17h.01"/></svg>';
 
-  /* Dónde arranca el mapa. Sin esto mostraba todo el país, con trece
-     chinches amontonadas en Buenos Aires y una en Mar del Plata. El local
-     de referencia es el más cercano si el cliente compartió dónde está; si
-     no, el de su última compra. Si queda lejos de Buenos Aires (Mar del
-     Plata), el mapa arranca ahí, cerca; si no, en Buenos Aires con los
-     trece a la vista. */
-  var MAPA_BSAS = { lat: -34.61, lng: -58.565 };
-  function centroMapa() {
-    var ref = null;
-    if (miPosicion) {
-      var km = Infinity;
-      LOCALES_VDH.forEach(function (l) {
-        var d = distanciaKm(miPosicion.lat, miPosicion.lng, l.lat, l.lng);
-        if (d < km) { km = d; ref = l; }
-      });
-    } else {
-      var compra = ((socioCodigo || {}).ultimas || []).filter(function (m) {
-        return m.tipo === 'compra' && m.local && m.local !== 'TIENDA ONLINE';
-      })[0];
-      ref = compra ? datosLocal(compra.local) : null;
-    }
-    if (ref && ref.lat && distanciaKm(MAPA_BSAS.lat, MAPA_BSAS.lng, ref.lat, ref.lng) > 100) {
-      return '&ll=' + ref.lat + '%2C' + ref.lng + '&z=13';
-    }
-    return '&ll=' + MAPA_BSAS.lat + '%2C' + MAPA_BSAS.lng + '&z=10';
-  }
-
-  /* Los 14 locales en el mapa, sin salir del Club (ver el comentario de
-     "Ver en el mapa"). */
-  function abrirMapa(mid) {
-    if (!$('canje') || !mid) { return false; }
-    $('canjeTit').textContent = 'Nuestros locales';
-    $('canjeCuerpo').innerHTML = '<iframe class="mapa-marco" title="Los locales VDH en el mapa" allowfullscreen ' +
-      'src="https://www.google.com/maps/d/embed?mid=' + encodeURIComponent(mid) + '&ehbc=1C1C1A' + centroMapa() + '"></iframe>';
-    subirHoja('mapa');
-    return true;
-  }
-
   /* La hoja que sube desde abajo. La usan "Cómo canjear" y las condiciones
      de una promo: lo de adentro lo pone cada una. */
   function subirHoja(ficha) {
     var capa = $('canje');
     if (!capa || !capa.hidden) { return; }
-    /* ficha: true es la del premio, a pantalla completa; 'mapa', el mapa de
-       los locales. Las condiciones de una promo siguen siendo la hoja de
-       abajo. */
+    /* ficha: la del premio, a pantalla completa. Las condiciones de una
+       promo siguen siendo la hoja de abajo. */
     capa.classList.toggle('ficha', ficha === true);
-    capa.classList.toggle('mapa', ficha === 'mapa');
     capa.hidden = false;
     /* Dos cuadros: el primero pinta la hoja abajo de todo y el segundo la
        sube. En uno solo el navegador junta los dos y no hay animación. */
@@ -3557,7 +3563,7 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-wallet], [data-premio], [data-mapa], [data-girar], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
+             ev.target.closest('[data-codigo], [data-wallet], [data-premio], [data-girar], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
     if (!el) { return; }
     if (el.hasAttribute('data-coleccion')) {
       var pc = promosPintadas[Number(el.getAttribute('data-coleccion'))];
@@ -3565,7 +3571,6 @@
       else { abrirColeccion(pc); }
       return;
     }
-    if (el.hasAttribute('data-mapa')) { if (abrirMapa(el.getAttribute('data-mapa'))) { ev.preventDefault(); } return; }
     if (el.hasAttribute('data-cond')) { abrirCondiciones(promosPintadas[Number(el.getAttribute('data-cond'))]); return; }
     if (el.id === 'canjeListo') { cerrarCanje(false); return; }
     if (el.hasAttribute('data-cartel-x')) { sacarCartel(el.closest('[data-cartel]'), 1); return; }
@@ -4561,7 +4566,7 @@
     }
 
     if (v === 'promos') { pintarPromoGrande(); marcarPromos(true); }
-    if (v === 'locales') pintarLocales();
+    if (v === 'locales') abrirLocales();
     if (v === 'tienda') pintarTienda();
     if (v === 'datos') pintarMisDatos();
     if (v === 'cupones') pintarCupones();
@@ -5363,6 +5368,278 @@
      razón para dejar anotado dónde estuvo alguien. */
   var miPosicion = null;
 
+  /* ── Abierto o cerrado ──
+     Sale del texto del horario de locales.js, que tiene tres formas:
+     "Lunes a sábados de 9 a 20:30", "Todos los días de 10 a 22" y
+     "Lunes a sábados de 9 a 21 · domingos de 10 a 21". Por día de la
+     semana (0 = domingo): [abre, cierra] en minutos, o null. Los feriados
+     no los sabe: ese día puede decir "abierto" y no estarlo. */
+  function horasDe(texto) {
+    var dias = [null, null, null, null, null, null, null];
+    String(texto || '').split('·').forEach(function (seg) {
+      var m = /(lunes a s[aá]bados|todos los d[ií]as|domingos)\s+de\s+(\d{1,2})(?::(\d{2}))?\s+a\s+(\d{1,2})(?::(\d{2}))?/i.exec(seg);
+      if (!m) { return; }
+      var abre = Number(m[2]) * 60 + Number(m[3] || 0), cierra = Number(m[4]) * 60 + Number(m[5] || 0);
+      var q = m[1].toLowerCase();
+      var cuales = /todos/.test(q) ? [0, 1, 2, 3, 4, 5, 6] : /lunes/.test(q) ? [1, 2, 3, 4, 5, 6] : [0];
+      cuales.forEach(function (d) { dias[d] = [abre, cierra]; });
+    });
+    return dias;
+  }
+  function horaLinda(min) { var h = Math.floor(min / 60), m = min % 60; return h + (m ? ':' + (m < 10 ? '0' : '') + m : ''); }
+  var DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  function estadoLocal(l, ahora) {
+    ahora = ahora || new Date();
+    var h = horasDe(l.hora), d = ahora.getDay(), min = ahora.getHours() * 60 + ahora.getMinutes();
+    if (!h.some(Boolean)) { return null; }
+    var hoy = h[d];
+    if (hoy && min >= hoy[0] && min < hoy[1]) {
+      return { abierto: true, txt: hoy[1] - min <= 45 ? 'Abierto · cierra en ' + (hoy[1] - min) + ' min' : 'Abierto · cierra ' + horaLinda(hoy[1]) };
+    }
+    if (hoy && min < hoy[0]) { return { abierto: false, txt: 'Cerrado · abre hoy a las ' + horaLinda(hoy[0]) }; }
+    for (var k = 1; k <= 7; k++) {
+      var dd = (d + k) % 7;
+      if (h[dd]) { return { abierto: false, txt: 'Cerrado · abre ' + (k === 1 ? 'mañana' : 'el ' + DIAS_SEMANA[dd]) + ' a las ' + horaLinda(h[dd][0]) }; }
+    }
+    return null;
+  }
+  function estadoHtml(l, clase) {
+    var e = estadoLocal(l);
+    /* Un span y no un <b>: en la lista, .local b es el nombre del local. */
+    return e ? '<span class="' + clase + (e.abierto ? ' si' : '') + '">' + esc(e.txt) + '</span><br>' : '';
+  }
+
+  /* ── Locales en el mapa (04/10/2026) ──
+     MapLibre (la librería) con OpenFreeMap (el mapa): gratis, sin clave
+     ni cuenta, sin tope de visitas, y en blanco y gris como la app. Es un
+     servicio comunitario sin garantía: si no carga en 12 segundos, o el
+     celular no puede dibujarlo, se ve la lista. La librería pesa ~280 KB y
+     se baja sólo la primera vez que alguien entra a Locales. */
+  var MAPLIBRE_JS = 'https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.24.0/maplibre-gl.js';
+  var MAPLIBRE_JS_SRI = 'sha512-rOFgoUgWaVi69JW1dzBu6PWF9xKW9rxYfY5u2SexFABHhWk0qUWkJoWNz4UuZRMvSXsNZG66+tU5B+HlwWF5kA==';
+  var MAPLIBRE_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.24.0/maplibre-gl.css';
+  var MAPLIBRE_CSS_SRI = 'sha512-KIMsMWIdnoG9OwZa+oaIafmbDonqck1UCmq+/zcUi2aaZ97N9QE6TqpTM+n36EO40HGh64hU/375zxtjx7WTyQ==';
+  var ESTILO_MAPA = 'https://tiles.openfreemap.org/styles/positron';
+  var CENTRO_BSAS = { lat: -34.61, lng: -58.565 };
+  var modoLocales = 'mapa', mapaVDH = null, mapaListo = false, cargaMapa = null;
+  var marcadores = [], tarjetasOrden = [], activo = -1, yoMarcador = null;
+
+  function abrirLocales() {
+    if (modoLocales === 'mapa' && mapaPosible()) { mostrarMapa(); } else { mostrarLista(); }
+  }
+  function mapaPosible() {
+    try {
+      var c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    } catch (e) { return false; }
+  }
+  function mostrarLista() {
+    modoLocales = 'lista';
+    if ($('vLocales')) { $('vLocales').classList.remove('en-mapa'); }
+    if ($('locMapa')) { $('locMapa').hidden = true; }
+    pintarLocales();
+    if ($('btnVerMapa')) {
+      $('btnVerMapa').hidden = !mapaPosible();
+      $('btnVerMapa').onclick = function () { modoLocales = 'mapa'; window.scrollTo(0, 0); mostrarMapa(); };
+    }
+  }
+  function mostrarMapa() {
+    var caja = $('locMapa');
+    if (!caja) { return; }
+    modoLocales = 'mapa';
+    $('vLocales').classList.add('en-mapa');
+    caja.hidden = false;
+    medirMapa();
+    /* Las tarjetas no esperan al mapa: se ven enseguida. */
+    if (!$('lmTarjetas').children.length) { pintarTarjetas(); }
+    $('lmLista').onclick = mostrarLista;
+    $('lmCerca').onclick = cercaMio;
+    cargarMapLibre().then(armarMapa).catch(function () { mostrarLista(); });
+  }
+  /* Dónde empieza el mapa (abajo de la cabecera) y cuánto tapa la barra. */
+  function medirMapa() {
+    var caja = $('locMapa'), cab = document.querySelector('.cab'), barra = document.querySelector('.tabs');
+    if (!caja) { return; }
+    caja.style.setProperty('--lm-top', (cab ? Math.max(0, Math.round(cab.getBoundingClientRect().bottom)) : 76) + 'px');
+    caja.style.setProperty('--barra', (barra ? barra.offsetHeight : 70) + 'px');
+  }
+  window.addEventListener('resize', function () {
+    if (modoLocales === 'mapa' && $('locMapa') && !$('locMapa').hidden) { medirMapa(); if (mapaVDH) { mapaVDH.resize(); } }
+  });
+
+  function cargarMapLibre() {
+    if (window.maplibregl) { return Promise.resolve(); }
+    if (cargaMapa) { return cargaMapa; }
+    cargaMapa = new Promise(function (ok, mal) {
+      var css = document.createElement('link');
+      css.rel = 'stylesheet'; css.href = MAPLIBRE_CSS; css.integrity = MAPLIBRE_CSS_SRI; css.crossOrigin = 'anonymous';
+      document.head.appendChild(css);
+      var s = document.createElement('script');
+      s.src = MAPLIBRE_JS; s.integrity = MAPLIBRE_JS_SRI; s.crossOrigin = 'anonymous';
+      s.onload = function () { if (window.maplibregl) { ok(); } else { cargaMapa = null; mal(new Error('sin maplibre')); } };
+      s.onerror = function () { cargaMapa = null; mal(new Error('no cargó')); };
+      document.head.appendChild(s);
+      setTimeout(function () { if (!window.maplibregl) { cargaMapa = null; mal(new Error('tardó')); } }, 15000);
+    });
+    return cargaMapa;
+  }
+
+  /* El local de referencia: el más cercano si dijo dónde está; si no, el de
+     su última compra. Decide dónde arranca el mapa y qué tarjeta. */
+  function referenciaLocal() {
+    if (miPosicion) { return tarjetasOrden[0] || null; }
+    var compra = ((socioCodigo || {}).ultimas || []).filter(function (m) {
+      return m.tipo === 'compra' && m.local && m.local !== 'TIENDA ONLINE';
+    })[0];
+    return compra ? datosLocal(compra.local) : null;
+  }
+  function lejosDeBsAs(l) { return distanciaKm(CENTRO_BSAS.lat, CENTRO_BSAS.lng, l.lat, l.lng) > 100; }
+  function margenMapa() {
+    var tar = $('lmTarjetas'), barra = document.querySelector('.tabs');
+    var abajo = (tar ? tar.offsetHeight : 180) + (barra ? barra.offsetHeight : 70) + 24;
+    return { top: 70, bottom: abajo, left: 36, right: 36 };
+  }
+
+  function armarMapa() {
+    if (mapaVDH) { mapaVDH.resize(); return; }
+    var ref = referenciaLocal();
+    var opciones = { container: 'lmLienzo', style: ESTILO_MAPA, attributionControl: false,
+                     dragRotate: false, pitchWithRotate: false, touchPitch: false, maxZoom: 17 };
+    if (ref && lejosDeBsAs(ref)) {
+      opciones.center = [ref.lng, ref.lat]; opciones.zoom = 12.5;
+    } else {
+      /* Buenos Aires con los trece a la vista, arriba de las tarjetas. */
+      var cerca = LOCALES_VDH.filter(function (l) { return !lejosDeBsAs(l); });
+      var lngs = cerca.map(function (l) { return l.lng; }), lats = cerca.map(function (l) { return l.lat; });
+      opciones.bounds = [[Math.min.apply(null, lngs), Math.min.apply(null, lats)], [Math.max.apply(null, lngs), Math.max.apply(null, lats)]];
+      opciones.fitBoundsOptions = { padding: margenMapa() };
+    }
+    try { mapaVDH = new maplibregl.Map(opciones); }
+    catch (e) { mapaVDH = null; mostrarLista(); return; }
+    mapaVDH.touchZoomRotate.disableRotation();
+    mapaVDH.addControl(new maplibregl.AttributionControl({ compact: true }), 'top-left');
+    mapaVDH.on('load', function () {
+      mapaListo = true;
+      var c = document.querySelector('#lmLienzo .lm-cargando'); if (c) { c.remove(); }
+      /* El crédito del mapa (lo pide la licencia de OpenStreetMap) arranca
+         abierto y tapa arriba: queda plegado en la "i". */
+      var at = document.querySelector('#lmLienzo .maplibregl-ctrl-attrib');
+      if (at) { at.classList.remove('maplibregl-compact-show'); at.removeAttribute('open'); }
+    });
+    setTimeout(function () { if (!mapaListo && modoLocales === 'mapa') { mostrarLista(); } }, 12000);
+    LOCALES_VDH.forEach(function (l) {
+      var el = document.createElement('div');
+      el.className = 'lm-pin';
+      el.setAttribute('role', 'button');
+      el.setAttribute('aria-label', l.nombre);
+      el.innerHTML = '<i><img src="icon-192.png" alt=""></i>';
+      el.addEventListener('click', function (ev) { ev.stopPropagation(); activar(tarjetasOrden.indexOf(l), 'pin'); });
+      marcadores.push({ l: l, m: new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -7] }).setLngLat([l.lng, l.lat]).addTo(mapaVDH) });
+    });
+    if (miPosicion) { ponerYo(); }
+    marcarActivo();
+  }
+
+  /* Las tarjetas, en el orden del momento: por cercanía si dijo dónde
+     está; si no, alfabético, arrancando por la de su última compra. */
+  function pintarTarjetas() {
+    var caja = $('lmTarjetas');
+    if (!caja) { return; }
+    var lista = LOCALES_VDH.slice();
+    if (miPosicion) {
+      lista.forEach(function (l) { l._km = distanciaKm(miPosicion.lat, miPosicion.lng, l.lat, l.lng); });
+      lista.sort(function (a, b) { return a._km - b._km; });
+    }
+    tarjetasOrden = lista;
+    caja.innerHTML = lista.map(function (l, k) {
+      var zona = (l.zona && l.zona !== l.nombre) ? '<span class="lm-zona">' + esc(l.zona) + '</span>' : '';
+      var dist = (miPosicion && l._km !== undefined) ? '<span class="lm-dist">a ' + distanciaLinda(l._km) + '</span>' : '';
+      return '<article class="lm-tarjeta" role="listitem" data-k="' + k + '">' +
+        '<span class="lm-nom">' + esc(l.nombre) + '</span>' + zona +
+        '<span class="lm-dato">' + icono('pin') + '<span>' + esc(l.dir) + '</span></span>' +
+        '<span class="lm-dato">' + icono('reloj') + '<span>' + estadoHtml(l, 'lm-estado') + '<small>' + esc(l.hora) + '</small></span></span>' +
+        '<span class="lm-pie"><a class="lm-ir" target="_blank" rel="noopener" href="' + esc(comoLlegar(l)) + '">Cómo llegar' + icono('flecha') + '</a>' + dist + '</span>' +
+      '</article>';
+    }).join('');
+    var ref = referenciaLocal();
+    var k0 = Math.max(0, ref ? tarjetasOrden.indexOf(ref) : 0);
+    activo = -1;
+    requestAnimationFrame(function () { caja.scrollLeft = k0 * pasoTarjetas(); activar(k0, 'inicio'); });
+    if (!caja.dataset.listo) {
+      caja.dataset.listo = '1';
+      var espera = null;
+      /* Deslizar: cuando para, la tarjeta del medio es la elegida. */
+      caja.addEventListener('scroll', function () {
+        clearTimeout(espera);
+        espera = setTimeout(function () {
+          var k = Math.round(caja.scrollLeft / pasoTarjetas());
+          if (k !== activo) { activar(k, 'tarjeta'); }
+        }, 130);
+      }, { passive: true });
+      /* Tocar una tarjeta la centra (salvo "Cómo llegar", que navega). */
+      caja.addEventListener('click', function (ev) {
+        if (ev.target.closest('.lm-ir')) { return; }
+        var c = ev.target.closest('.lm-tarjeta');
+        if (c) { activar(Number(c.dataset.k), 'pin'); }
+      });
+    }
+  }
+  function pasoTarjetas() {
+    var c = document.querySelector('#lmTarjetas .lm-tarjeta');
+    return c ? c.offsetWidth + 10 : 1;
+  }
+  function marcarActivo() {
+    var l = tarjetasOrden[activo];
+    marcadores.forEach(function (x) {
+      var el = x.m.getElement(), es = x.l === l;
+      el.classList.toggle('activo', es);
+      el.style.zIndex = es ? '3' : '1';
+    });
+  }
+  /* desde: 'inicio' (sin mover el mapa), 'tarjeta' (se deslizó: el mapa
+     vuela) o 'pin' (se tocó una chinche o una tarjeta: además se centra
+     la tarjeta). */
+  function activar(k, desde) {
+    if (k < 0 || k >= tarjetasOrden.length) { return; }
+    activo = k;
+    marcarActivo();
+    var l = tarjetasOrden[k];
+    if (desde === 'pin' && $('lmTarjetas')) { $('lmTarjetas').scrollTo({ left: k * pasoTarjetas(), behavior: 'smooth' }); }
+    if (desde !== 'inicio' && mapaVDH) {
+      var m = margenMapa();
+      mapaVDH.flyTo({ center: [l.lng, l.lat], zoom: Math.max(mapaVDH.getZoom(), 13.5), offset: [0, -(m.bottom - m.top) / 2], speed: 1.3 });
+    }
+  }
+  function ponerYo() {
+    if (!mapaVDH || !miPosicion) { return; }
+    if (!yoMarcador) {
+      var el = document.createElement('div'); el.className = 'lm-yo'; el.setAttribute('aria-label', 'Vos estás acá');
+      yoMarcador = new maplibregl.Marker({ element: el }).setLngLat([miPosicion.lng, miPosicion.lat]).addTo(mapaVDH);
+    } else { yoMarcador.setLngLat([miPosicion.lng, miPosicion.lat]); }
+  }
+  /* "Cerca mío": el permiso se pide al tocar, y siempre contesta algo. */
+  function cercaMio() {
+    var b = $('lmCerca'), txt = b.querySelector('span');
+    if (!navigator.geolocation) { txt.textContent = 'Sin ubicación'; return; }
+    b.disabled = true; txt.textContent = 'Buscando…';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      miPosicion = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      b.disabled = false; txt.textContent = 'Cerca mío';
+      pintarTarjetas();
+      if ($('listaLocales')) { delete $('listaLocales').dataset.listo; }
+      if (mapaVDH) {
+        ponerYo();
+        var l = tarjetasOrden[0];
+        mapaVDH.fitBounds([[Math.min(l.lng, miPosicion.lng), Math.min(l.lat, miPosicion.lat)],
+                           [Math.max(l.lng, miPosicion.lng), Math.max(l.lat, miPosicion.lat)]],
+                          { padding: margenMapa(), maxZoom: 14 });
+      }
+    }, function () {
+      b.disabled = false; txt.textContent = 'No pudimos ubicarte';
+      setTimeout(function () { txt.textContent = 'Cerca mío'; }, 3500);
+    }, { timeout: 10000, maximumAge: 300000, enableHighAccuracy: false });
+  }
+
   function pintarLocales() {
     var caja = $('listaLocales');
     if (!caja) return;
@@ -5396,7 +5673,7 @@
       return '<div class="local">' +
         '<b>' + esc(l.nombre) + dist + '</b>' + zona +
         '<div class="local-dato">' + pin + '<span>' + esc(l.dir) + '</span></div>' +
-        '<div class="local-dato">' + reloj + '<span>' + esc(l.hora) + '</span></div>' +
+        '<div class="local-dato">' + reloj + '<span>' + estadoHtml(l, 'local-estado') + esc(l.hora) + '</span></div>' +
         '<a class="local-ir" target="_blank" rel="noopener" href="' + esc(comoLlegar(l)) + '">' +
           'Cómo llegar' + flecha +
         '</a>' +
@@ -5429,6 +5706,7 @@
         function (pos) {
           miPosicion = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           pintarLocales();
+          if (mapaVDH) { ponerYo(); pintarTarjetas(); }
           b.textContent = 'Ordenados por cercanía';
         },
         function () {
