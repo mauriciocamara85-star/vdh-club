@@ -519,7 +519,11 @@
      renglón no entra en un celular angosto sin bajar de 48 px de alto, que
      es su mínimo; el de dos sí. Los archivos son los suyos, sin tocar:
      wallet-agregar.svg y wallet-ver.svg. */
-  .wallet-caja { display: grid; justify-items: center; gap: 6px; }
+  .wallet-caja { position: relative; display: grid; justify-items: center; gap: 6px; }
+  /* La ✕ (04/10/2026): el que no la quiere la cierra; sigue en Mis datos. */
+  .wallet-x { position: absolute; top: -8px; right: -8px; width: 40px; height: 40px; border: 0; background: none;
+              display: grid; place-items: center; color: var(--txt-3); cursor: pointer; }
+  .wallet-x svg { width: 18px; height: 18px; }
   .btn-wallet { display: block; border: 0; padding: 0; background: none; border-radius: 999px; cursor: pointer; line-height: 0; }
   .btn-wallet img { display: block; width: 226px; height: 52px; }
   .btn-wallet[disabled] { opacity: .6; cursor: default; }
@@ -2411,6 +2415,8 @@
      Inicio: el resumen. El saludo con los puntos y el código, la novedad,
      el premio, la reseña y la ayuda. Corto a propósito. */
   function pintar(t) {
+    /* La misión de la Billetera no va en iPhone: no la puede cumplir. */
+    if (esIOS() && t.misiones) { t.misiones = t.misiones.filter(function (m) { return m.accion !== 'wallet'; }); }
     var puntos  = t.puntos || 0;
     var premios = t.premios || [];
     var nv      = t.nivel || { nombre: 'Plata', multiplica: 1 };
@@ -2543,6 +2549,7 @@
     precargarPromo();
     marcarPromos();
     avisarInstalada(t);
+    comprobarWallet(t, false);
     /* Si se entró directo a una de las pantallas de adentro (#movs,
        #cupones, #niveles), se abrió antes de que llegara la tarjeta: se
        redibuja con los datos. */
@@ -2698,8 +2705,9 @@
     });
   }
 
-  function hacerMision(accion) {
+  function hacerMision(accion, el) {
     if (accion === 'datos') { irA('datos', true); return; }
+    if (accion === 'wallet') { agregarWallet(el, true); return; }
     if (accion === 'avisos') { abrirAvisos(); return; }
     if (accion === 'instalar') { abrirInstalar(); return; }
     /* Las de comprar se cumplen en la caja: lleva a los locales. */
@@ -2939,11 +2947,22 @@
      tarjeta se abre desde la Billetera misma —o desde la pantalla
      bloqueada—, nadie entra al Club para ir a la Billetera. Ahí queda en
      Mis datos. */
+  var K_WALLET_X = 'vdh_club_wallet_x';
   function walletMiTarjeta() {
     if (walletGuardada()) { return ''; }
+    try { if (localStorage.getItem(K_WALLET_X) === '1') { return ''; } } catch (e) {}
     var b = botonWallet();
     if (!b) { return ''; }
-    return '<div class="wallet-caja">' + b + '<p class="wallet-nota">Tu tarjeta en el celular, sin abrir la app.</p></div>';
+    return '<div class="wallet-caja">' +
+      '<button type="button" class="wallet-x" data-wallet-x aria-label="Cerrar">' + icono('cruz') + '</button>' +
+      b + '<p class="wallet-nota">Tu tarjeta en el celular, sin abrir la app.</p></div>';
+  }
+  /* Cerrado no vuelve: queda en Mis datos y, si está prendida, en la
+     misión de Inicio. */
+  function cerrarWalletCaja(el) {
+    try { localStorage.setItem(K_WALLET_X, '1'); } catch (e) {}
+    var caja = el.closest('.wallet-caja');
+    if (caja) { caja.remove(); }
   }
   /* Guardada: el de Mi tarjeta se va y los demás pasan a "Ver en la
      Billetera". */
@@ -2961,11 +2980,14 @@
     try { var u = localStorage.getItem(K_WALLET_VER) || ''; return /^https:\/\/pay\.google\.com\//.test(u) ? u : ''; }
     catch (e) { return ''; }
   }
-  function agregarWallet(b) {
+  /* paraGuardar: desde la misión. Va siempre a guardarla (aunque este
+     teléfono crea que ya fue: si la misión sigue pendiente, Google no la
+     tiene). */
+  function agregarWallet(b, paraGuardar) {
     var t = socioCodigo || {};
-    if (!t.codigo || b.disabled) { return; }
+    if (!t.codigo || !b || b.disabled) { return; }
     /* Ya guardada y con el enlace directo: se abre al instante. */
-    if (walletGuardada() && walletVer()) { location.href = walletVer(); return; }
+    if (!paraGuardar && walletGuardada() && walletVer()) { location.href = walletVer(); return; }
     b.disabled = true;
     var viejo = b.parentNode.querySelector('.wallet-error');
     if (viejo) { viejo.remove(); }
@@ -2983,8 +3005,10 @@
         localStorage.setItem(K_WALLET, '1');
         if (j.ver) { localStorage.setItem(K_WALLET_VER, j.ver); }
       } catch (e) {}
+      /* Al volver, se le pregunta a Google si la guardó (comprobarWallet). */
+      try { sessionStorage.setItem(K_WALLET_IDA, '1'); } catch (e) {}
       /* Si ya la tenía guardada, al pase directo; si no, a guardarla. */
-      location.href = yaEstaba && j.ver ? j.ver : j.url;
+      location.href = yaEstaba && j.ver && !paraGuardar ? j.ver : j.url;
       /* Si vuelve con "atrás", el botón tiene que andar otra vez. */
       setTimeout(function () { b.disabled = false; sacarAbriendo(); marcarWalletGuardada(); }, 2500);
     }).catch(function () {
@@ -2993,6 +3017,47 @@
       b.insertAdjacentHTML('afterend', '<p class="wallet-error">No se pudo abrir Google Wallet. Probá de nuevo en un rato.</p>');
     });
   }
+
+  /* ¿La guardó de verdad? (04/10/2026, la misión de la Billetera, SQL 50).
+     Se le pregunta a Google por club-wallet: si confirma, la anota y paga la
+     misión (si está prendida y no la cobró). Tocar el botón y cancelar no
+     da puntos. Sólo en el teléfono que fue a guardarla y mientras no esté
+     confirmado: al volver de la Billetera, enseguida (y otra vez a los
+     seis segundos, por si Google tarda); si no, como mucho cada 12 horas. */
+  var K_WALLET_OK = 'vdh_club_wallet_ok', K_WALLET_CHK = 'vdh_club_wallet_chk', K_WALLET_IDA = 'vdh_club_wallet_ida';
+  function comprobarWallet(t, otraVez) {
+    t = t || socioCodigo || {};
+    if (!t.codigo || esIOS() || !walletGuardada()) { return; }
+    var pendiente = (t.misiones || []).some(function (m) { return m.accion === 'wallet' && !m.hecha; });
+    var ida = false;
+    try {
+      if (localStorage.getItem(K_WALLET_OK) === '1' && !pendiente) { return; }
+      ida = sessionStorage.getItem(K_WALLET_IDA) === '1';
+      var ultima = Number(localStorage.getItem(K_WALLET_CHK)) || 0;
+      if (!ida && !otraVez && Date.now() - ultima < 12 * 36e5) { return; }
+      sessionStorage.removeItem(K_WALLET_IDA);
+      localStorage.setItem(K_WALLET_CHK, String(Date.now()));
+    } catch (e) { return; }
+    fetch(BASE + '/functions/v1/club-wallet', {
+      method: 'POST',
+      headers: { apikey: CLAVE, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accion: 'comprobar', codigo: t.codigo })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j.ok) { return; }
+      if (!j.guardada) {
+        if (ida) { setTimeout(function () { comprobarWallet(null, true); }, 6000); }
+        return;
+      }
+      /* Confirmada y anotada en la base: no se vuelve a preguntar. */
+      if (j.anotada) { try { localStorage.setItem(K_WALLET_OK, '1'); } catch (e) {} }
+      marcarWalletGuardada();
+      if (j.dio) { recargarTarjeta(); }
+    }).catch(function () {});
+  }
+  /* Al volver a la app (de la Billetera o de cualquier lado). */
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') { comprobarWallet(null, false); }
+  });
 
   /* La tarjeta grande, con frente y dorso (04/10/2026). Tocarla la da
      vuelta (girarTarjeta); el código de barras está atrás, en su tira
@@ -3624,7 +3689,7 @@
      pierde sus botones. */
   document.addEventListener('click', function (ev) {
     var el = ev.target && ev.target.closest &&
-             ev.target.closest('[data-codigo], [data-wallet], [data-premio], [data-girar], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x]');
+             ev.target.closest('[data-codigo], [data-wallet], [data-premio], [data-girar], [data-cond], [data-coleccion], #btnDudas, #canjeX, #canjeVelo, #canjeListo, #btnMisDatos, [data-atajo], [data-mision], [data-copiar], [data-cartel-x], [data-wallet-x]');
     if (!el) { return; }
     if (el.hasAttribute('data-coleccion')) {
       var pc = promosPintadas[Number(el.getAttribute('data-coleccion'))];
@@ -3636,7 +3701,8 @@
     if (el.id === 'canjeListo') { cerrarCanje(false); return; }
     if (el.hasAttribute('data-cartel-x')) { sacarCartel(el.closest('[data-cartel]'), 1); return; }
     if (el.hasAttribute('data-atajo')) { atajo(el.getAttribute('data-atajo')); return; }
-    if (el.hasAttribute('data-mision')) { hacerMision(el.getAttribute('data-mision')); return; }
+    if (el.hasAttribute('data-mision')) { hacerMision(el.getAttribute('data-mision'), el); return; }
+    if (el.hasAttribute('data-wallet-x')) { cerrarWalletCaja(el); return; }
     if (el.hasAttribute('data-copiar')) { copiarCupon(el); return; }
     if (el.id === 'btnMisDatos') { irA('datos', true); return; }
     if (el.id === 'canjeX' || el.id === 'canjeVelo') { cerrarCanje(false); return; }
