@@ -1562,6 +1562,16 @@
     background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r);
     padding: 14px 16px 16px; display: flex; flex-direction: column;
   }
+  /* Mi tarjeta sin cajas (04/10/2026): los dos números en una franja
+     entre líneas, partida al medio, y Premios y Nivel pegados abajo. */
+  .bloque-lineas { display: grid; }
+  .bloque-lineas .dos { gap: 0; border-top: 1px solid var(--linea); border-bottom: 1px solid var(--linea); }
+  .bloque-lineas .num { background: none; border: 0; border-radius: 0; padding: 18px 14px 18px 2px; }
+  .bloque-lineas .num-2 { border-left: 1px solid var(--linea); padding-left: 18px; }
+  .bloque-lineas .renglon { background: none; border: 0; border-bottom: 1px solid var(--linea); border-radius: 0; padding: 16px 2px; }
+  /* Los movimientos, sueltos: la línea de cada uno ya los separa. */
+  .movs-lista { border-top: 1px solid var(--linea); padding: 0 2px; }
+  .movs-lista .mov:last-child { border-bottom: 1px solid var(--linea); }
   .num-rot { font: 600 13px/1.3 var(--sans); color: var(--txt); min-height: 34px; }
   .num-val { font: 700 32px/1.1 var(--sans); letter-spacing: -.02em; margin-top: 6px; font-variant-numeric: tabular-nums; }
   .num-val small { font: 500 13px var(--sans); color: var(--txt-2); letter-spacing: 0; }
@@ -1684,22 +1694,28 @@
   /* ── Sumá más puntos ──
      Cada misión es un renglón con lo que hay que hacer a la izquierda y los
      puntos, en verde, a la derecha. Sólo las que faltan. */
-  .misiones { display: grid; gap: 10px; }
-  .mision { display: grid; grid-template-columns: minmax(0, 1fr) auto; width: 100%; padding: 0; overflow: hidden;
-            background: var(--hoja); border: 1px solid var(--ok-borde); border-radius: var(--r-sm);
+  /* Sin cajas (04/10/2026): renglones con una línea finita, y los puntos
+     en una pastilla verde "+250". */
+  .misiones { display: grid; border-top: 1px solid var(--linea); }
+  .mision { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; width: 100%;
+            padding: 14px 2px; background: none; border: 0; border-bottom: 1px solid var(--linea); border-radius: 0;
             text-align: left; font: inherit; color: var(--txt); cursor: pointer; }
-  .mision-txt { padding: 13px 14px; display: grid; gap: 3px; }
+  .mision-txt { display: grid; gap: 3px; }
   .mision-txt b { font: 600 15px/1.3 var(--sans); }
   .mision-txt span { font-size: 13.5px; line-height: 1.4; color: var(--txt-2); }
-  .mision-pts { background: var(--ok); color: #fff; display: grid; place-content: center; justify-items: center;
-                padding: 8px 14px; min-width: 86px; text-align: center; }
-  .mision-pts small { font: 600 10.5px var(--sans); letter-spacing: .1em; text-transform: uppercase; }
-  .mision-pts b { font: 700 22px/1.1 var(--sans); font-variant-numeric: tabular-nums; }
+  .mision-pts { display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px; border-radius: 999px;
+                background: var(--ok); color: #fff; white-space: nowrap; }
+  .mision-pts small { font: 600 12px var(--sans); }
+  .mision-pts b { font: 700 15px/1 var(--sans); font-variant-numeric: tabular-nums; }
+  .mision-pts b::before { content: '+'; }
+  /* "Sumá" y "puntos" se leen con el lector de pantalla, no se ven: la
+     pastilla dice "+250" y el título de arriba ya dice "Sumá más puntos". */
+  .mision:not(.hecha) .mision-pts small { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-  .mision.hecha { border-color: var(--linea); cursor: default; }
+  .mision.hecha { cursor: default; }
   .mision.hecha .mision-txt { opacity: .7; }
   .mision.hecha .mision-pts { background: var(--ok-soft); color: var(--ok); }
-  .mision.hecha .mision-pts svg { width: 22px; height: 22px; }
+  .mision.hecha .mision-pts svg { width: 16px; height: 16px; }
 
   /* ── Tus puntos: los puntos y las tres solapas ── */
   .movs-cab { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
@@ -1754,7 +1770,7 @@
   .niv ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; line-height: 1.4; }
   .niv li { display: flex; gap: 8px; align-items: flex-start; }
   .niv li svg { width: 18px; height: 18px; flex: none; margin-top: 1px; color: var(--ok); }
-  .niv-avance { display: grid; gap: 6px; }
+  .niv-avance { display: grid; gap: 6px; padding: 4px 2px 18px; }
   .niv-avance .barra { height: 8px; }
   /* "Cómo se mantiene mi nivel": un enlace chico que se despliega. */
   .niv-regla { margin: -4px 2px 0; }
@@ -1794,7 +1810,10 @@
   .btn-claro { background: var(--hoja); color: var(--txt); border: 1px solid var(--linea); gap: 10px; font-size: 15.5px; min-height: 50px; }
   .btn-claro svg { width: 20px; height: 20px; }
 
-  .renglones { display: grid; gap: 10px; }
+  /* Sin cajas (04/10/2026): uno abajo del otro, con una línea finita. */
+  .renglones { display: grid; border-top: 1px solid var(--linea); }
+  .renglones > .renglon { background: none; border: 0; border-bottom: 1px solid var(--linea); border-radius: 0; padding: 14px 2px; }
+  .renglones > .dudas { background: none; border: 0; border-bottom: 1px solid var(--linea); border-radius: 0; padding: 0 2px 6px; }
   .renglon {
     display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
     background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r-sm);
@@ -2367,9 +2386,7 @@
     var todo =
       carnetHtml(t, nv) +
       walletMiTarjeta() +
-      dosNumeros +
-      premiosHtml +
-      nivelHtml +
+      '<div class="bloque-lineas">' + dosNumeros + premiosHtml + nivelHtml + '</div>' +
       movimientosHtml(t) +
       /* Un renglón, no una tarjeta. El aviso de instalar aparece solo al
          entrar y vive abajo, colgado de la barra; esto es nada más que
@@ -2557,7 +2574,7 @@
       var esCanje = function (m) { return m.tipo === 'canje'; };
       var lista = ult.filter(function (m) { return s === 'canjes' ? esCanje(m) : !esCanje(m); });
       cuerpo = lista.length
-        ? '<div class="caja" style="padding:4px 18px;margin-top:0">' + lista.map(filaMov).join('') + '</div>'
+        ? '<div class="movs-lista">' + lista.map(filaMov).join('') + '</div>'
         : '<p class="vacio">' + (s === 'canjes' ? 'Todavía no te llevaste ningún premio.' : 'Todavía no hay movimientos.') + '</p>';
     }
 
@@ -2731,12 +2748,12 @@
     lista.forEach(function (n, i) { if (n.nombre === nv.nombre) { yo = i; } });
 
     var avance = nv.hasta_xp
-      ? '<div class="caja niv-avance" style="margin-top:0">' +
+      ? '<div class="niv-avance">' +
           '<div class="sec-cab" style="margin:0"><h2>' + miles(xp) + ' <small style="font-weight:500;color:var(--txt-2)">de ' +
             miles(nv.hasta_xp) + ' puntos de compras</small></h2></div>' +
           '<span class="barra"><i style="width:' + Math.max(0, Math.min(100, Math.round(xp * 100 / nv.hasta_xp))) + '%"></i></span>' +
         '</div>'
-      : '<div class="caja" style="margin-top:0"><h2>Estás en el nivel más alto</h2></div>';
+      : '<div class="niv-avance"><h2>Estás en el nivel más alto</h2></div>';
 
     var tarjetas = lista.map(function (n, i) {
       var marca = i === yo ? '<span class="niv-marca es">Tu nivel</span>'
@@ -3296,7 +3313,7 @@
       '<div class="sec-cab"><h2>Últimos movimientos</h2>' +
         (ult.length ? '<button type="button" class="movs-ver" data-atajo="movs">Ver todos</button>' : '') +
       '</div>' +
-      '<div class="caja" style="padding:4px 18px">' + filas +
+      '<div class="movs-lista">' + filas +
         (t.compras
           ? ''
           : '<p class="vacio" style="padding:12px 0">Mostrá tu tarjeta la próxima vez que compres y ' +
