@@ -2374,9 +2374,10 @@
       /* Un renglón, no una tarjeta. El aviso de instalar aparece solo al
          entrar y vive abajo, colgado de la barra; esto es nada más que
          para el que lo cerró y después lo quiere. */
-      (estaInstalada() ? '' : filaInstalar()) +
-      '<p class="letra-chica">Tu código es sólo tuyo: no lo compartas.<br>' +
-      'Si perdés esta página, en cualquier local te la vuelven a abrir con tu teléfono.</p>';
+      (estaInstalada() ? '' : filaInstalar());
+      /* Sin la letra chica del final (04/10/2026, Mauricio): "no lo
+         compartas" y "si la perdés, en cualquier local te la abren" ya están
+         en Dudas (¿Se la puedo prestar…? y Perdí mi tarjeta). */
 
     /* Inicio (29/09/2026, sobre la app de King Of The Kongo): el saludo y la
        tarjeta con los puntos y los cuatro accesos. Todo lo de arriba es del
