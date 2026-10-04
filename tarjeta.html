@@ -1674,11 +1674,10 @@
   }
   /* Mi tarjeta sin cajas (04/10/2026): los dos números en una franja
      entre líneas, partida al medio, y Premios y Nivel pegados abajo. */
-  /* 04/10/2026: sin los dos números; Premios (con los puntos) y Nivel (con
-     su barra) entre líneas. */
-  .bloque-lineas { display: grid; border-top: 1px solid var(--linea); }
-  .rg-num { font: 700 22px/1.1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-  .renglon-txt > .nivel-barra { height: 4px; margin-top: 9px; max-width: 240px; }
+  .bloque-lineas { display: grid; }
+  .bloque-lineas .dos { gap: 0; border-top: 1px solid var(--linea); border-bottom: 1px solid var(--linea); }
+  .bloque-lineas .num { background: none; border: 0; border-radius: 0; padding: 18px 14px 18px 2px; }
+  .bloque-lineas .num-2 { border-left: 1px solid var(--linea); padding-left: 18px; }
   .bloque-lineas .renglon { background: none; border: 0; border-bottom: 1px solid var(--linea); border-radius: 0; padding: 16px 2px; }
   /* Los movimientos, sueltos: la línea de cada uno ya los separa. */
   .movs-lista { padding: 0 2px; }
@@ -2430,6 +2429,24 @@
       ? Math.max(0, Math.min(100, Math.round((t.xp || 0) * 100 / nv.hasta_xp)))
       : 100;
 
+    /* Los dos números, lado a lado y con nombre propio. "501 puntos" y
+       "1 / 4.000" en la misma pantalla y el cliente no sabía cuál era cuál:
+       los de canjear se gastan; los del nivel son sólo de compras —los
+       regalos no cuentan— y canjear no los baja. (El 04/10/2026 se probó
+       pasarlos a los renglones de Premios y Nivel, y Mauricio los quiso de
+       vuelta así.) */
+    var dosNumeros =
+      '<div><h2 class="solo-lector">Tus puntos</h2><div class="dos">' +
+        '<div class="num"><span class="num-rot">Puntos para canjear</span>' +
+          '<span class="num-val" data-cuenta="' + puntos + '">' + miles(puntos) + '</span>' +
+          '<span class="num-uni">Se usan para los premios</span></div>' +
+        '<div class="num num-2"><span class="num-rot">Puntos para subir de nivel</span>' +
+          '<span class="num-val">' + miles(t.xp) +
+            (nv.hasta_xp ? ' <small>de ' + miles(nv.hasta_xp) + '</small>' : '') + '</span>' +
+          '<span class="barra"><i style="width:' + tramo + '%"></i></span>' +
+          '<span class="num-uni">' + (nv.sigue ? 'Para llegar a ' + esc(nv.sigue) : 'Nivel más alto') + '</span></div>' +
+      '</div></div>';
+
     /* Los premios, en un renglón como el del nivel (04/10/2026: "Ver los
        premios" adentro del recuadro de los puntos se perdía). Dice lo que
        más importa: cuántos ya le alcanzan o cuánto le falta al próximo. */
@@ -2446,21 +2463,16 @@
           return '<span class="mazo-carta" data-pos="' + (l.length - 1 - k) + '"><img src="' + esc(f) + '" alt="" decoding="async"></span>';
         }).join('') + '</span>'
       : '<span class="renglon-ico">' + icono('regalo') + '</span>';
-    /* Los puntos para canjear, en el renglón de los premios (04/10/2026,
-       Mauricio: Mi tarjeta repetía Inicio). Son para eso: el número
-       arriba y abajo lo que ya le alcanza. Los del nivel van en el renglón
-       del nivel, con su barra: cada número al lado de lo que mide, y así
-       no se confunden (los de canjear se gastan; los del nivel son sólo de
-       compras y canjear no los baja). */
-    var premiosHtml =
-      '<button type="button" class="renglon toca premios-renglon' + (mazoFotos.length >= 2 ? ' con-mazo' : '') + '" data-atajo="premios">' +
-        mazo +
-        '<span class="renglon-txt"><b class="rg-num" data-cuenta="' + puntos + '">' + miles(puntos) + '</b> puntos<span>' +
-          (alcanzan ? 'Ya te alcanza' + (alcanzan === 1 ? ' 1 premio' : 'n <b class="mazo-n" data-n="' + alcanzan + '">' + alcanzan + '</b> premios')
-           : proximo ? 'Te faltan ' + miles(proximo.falta) + ' puntos para ' + esc(proximo.nombre)
-           : premios.length ? 'Mirá todo el catálogo' : 'Se usan para los premios') +
-        '</span></span>' + icono('flecha') +
-      '</button>';
+    var premiosHtml = premios.length
+      ? '<button type="button" class="renglon toca premios-renglon' + (mazoFotos.length >= 2 ? ' con-mazo' : '') + '" data-atajo="premios">' +
+          mazo +
+          '<span class="renglon-txt">Premios<span>' +
+            (alcanzan ? 'Ya te alcanza' + (alcanzan === 1 ? ' 1 premio' : 'n <b class="mazo-n" data-n="' + alcanzan + '">' + alcanzan + '</b> premios')
+             : proximo ? 'Te faltan ' + miles(proximo.falta) + ' puntos para ' + esc(proximo.nombre)
+             : 'Mirá todo el catálogo') +
+          '</span></span>' + icono('flecha') +
+        '</button>'
+      : '';
 
     /* El nivel, en un renglón (29/09/2026, Mauricio: "más rápido de
        entender"). Lo que da cada nivel, el regalo de cumple y el
@@ -2469,23 +2481,19 @@
       '<button type="button" class="renglon toca nivel-fila" data-atajo="niveles">' +
         '<span class="renglon-ico trofeo ' + claseNivel(nv.nombre) + '">' + icono('trofeo') + '</span>' +
         '<span class="renglon-txt">Nivel ' + esc(nv.nombre) +
-          (nv.sigue
-            ? '<span>' + miles(t.xp) + (nv.hasta_xp ? ' de ' + miles(nv.hasta_xp) : '') + ' para llegar a ' + esc(nv.sigue) + '</span>' +
-              '<span class="barra nivel-barra"><i style="width:' + tramo + '%"></i></span>'
-            : '<span>Nivel más alto · ' + (multi > 1 ? 'sumás ' + coma(multi) + ' puntos por cada $100' : '1 punto por cada $100') + '</span>') +
-        '</span>' +
+          '<span>' + (multi > 1 ? 'Sumás ' + coma(multi) + ' puntos por cada $100' : '1 punto por cada $100') + '</span></span>' +
         icono('flecha') +
       '</button>';
 
-    /* Mi tarjeta, simple: la tarjeta, la Billetera de Google, los premios
-       (con los puntos) y el nivel (con su avance) en un renglón cada uno, y
-       los últimos movimientos. Los carteles (subiste de nivel, cumple, puntos dobles)
+    /* Mi tarjeta, simple: la tarjeta, la Billetera de Google, los dos
+       números, los premios y el nivel en un renglón cada uno, y los últimos
+       movimientos. Los carteles (subiste de nivel, cumple, puntos dobles)
        viven en Inicio: acá se repetían. La fila de premios con fotos se
        fue el 03/10/2026: estaba en Inicio y en el catálogo. */
     var todo =
       carnetHtml(t, nv) +
       walletMiTarjeta() +
-      '<div class="bloque-lineas">' + premiosHtml + nivelHtml + '</div>' +
+      '<div class="bloque-lineas">' + dosNumeros + premiosHtml + nivelHtml + '</div>' +
       movimientosHtml(t) +
       /* Un renglón, no una tarjeta. El aviso de instalar aparece solo al
          entrar y vive abajo, colgado de la barra; esto es nada más que
