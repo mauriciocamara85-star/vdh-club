@@ -34,5 +34,20 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mostrar mi código",
+      "short_name": "Mi código",
+      "description": "El código de barras para mostrar en la caja",
+      "url": "tarjeta.html?abrir=codigo",
+      "icons": [
+        {
+          "src": "atajo-codigo.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

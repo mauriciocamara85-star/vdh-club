@@ -116,7 +116,7 @@
      Ojo con los nombres de color acá: el Club tiene los SUYOS (--linea,
      --hoja, --acc) y no los del Sistema No Compra. Una variable que no
      existe no da error, descarta la propiedad en silencio. */
-  .campana {
+  .campana, .cab-codigo {
     position: relative;
     flex-shrink: 0;
     width: 38px; height: 38px;
@@ -133,6 +133,11 @@
      navegador que no puede notificar tiene que desaparecer de verdad. */
   .campana[hidden] { display: none; }
   .campana:hover { border-color: var(--txt-3); }
+  /* El código de barras, arriba en todas las pantallas (04/10/2026, idea de
+     Mauricio): en la caja se abre con un toque estés donde estés. Barras y
+     no QR: lo que leen las pistolas del local es el código de barras. */
+  .cab-codigo[hidden] { display: none; }
+  .cab-codigo svg { width: 20px; height: 20px; }
   .cab-botones { display: flex; gap: 8px; align-items: center; }
   .campana svg { width: 20px; height: 20px; }
 
@@ -373,17 +378,21 @@
   }
   .btn-codigo svg { width: 22px; height: 22px; }
 
-  /* Google Wallet (03/10/2026): el botón como lo pide Google —negro, la
-     billetera de cuatro colores y "Agregar a Google Wallet"— para que se
-     reconozca de las otras apps. Va siempre negro, también en modo oscuro. */
-  .btn-wallet {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; min-height: 48px; border: 1px solid #747775; border-radius: 999px;
-    background: #1F1F1F; color: #fff; font: 500 15px Roboto, var(--sans); cursor: pointer;
-  }
-  .btn-wallet svg { width: 24px; height: 20px; flex: none; }
-  .btn-wallet[disabled] { opacity: .7; cursor: default; }
-  .wallet-error { margin: -4px 0 0; text-align: center; font-size: 13px; color: var(--txt-2, #5A5750); }
+  /* Google Wallet (04/10/2026): el botón OFICIAL de Google, el de dos
+     renglones en español latino ("Agregar a la Billetera de Google"). Sus
+     reglas no dejan hacer uno propio ni cambiarle color, letra o bordes, y
+     lo revisan antes de dar el acceso para publicar. El ancho de un
+     renglón no entra en un celular angosto sin bajar de 48 px de alto, que
+     es su mínimo; el de dos sí. Los archivos son los suyos, sin tocar:
+     wallet-agregar.svg y wallet-ver.svg. */
+  .wallet-caja { display: grid; justify-items: center; gap: 6px; }
+  .btn-wallet { display: block; border: 0; padding: 0; background: none; border-radius: 999px; cursor: pointer; line-height: 0; }
+  .btn-wallet img { display: block; width: 226px; height: 52px; }
+  .btn-wallet[disabled] { opacity: .6; cursor: default; }
+  .wallet-nota { font-size: 13px; color: var(--txt-2); text-align: center; line-height: 1.4; }
+  .wallet-error { margin: 0; text-align: center; font-size: 13px; color: var(--txt-2, #5A5750); }
+  .dwallet { display: grid; gap: 12px; justify-items: start; }
+  .dwallet p { font-size: 13.5px; color: var(--txt-2); line-height: 1.45; }
 
   .barras {
     background: #fff;
@@ -1431,11 +1440,6 @@
   .num-uni { font-size: 13px; color: var(--txt-2); margin-top: 4px; line-height: 1.4; }
   .num .barra { height: 6px; margin-top: 8px; }
   .aclara { font-size: 13px; color: var(--txt-2); margin: 8px 2px 0; line-height: 1.45; }
-  /* "Puntos para canjear" se toca y abre los premios (03/10/2026: la fila
-     de premios se fue de Mi tarjeta, que los repetía). */
-  .num-ir { font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
-  .num-ir .num-uni { display: inline-flex; align-items: center; gap: 4px; color: var(--txt); font-weight: 600; }
-  .num-ir .num-uni svg { width: 14px; height: 14px; flex: none; }
 
   /* ── El premio que ya se puede llevar ──
      Fondo oliva y la acción a la vista. Si todavía no alcanza, blanco y
@@ -1815,6 +1819,9 @@
          hacer notificaciones: un botón que no hace nada es peor que no
          tenerlo. -->
     <div class="cab-botones">
+      <button type="button" class="cab-codigo toca" id="cabCodigo" data-codigo hidden aria-label="Mostrar mi código">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 5v14M7 5v14M10 5v14M14 5v14M16 5v14M20 5v14"/></svg>
+      </button>
       <button type="button" class="campana" id="campana" hidden
               aria-label="Avisos"></button>
     </div>
@@ -1920,7 +1927,7 @@
     <a class="local-mapa" target="_blank" rel="noopener" data-mapa="1y8koZ_-YOh37JwyQhBwsMvZJ2EZJans"
        href="https://www.google.com/maps/d/viewer?mid=1y8koZ_-YOh37JwyQhBwsMvZJ2EZJans">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>
-      Ver los 14 en el mapa
+      Ver en el mapa
     </a>
 
     <button type="button" class="local-cerca" id="btnCerca">
@@ -2040,6 +2047,10 @@
      manda, y se guarda: así abrir el enlace en otro teléfono también
      funciona. */
   var m = /[?&]c=([0-9]+)/.exec(location.search);
+  /* El atajo de Android (04/10/2026): apretando el ícono de la app aparece
+     "Mostrar mi código" (los shortcuts del tarjeta.webmanifest), que abre
+     tarjeta.html?abrir=codigo. Con la tarjeta pintada, se abre el código. */
+  var abrirCodigoYa = /[?&]abrir=codigo(&|$)/.test(location.search);
   var codigo = m ? m[1] : codigoGuardado();
   if (m) guardarCodigo(m[1]);
 
@@ -2121,9 +2132,8 @@
      juntas: cambiar de pestaña es instantáneo y anda sin señal.
 
      Mi tarjeta: la tarjeta grande con el material del nivel, el código,
-     los dos números con su nombre, el nivel y los movimientos. Los
-     premios se ven en Inicio y en el catálogo ("Puntos para canjear" lleva
-     ahí).
+     los dos números con su nombre, los premios y el nivel en un renglón
+     cada uno, y los movimientos.
 
      Inicio: el resumen. El saludo con los puntos y el código, la novedad,
      el premio, la reseña y la ayuda. Corto a propósito. */
@@ -2152,15 +2162,31 @@
        regalos no cuentan— y canjear no los baja. */
     var dosNumeros =
       '<div><h2 class="solo-lector">Tus puntos</h2><div class="dos">' +
-        '<button type="button" class="num num-ir toca" data-atajo="premios"><span class="num-rot">Puntos para canjear</span>' +
+        '<div class="num"><span class="num-rot">Puntos para canjear</span>' +
           '<span class="num-val" data-cuenta="' + puntos + '">' + miles(puntos) + '</span>' +
-          '<span class="num-uni">Ver los premios' + icono('flecha') + '</span></button>' +
+          '<span class="num-uni">Se usan para los premios</span></div>' +
         '<div class="num num-2"><span class="num-rot">Puntos para subir de nivel</span>' +
           '<span class="num-val">' + miles(t.xp) +
             (nv.hasta_xp ? ' <small>de ' + miles(nv.hasta_xp) + '</small>' : '') + '</span>' +
           '<span class="barra"><i style="width:' + tramo + '%"></i></span>' +
           '<span class="num-uni">' + (nv.sigue ? 'Para llegar a ' + esc(nv.sigue) : 'Nivel más alto') + '</span></div>' +
       '</div></div>';
+
+    /* Los premios, en un renglón como el del nivel (04/10/2026: "Ver los
+       premios" adentro del recuadro de los puntos se perdía). Dice lo que
+       más importa: cuántos ya le alcanzan o cuánto le falta al próximo. */
+    var alcanzan = premios.filter(function (p) { return p.alcanzado && !p.agotado; }).length;
+    var proximo = ordenPremios(premios).filter(function (p) { return !p.alcanzado && !p.agotado; })[0];
+    var premiosHtml = premios.length
+      ? '<button type="button" class="renglon toca premios-renglon" data-atajo="premios">' +
+          '<span class="renglon-ico">' + icono('regalo') + '</span>' +
+          '<span class="renglon-txt">Premios<span>' +
+            (alcanzan ? 'Ya te alcanza' + (alcanzan === 1 ? ' 1 premio' : 'n ' + alcanzan + ' premios')
+             : proximo ? 'Te faltan ' + miles(proximo.falta) + ' puntos para ' + esc(proximo.nombre)
+             : 'Mirá todo el catálogo') +
+          '</span></span>' + icono('flecha') +
+        '</button>'
+      : '';
 
     /* El nivel, en un renglón (29/09/2026, Mauricio: "más rápido de
        entender"). Lo que da cada nivel, el regalo de cumple y el
@@ -2173,16 +2199,16 @@
         icono('flecha') +
       '</button>';
 
-    /* Mi tarjeta, simple: la tarjeta, los dos números, el nivel y los
-       últimos movimientos. Los carteles (subiste de nivel, cumple, puntos
-       dobles) viven en Inicio: acá se repetían. La fila de premios también
-       se fue (03/10/2026): estaban en el carrusel de Inicio y en el
-       catálogo, y acá eran la tercera vez. "Puntos para canjear" lleva al
-       catálogo. */
+    /* Mi tarjeta, simple: la tarjeta, la Billetera de Google, los dos
+       números, los premios y el nivel en un renglón cada uno, y los últimos
+       movimientos. Los carteles (subiste de nivel, cumple, puntos dobles)
+       viven en Inicio: acá se repetían. La fila de premios con fotos se
+       fue el 03/10/2026: estaba en Inicio y en el catálogo. */
     var todo =
       carnetHtml(t, nv) +
-      botonWallet() +
+      walletMiTarjeta() +
       dosNumeros +
+      premiosHtml +
       nivelHtml +
       movimientosHtml(t) +
       /* Un renglón, no una tarjeta. El aviso de instalar aparece solo al
@@ -2200,7 +2226,7 @@
     var primerNombre = String(t.nombre || '').split(' ')[0];
     var inicio =
       '<h1 class="hola">Hola, ' + esc(primerNombre) + '</h1>' +
-      '<div class="carnet-bloque">' + tarjetaInicio(t, nv) + botonCodigo() + botonWallet(true) + '</div>' +
+      '<div class="carnet-bloque">' + tarjetaInicio(t, nv) + botonCodigo() + '</div>' +
       bonus +
       (premios.length ? carruselPremios(t, premios) : '') +
       misionesHtml(t) +
@@ -2209,6 +2235,7 @@
 
     $('todo').innerHTML = todo;
     $('todo').hidden = false;
+    if ($('cabCodigo')) { $('cabCodigo').hidden = !t.codigo; }
     $('cargando').hidden = true;
     $('inicioTodo').innerHTML = inicio;
     engancharCarteles();
@@ -2236,6 +2263,7 @@
     if ($('vCupones') && !$('vCupones').hidden) { pintarCupones(); }
     if ($('vNiveles') && !$('vNiveles').hidden) { pintarNiveles(); }
     if ($('vPremios') && !$('vPremios').hidden) { pintarPremios(); }
+    if (abrirCodigoYa && t.codigo) { abrirCodigoYa = false; abrirCodigo(); }
   }
 
   /* ═══ La tarjeta de Inicio: los accesos, las misiones y las vistas ═════
@@ -2583,23 +2611,36 @@
      el mismo botón dice "Ver en Google Wallet" y abre el pase. */
   var K_WALLET = 'vdh_club_wallet';
   function walletGuardada() { try { return localStorage.getItem(K_WALLET) === '1'; } catch (e) { return false; } }
-  /* enInicio: ya guardada, el botón se va de Inicio (03/10/2026, Mauricio:
-     dos botones negros era mucho) y queda en Mi tarjeta. */
-  function botonWallet(enInicio) {
-    if (esIOS() || (enInicio && walletGuardada())) { return ''; }
-    return '<button type="button" class="btn-wallet toca" data-wallet>' +
-      '<svg viewBox="0 0 24 20" aria-hidden="true">' +
-        '<rect x="1" y="1" width="22" height="8" rx="2.5" fill="#34A853"/>' +
-        '<rect x="1" y="4.5" width="22" height="8" rx="2.5" fill="#FBBC04"/>' +
-        '<rect x="1" y="8" width="22" height="8" rx="2.5" fill="#EA4335"/>' +
-        '<path d="M1 12h6.2a4.8 3.4 0 0 0 9.6 0H23v4.6a2.4 2.4 0 0 1-2.4 2.4H3.4A2.4 2.4 0 0 1 1 16.6z" fill="#4285F4"/>' +
-      '</svg>' + (walletGuardada() ? 'Ver en Google Wallet' : 'Agregar a Google Wallet') + '</button>';
+  /* El botón oficial (ver .btn-wallet). Ya no va en Inicio (04/10/2026:
+     dos botones negros era mucho): queda en Mi tarjeta, debajo de la
+     tarjeta, y en Mis datos como opción, al lado de los avisos. */
+  function botonWallet() {
+    if (esIOS()) { return ''; }
+    var ya = walletGuardada();
+    return '<button type="button" class="btn-wallet toca" data-wallet aria-label="' +
+      (ya ? 'Ver en la Billetera de Google' : 'Agregar a la Billetera de Google') + '">' +
+      '<img src="' + (ya ? 'wallet-ver.svg' : 'wallet-agregar.svg') + '" alt="" width="226" height="52"></button>';
+  }
+  /* En Mi tarjeta, con una línea que dice para qué sirve: el que no sabe
+     qué es la Billetera no toca un botón que no entiende. */
+  function walletMiTarjeta() {
+    var b = botonWallet();
+    if (!b) { return ''; }
+    return '<div class="wallet-caja">' + b +
+      (walletGuardada() ? '' : '<p class="wallet-nota">Tu tarjeta en el celular, sin abrir la app.</p>') + '</div>';
+  }
+  /* Guardada: todos los botones pasan a "Ver en la Billetera". */
+  function marcarWalletGuardada() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-wallet]'), function (b) {
+      b.setAttribute('aria-label', 'Ver en la Billetera de Google');
+      var img = b.querySelector('img'); if (img) { img.src = 'wallet-ver.svg'; }
+      var nota = b.parentNode.querySelector('.wallet-nota'); if (nota) { nota.remove(); }
+    });
   }
   function agregarWallet(b) {
     var t = socioCodigo || {};
     if (!t.codigo || b.disabled) { return; }
-    var antes = b.lastChild.textContent;
-    b.disabled = true; b.lastChild.textContent = 'Abriendo Google Wallet…';
+    b.disabled = true;
     var viejo = b.parentNode.querySelector('.wallet-error');
     if (viejo) { viejo.remove(); }
     fetch(BASE + '/functions/v1/club-wallet', {
@@ -2611,9 +2652,9 @@
       try { localStorage.setItem(K_WALLET, '1'); } catch (e) {}
       location.href = j.url;
       /* Si vuelve con "atrás", el botón tiene que andar otra vez. */
-      setTimeout(function () { b.disabled = false; b.lastChild.textContent = 'Ver en Google Wallet'; }, 2500);
+      setTimeout(function () { b.disabled = false; marcarWalletGuardada(); }, 2500);
     }).catch(function () {
-      b.disabled = false; b.lastChild.textContent = antes;
+      b.disabled = false;
       b.insertAdjacentHTML('afterend', '<p class="wallet-error">No se pudo abrir Google Wallet. Probá de nuevo en un rato.</p>');
     });
   }
@@ -2933,10 +2974,10 @@
   }
 
   /* Los 14 locales en el mapa, sin salir del Club (ver el comentario de
-     "Ver los 14 en el mapa"). */
+     "Ver en el mapa"). */
   function abrirMapa(mid) {
     if (!$('canje') || !mid) { return false; }
-    $('canjeTit').textContent = 'Los 14 locales';
+    $('canjeTit').textContent = 'Nuestros locales';
     $('canjeCuerpo').innerHTML = '<iframe class="mapa-marco" title="Los locales VDH en el mapa" allowfullscreen ' +
       'src="https://www.google.com/maps/d/embed?mid=' + encodeURIComponent(mid) + '&ehbc=1C1C1A' + centroMapa() + '"></iframe>';
     subirHoja('mapa');
@@ -3872,6 +3913,11 @@
           (e === 'no' ? '' : '<button type="button" class="btn btn-claro toca" id="dAvisos">' + (e === 'si' ? 'Cambiar' : 'Ver') + '</button>') +
           '<p id="dAvisosTxt">' + esc(textoAvisos()) + '</p></div>' +
       '</div>' +
+      (botonWallet()
+        ? '<div class="datos-grupo"><h2>Tu tarjeta en el celular</h2><div class="dwallet">' +
+            '<p>Guardala en la Billetera de Google: la abrís sin entrar a la app, los puntos se actualizan solos ' +
+            'y te avisa cuando pasás cerca de un local.</p>' + botonWallet() + '</div></div>'
+        : '') +
       '<button type="button" class="btn toca" id="dGuardar" style="margin-top:4px">Guardar cambios</button>' +
       '<p class="datos-pie">Socio desde ' + esc(mesAnio(d.desde)) + '</p>';
     $('dGuardar').onclick = guardarMisDatos;
