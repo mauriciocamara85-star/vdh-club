@@ -1931,26 +1931,27 @@
   /* min-width 0: sin esto el bloque crece hasta el ancho de todos los
      premios juntos y la página entera se corre de costado. */
   .carru-caja, #inicioTodo > * { min-width: 0; }
-  .carru { min-width: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 62%; gap: 12px; overflow-x: auto;
+  .carru { min-width: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 44%; gap: 10px; overflow-x: auto;
            scroll-snap-type: x mandatory; margin: 0 -20px; padding: 0 20px 4px; scroll-padding: 0 20px; scrollbar-width: none; }
   .carru::-webkit-scrollbar { display: none; }
   .carru-item { scroll-snap-align: start; border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; display: grid; gap: 10px; }
   /* Verticales y con las esquinas casi rectas, como el catálogo
-     (04/10/2026); más angostas (62 %) para que asome la siguiente. */
+     (04/10/2026). Al 44 % del ancho: dos enteros y asoma el tercero; con
+     62 % cada foto era más alta que la tarjeta de puntos. */
   .carru-foto { position: relative; display: block; aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; background: var(--fondo-foto); }
   .carru-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .carru-foto.sin-foto { background: #1C1C1A; color: #F5F3EE; display: grid; place-content: center; justify-items: center; gap: 10px;
-                         padding: 20px; text-align: center; font: 700 22px/1.15 var(--sans); }
-  .carru-foto.sin-foto svg { width: 36px; height: 36px; opacity: .7; }
+                         padding: 14px; text-align: center; font: 700 16px/1.15 var(--sans); }
+  .carru-foto.sin-foto svg { width: 28px; height: 28px; opacity: .7; }
   .carru-txt { display: grid; gap: 2px; }
-  .carru-estado { display: flex; align-items: center; gap: 6px; margin-top: 3px; font: 600 12.5px/1.3 var(--sans); color: var(--txt); }
+  .carru-estado { display: flex; align-items: center; gap: 6px; margin-top: 3px; font: 600 12px/1.3 var(--sans); color: var(--txt); }
   .carru-estado.si { color: var(--ok); }
   .carru-estado.si::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
   .carru-estado.ya { color: var(--txt-3); font-weight: 500; }
   .carru-item .barra { height: 3px; margin-top: 6px; }
   .carru-item .barra i { background: var(--txt); }
-  .carru-nom { display: block; font: 600 16px/1.25 var(--sans); }
-  .carru-pts { display: block; font: 500 13px/1.35 var(--sans); color: var(--txt-2); margin-top: 2px; }
+  .carru-nom { display: block; font: 600 14.5px/1.25 var(--sans); }
+  .carru-pts { display: block; font: 500 12.5px/1.35 var(--sans); color: var(--txt-2); margin-top: 2px; }
   .carru-item.agotado .carru-foto { opacity: .55; }
 </style>
 </head>
