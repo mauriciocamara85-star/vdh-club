@@ -1107,7 +1107,9 @@
   .col-portada small { display: block; font: 600 12px var(--sans); letter-spacing: .18em; text-transform: uppercase; margin-bottom: 8px; opacity: .9; }
   .col-grilla { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 2px; }
   .col-foto { position: relative; display: block; border: 0; padding: 0; background: #e9e7e3 center / cover no-repeat; aspect-ratio: 2 / 3; cursor: default; }
-  .col-foto.ancho { grid-column: 1 / -1; aspect-ratio: 4 / 5; }
+  /* Recortada desde arriba (04/10/2026): al centro, las de cuerpo entero
+     perdían la cara. */
+  .col-foto.ancho { grid-column: 1 / -1; aspect-ratio: 4 / 5; background-position: 50% 15%; }
   .col-foto[data-prod] { cursor: pointer; }
   .col-mas {
     position: absolute; right: 10px; bottom: 10px; width: 30px; height: 30px; border-radius: 50%;
@@ -1316,6 +1318,34 @@
   /* El video de una promo, de fondo, con el velo de abajo encima. */
   .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .hero-velo { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 11, 12, .84) 0%, rgba(10, 11, 12, .5) 24%, rgba(10, 11, 12, 0) 50%); }
+  /* ── La portada que se desliza (04/10/2026, como la app de Adidas) ──
+     Las fotos pasan por detrás; el título, el velo y los rótulos quedan
+     quietos encima y dejan pasar el dedo. De a una por vez
+     (scroll-snap-stop), sin el zoom lento: el movimiento lo da el dedo. */
+  .promo-hero.con-carru { background: #1A1A18; }
+  .con-carru .hero-velo { z-index: 1; pointer-events: none; }
+  .con-carru .promo-marcas { pointer-events: none; }
+  .hc-pista { position: absolute; inset: 0; display: flex; overflow-x: auto; overflow-y: hidden;
+              scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .hc-pista::-webkit-scrollbar { display: none; }
+  .hc-foto { position: relative; flex: 0 0 100%; height: 100%; margin: 0; padding: 0; border: 0; cursor: pointer;
+             scroll-snap-align: start; scroll-snap-stop: always; background: #1A1A18 center / cover no-repeat; }
+  /* La última, si hay más de seis: la séptima foto, apagada, invita a
+     verla entera. */
+  .hc-mas::after { content: ''; position: absolute; inset: 0; background: rgba(10, 11, 12, .5); }
+  .hc-mas-txt { position: absolute; left: 0; right: 0; top: 40%; z-index: 1; display: grid; gap: 8px; justify-items: center;
+                color: #fff; font: 600 13px/1.2 var(--sans); letter-spacing: .18em; text-transform: uppercase; }
+  .hc-mas-txt small { font: 500 14px var(--sans); letter-spacing: 0; text-transform: none; opacity: .85; }
+  /* Las rayitas: en cuál vas. Más finas que puntitos, más de revista. */
+  .hc-rayas { display: flex; gap: 5px; margin-top: 16px; }
+  .hc-rayas i { width: 14px; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, .4);
+                transition: width .3s ease, background-color .3s ease; }
+  .hc-rayas i.on { width: 28px; background: #fff; }
+  /* La pista, una sola vez por teléfono: las fotos se corren un poco y
+     vuelven, y se ve que hay más al costado. */
+  .hc-pista.pista > .hc-foto { animation: hcPista 1.3s cubic-bezier(.45, 0, .2, 1) 1; }
+  @keyframes hcPista { 0%, 100% { transform: none; } 42%, 58% { transform: translateX(-64px); } }
+  @media (prefers-reduced-motion: reduce) { .hc-pista.pista > .hc-foto { animation: none; } .hc-rayas i { transition: none; } }
   .tz-volver { display: inline-flex; align-items: center; gap: 2px; margin: 0 0 10px -4px; padding: 4px; border: 0; background: none; font: 600 14px var(--sans); color: var(--txt-2); cursor: pointer; }
   .tz-volver svg { width: 18px; height: 18px; }
   .tz-titulo { font: 800 clamp(32px, 10vw, 46px)/1 var(--display); letter-spacing: -1.3px; text-transform: uppercase; }
@@ -1631,10 +1661,11 @@
   }
   /* Mi tarjeta sin cajas (04/10/2026): los dos números en una franja
      entre líneas, partida al medio, y Premios y Nivel pegados abajo. */
-  .bloque-lineas { display: grid; }
-  .bloque-lineas .dos { gap: 0; border-top: 1px solid var(--linea); border-bottom: 1px solid var(--linea); }
-  .bloque-lineas .num { background: none; border: 0; border-radius: 0; padding: 18px 14px 18px 2px; }
-  .bloque-lineas .num-2 { border-left: 1px solid var(--linea); padding-left: 18px; }
+  /* 04/10/2026: sin los dos números; Premios (con los puntos) y Nivel (con
+     su barra) entre líneas. */
+  .bloque-lineas { display: grid; border-top: 1px solid var(--linea); }
+  .rg-num { font: 700 22px/1.1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .renglon-txt > .nivel-barra { height: 4px; margin-top: 9px; max-width: 240px; }
   .bloque-lineas .renglon { background: none; border: 0; border-bottom: 1px solid var(--linea); border-radius: 0; padding: 16px 2px; }
   /* Los movimientos, sueltos: la línea de cada uno ya los separa. */
   .movs-lista { padding: 0 2px; }
@@ -1729,24 +1760,21 @@
      accesos redondos. El código queda afuera, abajo, a todo el ancho: es lo
      que se usa en la caja y no puede competir con nada. */
   .hola { font: 700 24px/1.2 var(--sans); letter-spacing: -.3px; }
-  .ti { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); overflow: hidden;
-        box-shadow: 0 1px 2px rgba(28, 28, 26, .06), 0 10px 24px -16px rgba(28, 28, 26, .35); }
-  .ti-franja { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 16px; }
-  .ti-franja span { font: 700 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; }
-  .ti-franja b { font: 600 11.5px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase;
-                 border: 1.5px solid currentColor; border-radius: 999px; padding: 4px 9px; }
-  .ti-franja.nv-plata { background: linear-gradient(135deg, #C9CDD3 0%, #979DA6 45%, #B9BEC5 100%); color: #121417; }
-  .ti-franja.nv-oro { background: linear-gradient(135deg, #EED79E 0%, #C99A3E 45%, #E0BC6C 100%); color: #1A1406; }
-  .ti-franja.nv-platino { background: linear-gradient(135deg, #3A3935 0%, #1A1A18 55%, #46443F 100%); color: #F1EEE7; }
-  .ti-cuerpo { padding: 12px 12px 14px 16px; display: grid; gap: 2px; }
+  /* Sin caja ni franja dorada (04/10/2026, Mauricio: Inicio y Mi tarjeta
+     arrancaban las dos con una tarjeta dorada con "Oro" y los puntos). La
+     tarjeta de verdad está en Mi tarjeta; acá, los puntos sueltos, el
+     nivel con un puntito de su metal y los accesos. */
+  .ti { display: grid; gap: 2px; }
   .ti-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .ti-rot { font: 600 15px var(--sans); }
+  .ti-rot { font: 600 14px var(--sans); color: var(--txt-2); }
+  .ti-nivel { display: inline-flex; align-items: center; gap: 7px; margin-top: 4px; font: 600 14px var(--sans); }
+  .ti-metal { width: 10px; height: 10px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(28, 28, 26, .18); }
   .ti-ver { border: 0; background: none; padding: 4px 0; display: inline-flex; align-items: center; gap: 2px;
             font: 500 14px var(--sans); color: var(--txt); cursor: pointer; }
   .ti-ver svg { width: 16px; height: 16px; }
-  .ti-pts { font: 700 34px/1.1 var(--sans); letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+  .ti-pts { font: 700 46px/1.05 var(--sans); letter-spacing: -1.6px; font-variant-numeric: tabular-nums; }
   .ti-vence { font: 500 13px/1.45 var(--sans); color: var(--mal-txt); }
-  .ti-acc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: 10px; }
+  .ti-acc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--linea); }
   .ti-btn { border: 0; background: none; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 5px;
             font: 500 11.5px/1.2 var(--sans); letter-spacing: -.1px; color: var(--txt); text-align: center; position: relative; }
   .ti-ico { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
@@ -2384,22 +2412,6 @@
       ? Math.max(0, Math.min(100, Math.round((t.xp || 0) * 100 / nv.hasta_xp)))
       : 100;
 
-    /* Los dos números, lado a lado y con nombre propio. "501 puntos" y
-       "1 / 4.000" en la misma pantalla y el cliente no sabía cuál era cuál:
-       los de canjear se gastan; los del nivel son sólo de compras —los
-       regalos no cuentan— y canjear no los baja. */
-    var dosNumeros =
-      '<div><h2 class="solo-lector">Tus puntos</h2><div class="dos">' +
-        '<div class="num"><span class="num-rot">Puntos para canjear</span>' +
-          '<span class="num-val" data-cuenta="' + puntos + '">' + miles(puntos) + '</span>' +
-          '<span class="num-uni">Se usan para los premios</span></div>' +
-        '<div class="num num-2"><span class="num-rot">Puntos para subir de nivel</span>' +
-          '<span class="num-val">' + miles(t.xp) +
-            (nv.hasta_xp ? ' <small>de ' + miles(nv.hasta_xp) + '</small>' : '') + '</span>' +
-          '<span class="barra"><i style="width:' + tramo + '%"></i></span>' +
-          '<span class="num-uni">' + (nv.sigue ? 'Para llegar a ' + esc(nv.sigue) : 'Nivel más alto') + '</span></div>' +
-      '</div></div>';
-
     /* Los premios, en un renglón como el del nivel (04/10/2026: "Ver los
        premios" adentro del recuadro de los puntos se perdía). Dice lo que
        más importa: cuántos ya le alcanzan o cuánto le falta al próximo. */
@@ -2416,16 +2428,21 @@
           return '<span class="mazo-carta" data-pos="' + (l.length - 1 - k) + '"><img src="' + esc(f) + '" alt="" decoding="async"></span>';
         }).join('') + '</span>'
       : '<span class="renglon-ico">' + icono('regalo') + '</span>';
-    var premiosHtml = premios.length
-      ? '<button type="button" class="renglon toca premios-renglon' + (mazoFotos.length >= 2 ? ' con-mazo' : '') + '" data-atajo="premios">' +
-          mazo +
-          '<span class="renglon-txt">Premios<span>' +
-            (alcanzan ? 'Ya te alcanza' + (alcanzan === 1 ? ' 1 premio' : 'n <b class="mazo-n" data-n="' + alcanzan + '">' + alcanzan + '</b> premios')
-             : proximo ? 'Te faltan ' + miles(proximo.falta) + ' puntos para ' + esc(proximo.nombre)
-             : 'Mirá todo el catálogo') +
-          '</span></span>' + icono('flecha') +
-        '</button>'
-      : '';
+    /* Los puntos para canjear, en el renglón de los premios (04/10/2026,
+       Mauricio: Mi tarjeta repetía Inicio). Son para eso: el número
+       arriba y abajo lo que ya le alcanza. Los del nivel van en el renglón
+       del nivel, con su barra: cada número al lado de lo que mide, y así
+       no se confunden (los de canjear se gastan; los del nivel son sólo de
+       compras y canjear no los baja). */
+    var premiosHtml =
+      '<button type="button" class="renglon toca premios-renglon' + (mazoFotos.length >= 2 ? ' con-mazo' : '') + '" data-atajo="premios">' +
+        mazo +
+        '<span class="renglon-txt"><b class="rg-num" data-cuenta="' + puntos + '">' + miles(puntos) + '</b> puntos<span>' +
+          (alcanzan ? 'Ya te alcanza' + (alcanzan === 1 ? ' 1 premio' : 'n <b class="mazo-n" data-n="' + alcanzan + '">' + alcanzan + '</b> premios')
+           : proximo ? 'Te faltan ' + miles(proximo.falta) + ' puntos para ' + esc(proximo.nombre)
+           : premios.length ? 'Mirá todo el catálogo' : 'Se usan para los premios') +
+        '</span></span>' + icono('flecha') +
+      '</button>';
 
     /* El nivel, en un renglón (29/09/2026, Mauricio: "más rápido de
        entender"). Lo que da cada nivel, el regalo de cumple y el
@@ -2434,19 +2451,23 @@
       '<button type="button" class="renglon toca nivel-fila" data-atajo="niveles">' +
         '<span class="renglon-ico trofeo ' + claseNivel(nv.nombre) + '">' + icono('trofeo') + '</span>' +
         '<span class="renglon-txt">Nivel ' + esc(nv.nombre) +
-          '<span>' + (multi > 1 ? 'Sumás ' + coma(multi) + ' puntos por cada $100' : '1 punto por cada $100') + '</span></span>' +
+          (nv.sigue
+            ? '<span>' + miles(t.xp) + (nv.hasta_xp ? ' de ' + miles(nv.hasta_xp) : '') + ' para llegar a ' + esc(nv.sigue) + '</span>' +
+              '<span class="barra nivel-barra"><i style="width:' + tramo + '%"></i></span>'
+            : '<span>Nivel más alto · ' + (multi > 1 ? 'sumás ' + coma(multi) + ' puntos por cada $100' : '1 punto por cada $100') + '</span>') +
+        '</span>' +
         icono('flecha') +
       '</button>';
 
-    /* Mi tarjeta, simple: la tarjeta, la Billetera de Google, los dos
-       números, los premios y el nivel en un renglón cada uno, y los últimos
-       movimientos. Los carteles (subiste de nivel, cumple, puntos dobles)
+    /* Mi tarjeta, simple: la tarjeta, la Billetera de Google, los premios
+       (con los puntos) y el nivel (con su avance) en un renglón cada uno, y
+       los últimos movimientos. Los carteles (subiste de nivel, cumple, puntos dobles)
        viven en Inicio: acá se repetían. La fila de premios con fotos se
        fue el 03/10/2026: estaba en Inicio y en el catálogo. */
     var todo =
       carnetHtml(t, nv) +
       walletMiTarjeta() +
-      '<div class="bloque-lineas">' + dosNumeros + premiosHtml + nivelHtml + '</div>' +
+      '<div class="bloque-lineas">' + premiosHtml + nivelHtml + '</div>' +
       movimientosHtml(t) +
       /* Un renglón, no una tarjeta. El aviso de instalar aparece solo al
          entrar y vive abajo, colgado de la barra; esto es nada más que
@@ -2533,11 +2554,10 @@
         '<span class="ti-ico">' + icono(ico) + '</span>' + txt + (extra || '') + '</button>';
     };
     return '<div class="ti">' +
-      '<div class="ti-franja ' + claseNivel(nv.nombre) + '"><span>VDH Club</span><b>Nivel ' + esc(nv.nombre) + '</b></div>' +
-      '<div class="ti-cuerpo">' +
         '<div class="ti-fila"><span class="ti-rot">Puntos disponibles</span>' +
           '<button type="button" class="ti-ver" data-atajo="tarjeta">Ver mi tarjeta' + icono('flecha') + '</button></div>' +
         '<b class="ti-pts" data-cuenta="' + (t.puntos || 0) + '">' + miles(t.puntos || 0) + '</b>' +
+        '<span class="ti-nivel"><i class="ti-metal ' + claseNivel(nv.nombre) + '"></i>Nivel ' + esc(nv.nombre) + '</span>' +
         /* El vencimiento, acá sólo cuando se acerca: dos meses antes. Antes
            de eso está en Mi tarjeta y en Niveles, sin apurar a nadie. */
         (faltan !== null && faltan >= 0 && faltan <= 60
@@ -2549,7 +2569,7 @@
           boton('cupones', 'ticket', 'Mis cupones', cupones ? '<span class="ti-cuenta">' + cupones + '</span>' : '') +
           boton('niveles', 'trofeo', 'Niveles') +
         '</div>' +
-      '</div></div>';
+      '</div>';
   }
 
   /* "Sumá más puntos": las misiones que le faltan, hasta tres. La de
@@ -4830,14 +4850,13 @@
       : urge ? '<span class="promo-reloj">' + icono('reloj') + '<span>' + urge + '</span></span>' : '';
     /* "Sólo socios" (SQL 38) o "Socios Oro y Platino" (SQL 39). */
     var solo = rotuloPromo(p);
-    var gal = p.galeria && p.galeria.length;
-    /* Toda la foto se toca: la colección, o la hoja de la promo (dónde,
-       hasta cuándo, condiciones y su enlace). Sin botones encima. */
-    var toque = gal
-      ? '<button type="button" class="hero-toque" data-coleccion="' + i + '" aria-label="Ver la colección ' + esc(p.texto) + '"></button>'
-      : '<button type="button" class="hero-toque" data-cond="' + i + '" aria-label="' + esc(p.texto) + '"></button>';
     /* Con video (SQL 45): de fondo, con la foto mientras carga y su velo. */
     var vid = videoHtml(p.video, p.imagen, 'hero-video');
+    /* Con colección, la portada se desliza (heroCarru). */
+    if (p.galeria && p.galeria.length) { return heroCarru(p, i, solo + cuenta, vid); }
+    /* Toda la foto se toca: la hoja de la promo (dónde, hasta cuándo,
+       condiciones y su enlace). Sin botones encima. */
+    var toque = '<button type="button" class="hero-toque" data-cond="' + i + '" aria-label="' + esc(p.texto) + '"></button>';
     return '<article class="promo-hero ' + (p.imagen || vid ? 'con-foto' : 'en-carbon') + '"' + estilo + '>' +
       (vid ? vid + '<span class="hero-velo"></span>' : '') + toque +
       (solo || cuenta ? '<div class="promo-marcas">' + solo + cuenta + '</div>' : '') +
@@ -4846,6 +4865,90 @@
         '<div class="hero-tit">' + esc(p.texto) + '</div>' +
       '</div>' +
     '</article>';
+  }
+
+  /* La colección se mira sin entrar (04/10/2026, Mauricio, como en la app
+     de Adidas): la portada se desliza de costado y pasan sus fotos, hasta
+     seis; si hay más, la séptima invita a verla entera. El título queda
+     quieto y las rayitas dicen en cuál vas. Sólo la primera foto se pide al
+     pintar: las demás, cuando hacen falta (carruHeros). Tocar cualquiera
+     abre la colección. Con video, el video va en la primera. */
+  var CARRU_MAX = 6;
+  function heroCarru(p, i, marcas, vid) {
+    var fotos = [];
+    if (p.imagen) { fotos.push(p.imagen); }
+    p.galeria.forEach(function (g) { if (g && g.foto && fotos.indexOf(g.foto) < 0) { fotos.push(g.foto); } });
+    var mas = fotos.length > CARRU_MAX;
+    var lista = fotos.slice(0, CARRU_MAX + (mas ? 1 : 0));
+    var pasan = lista.map(function (f, k) {
+      var ultima = mas && k === CARRU_MAX;
+      return '<button type="button" class="hc-foto' + (ultima ? ' hc-mas' : '') + '" data-coleccion="' + i + '"' +
+        (k ? ' data-foto="' + esc(f) + '"' : ' style="background-image:url(&quot;' + esc(f) + '&quot;)"') +
+        ' aria-label="' + (ultima ? 'Ver toda la colección' : 'Ver la colección ' + esc(p.texto) + ', foto ' + (k + 1)) + '">' +
+        (k === 0 && vid ? vid : '') +
+        (ultima ? '<span class="hc-mas-txt">Ver toda la colección<small>' + fotos.length + ' fotos</small></span>' : '') +
+      '</button>';
+    }).join('');
+    return '<article class="promo-hero con-carru">' +
+      '<div class="hc-pista">' + pasan + '</div>' +
+      '<span class="hero-velo"></span>' +
+      (marcas ? '<div class="promo-marcas">' + marcas + '</div>' : '') +
+      '<div class="hero-pie">' +
+        (p.sobre ? '<span class="hero-sobre">' + esc(p.sobre) + '</span>' : '') +
+        '<div class="hero-tit">' + esc(p.texto) + '</div>' +
+        (lista.length > 1 ? '<div class="hc-rayas" aria-hidden="true">' + lista.map(function (f, k) { return '<i' + (k ? '' : ' class="on"') + '></i>'; }).join('') + '</div>' : '') +
+      '</div>' +
+    '</article>';
+  }
+
+  /* Una foto que esperaba en data-foto, a la vista. */
+  function ponerFoto(el) {
+    if (!el || !el.getAttribute('data-foto')) { return; }
+    el.style.backgroundImage = 'url("' + el.getAttribute('data-foto').replace(/"/g, '%22') + '")';
+    el.removeAttribute('data-foto');
+  }
+
+  /* El carrusel: la segunda foto se pide cuando la portada aparece (así el
+     primer deslizar ya la encuentra), las demás al empezar a deslizar. Las
+     rayitas siguen al dedo. La pista, una vez por teléfono y con la
+     portada bien a la vista. */
+  var obsCarru = null, K_CARRU_PISTA = 'vdh_club_carru_pista';
+  function carruHeros(caja) {
+    Array.prototype.forEach.call((caja || document).querySelectorAll('.hc-pista'), function (pista) {
+      if (pista.children.length < 2) { return; }
+      var rayas = pista.parentNode.querySelectorAll('.hc-rayas i'), todas = false, k0 = 0;
+      pista.addEventListener('scroll', function () {
+        if (!todas) { todas = true; Array.prototype.forEach.call(pista.children, ponerFoto); }
+        var k = Math.round(pista.scrollLeft / (pista.clientWidth || 1));
+        if (k !== k0) {
+          k0 = k;
+          Array.prototype.forEach.call(rayas, function (r, j) { r.classList.toggle('on', j === k); });
+        }
+      }, { passive: true });
+      if (!window.IntersectionObserver) { ponerFoto(pista.children[1]); return; }
+      if (!obsCarru) {
+        obsCarru = new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (!e.isIntersecting) { return; }
+            ponerFoto(e.target.children[1]);
+            if (e.intersectionRatio >= 0.6) { obsCarru.unobserve(e.target); darPistaCarru(e.target); }
+          });
+        }, { threshold: [0, 0.6] });
+      }
+      obsCarru.observe(pista);
+    });
+  }
+  function darPistaCarru(pista) {
+    try {
+      if (localStorage.getItem(K_CARRU_PISTA)) { return; }
+      if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+      localStorage.setItem(K_CARRU_PISTA, '1');
+    } catch (e) { return; }
+    setTimeout(function () {
+      if (pista.scrollLeft > 0) { return; }
+      pista.classList.add('pista');
+      setTimeout(function () { pista.classList.remove('pista'); }, 1400);
+    }, 900);
   }
 
   function abrirColeccion(p) {
@@ -4864,14 +4967,14 @@
       '<div class="col-cab"><button type="button" id="colX" aria-label="Volver">' + icono('volver') + '</button><b>Colección</b></div>' +
       '<div class="col-portada" style="background-image:url(&quot;' + esc(p.imagen || p.galeria[0].foto) + '&quot;)"><div>' +
         (p.sobre ? '<small>' + esc(p.sobre) + '</small>' : '') + '<b>' + esc(p.texto) + '</b>' +
-        '<span class="col-dato">' + esc(dondeTexto(p)) + (p.hasta ? ' · Hasta el ' + fecha(p.hasta) : '') +
+        '<span class="col-dato">' + esc(dondeTexto(p)) + (p.hasta && diasHasta(p.hasta) <= 45 ? ' · Hasta el ' + fecha(p.hasta) : '') +
           (quedan(p.hasta) ? ' · <span class="urge">' + quedan(p.hasta) + '</span>' : '') + '</span>' +
       '</div></div>' +
       '<div class="col-grilla">' + p.galeria.map(function (g, k) {
         /* El ritmo: una a lo ancho, dos juntas. */
         var ancho = k % 3 === 0, pr = online && g.producto && deId(g.producto);
         return '<button type="button" class="col-foto' + (ancho ? ' ancho' : '') + '"' + (pr ? ' data-prod="' + esc(g.producto) + '" aria-label="' + esc(pr.nombre) + '"' : ' tabindex="-1"') +
-          ' style="background-image:url(&quot;' + esc(g.foto) + '&quot;)">' + (pr ? '<span class="col-mas">' + icono('mas') + '</span>' : '') + '</button>';
+          ' data-foto="' + esc(g.foto) + '">' + (pr ? '<span class="col-mas">' + icono('mas') + '</span>' : '') + '</button>';
       }).join('') + '</div>' +
       '<div class="col-pie">' +
         (p.condiciones ? '<p>' + esc(p.condiciones) + '</p>' : '') +
@@ -4879,6 +4982,18 @@
         (p.donde !== 'online' ? '<button type="button" class="btn' + (online && p.enlace ? ' btn-claro' : '') + '" id="colLocales">Ver locales</button>' : '') +
       '</div>';
     capa.hidden = false; capa.scrollTop = 0;
+    /* Las fotos, a medida que se baja (04/10/2026): la colección nueva son
+       40, y abrirla no tiene que descargarlas todas. Un poco antes de que
+       lleguen, así no se ven en blanco. */
+    var fotosCol = capa.querySelectorAll('.col-foto[data-foto]');
+    if (window.IntersectionObserver) {
+      var obsCol = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) { ponerFoto(e.target); obsCol.unobserve(e.target); } });
+      }, { root: capa, rootMargin: '0px 0px 900px 0px' });
+      Array.prototype.forEach.call(fotosCol, function (b) { obsCol.observe(b); });
+    } else {
+      Array.prototype.forEach.call(fotosCol, ponerFoto);
+    }
     try { history.pushState({ v: vistaActual(), coleccion: true }, '', location.pathname + location.search + location.hash); } catch (e) {}
     $('colX').onclick = function () { cerrarColeccion(false); };
     /* A los locales: la entrada de la colección pasa a ser la de Locales,
@@ -4985,6 +5100,7 @@
             '<p class="vacio">Cuando haya una, te la mostramos acá. Mientras tanto, tus ' +
             'compras siguen sumando puntos.</p></div>');
       arrancarVideos(caja);
+      carruHeros(caja);
     };
 
     /* Los puntos extra se piden cada vez que se entra: una hora feliz
