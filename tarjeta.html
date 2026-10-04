@@ -1539,7 +1539,7 @@
   .ti-vence { font: 500 13px/1.45 var(--sans); color: var(--mal-txt); }
   .ti-acc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: 10px; }
   .ti-btn { border: 0; background: none; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 5px;
-            font: 500 11.5px/1.2 var(--sans); letter-spacing: -.1px; color: var(--txt); text-align: center; position: relative; white-space: nowrap; }
+            font: 500 11.5px/1.2 var(--sans); letter-spacing: -.1px; color: var(--txt); text-align: center; position: relative; }
   .ti-ico { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
             background: var(--hoja); border: 1px solid var(--linea); box-shadow: 0 2px 6px -2px rgba(28, 28, 26, .18); }
   .ti-ico svg { width: 22px; height: 22px; }
@@ -1785,7 +1785,10 @@
                background: var(--hoja); border-top: 1px solid var(--linea); }
 
   /* ── "Canjeá tus puntos" en Inicio: el carrusel de premios ── */
-  .carru { display: grid; grid-auto-flow: column; grid-auto-columns: 74%; gap: 12px; overflow-x: auto;
+  /* min-width 0: sin esto el bloque crece hasta el ancho de todos los
+     premios juntos y la página entera se corre de costado. */
+  .carru-caja, #inicioTodo > * { min-width: 0; }
+  .carru { min-width: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 74%; gap: 12px; overflow-x: auto;
            scroll-snap-type: x mandatory; margin: 0 -20px; padding: 0 20px 4px; scroll-padding: 0 20px; scrollbar-width: none; }
   .carru::-webkit-scrollbar { display: none; }
   .carru-item { scroll-snap-align: start; border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; display: grid; gap: 10px; }
@@ -2694,7 +2697,7 @@
       if (ga !== gb) { return ga - gb; }
       return ga === 0 ? b.puntos - a.puntos : (a.falta || 0) - (b.falta || 0);
     });
-    return '<div><div class="sec-cab"><h2>Canjeá tus puntos</h2>' +
+    return '<div class="carru-caja"><div class="sec-cab"><h2>Canjeá tus puntos</h2>' +
         '<button type="button" class="movs-ver" data-atajo="premios">Ver todos</button></div>' +
       '<div class="carru" tabindex="0" aria-label="Premios">' +
         orden.map(function (p) {
