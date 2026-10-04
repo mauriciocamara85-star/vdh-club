@@ -429,6 +429,33 @@
     .carnet-giro { transform: none; }
   }
 
+  /* ── Premios en Mi tarjeta: el mazo (04/10/2026) ──
+     Tres fotos de premios como cartas. Juntas al pintar; .abierto las abre
+     en abanico, escalonadas. Cada carta va a su lugar según data-pos (0 =
+     atrás, 2 = adelante); .sale es la de adelante yéndose al barajar. */
+  .premios-renglon.con-mazo { padding-top: 14px; padding-bottom: 14px; }
+  .mazo { position: relative; flex: none; width: 74px; height: 58px; }
+  .mazo-carta { position: absolute; left: 13px; top: 2px; width: 46px; height: 54px; border-radius: 10px; overflow: hidden;
+                background: var(--fondo-foto); border: 2px solid var(--hoja);
+                box-shadow: 0 6px 14px -6px rgba(28, 28, 26, .45);
+                transform-origin: 50% 92%;
+                transition: transform .75s cubic-bezier(.2, .85, .25, 1.1), opacity .35s ease; }
+  .mazo-carta img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .mazo-carta[data-pos="0"] { z-index: 1; }
+  .mazo-carta[data-pos="1"] { z-index: 2; }
+  .mazo-carta[data-pos="2"] { z-index: 3; }
+  .mazo.abierto .mazo-carta[data-pos="0"] { transform: translateX(-12px) rotate(-12deg); transition-delay: .05s; }
+  .mazo.abierto .mazo-carta[data-pos="1"] { transform: translateX(0) rotate(-2deg); transition-delay: .13s; }
+  .mazo.abierto .mazo-carta[data-pos="2"] { transform: translateX(12px) rotate(9deg); transition-delay: .21s; }
+  /* Con dos fotos: atrás y adelante. */
+  .mazo.de-2.abierto .mazo-carta[data-pos="0"] { transform: translateX(-8px) rotate(-8deg); }
+  .mazo.de-2.abierto .mazo-carta[data-pos="1"] { transform: translateX(8px) rotate(7deg); }
+  .mazo.abierto .mazo-carta.sale { transform: translateX(30px) translateY(8px) rotate(20deg); opacity: 0; transition-delay: 0s; }
+  .mazo-n { font-weight: 700; color: var(--txt); font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) {
+    .mazo-carta { transition: none; }
+  }
+
   /* ── Los festejos (04/10/2026) ──
      Un aviso arriba y papelitos con los colores de la marca: sumaste
      puntos, subiste de nivel, te llevaste un premio, tu cumple. Una vez
@@ -2277,11 +2304,22 @@
        más importa: cuántos ya le alcanzan o cuánto le falta al próximo. */
     var alcanzan = premios.filter(function (p) { return p.alcanzado && !p.agotado; }).length;
     var proximo = ordenPremios(premios).filter(function (p) { return !p.alcanzado && !p.agotado; })[0];
+    /* El mazo (04/10/2026): las fotos de los premios, los que le alcanzan
+       primero. Con menos de dos fotos queda el ícono del regalo. */
+    mazoFotos = ordenPremios(premios).filter(function (p) { return p.imagen && !p.agotado; })
+      .sort(function (a, b) { return (b.alcanzado ? 1 : 0) - (a.alcanzado ? 1 : 0); })
+      .map(function (p) { return p.imagen; });
+    mazoSigue = 3;
+    var mazo = mazoFotos.length >= 2
+      ? '<span class="mazo de-' + Math.min(3, mazoFotos.length) + '" aria-hidden="true">' + mazoFotos.slice(0, 3).map(function (f, k, l) {
+          return '<span class="mazo-carta" data-pos="' + (l.length - 1 - k) + '"><img src="' + esc(f) + '" alt="" decoding="async"></span>';
+        }).join('') + '</span>'
+      : '<span class="renglon-ico">' + icono('regalo') + '</span>';
     var premiosHtml = premios.length
-      ? '<button type="button" class="renglon toca premios-renglon" data-atajo="premios">' +
-          '<span class="renglon-ico">' + icono('regalo') + '</span>' +
+      ? '<button type="button" class="renglon toca premios-renglon' + (mazoFotos.length >= 2 ? ' con-mazo' : '') + '" data-atajo="premios">' +
+          mazo +
           '<span class="renglon-txt">Premios<span>' +
-            (alcanzan ? 'Ya te alcanza' + (alcanzan === 1 ? ' 1 premio' : 'n ' + alcanzan + ' premios')
+            (alcanzan ? 'Ya te alcanza' + (alcanzan === 1 ? ' 1 premio' : 'n <b class="mazo-n" data-n="' + alcanzan + '">' + alcanzan + '</b> premios')
              : proximo ? 'Te faltan ' + miles(proximo.falta) + ' puntos para ' + esc(proximo.nombre)
              : 'Mirá todo el catálogo') +
           '</span></span>' + icono('flecha') +
@@ -2337,6 +2375,7 @@
     $('todo').innerHTML = todo;
     $('todo').hidden = false;
     if ($('cabCodigo')) { $('cabCodigo').hidden = !t.codigo; }
+    if ($('vTarjeta') && !$('vTarjeta').hidden) { abrirMazo(); }
     $('cargando').hidden = true;
     $('inicioTodo').innerHTML = inicio;
     engancharCarteles();
@@ -2844,6 +2883,59 @@
     }
     l.push({ txt: 'Socio desde ' + mesAnio(t.desde) + '. Gracias por elegirnos.' });
     return l;
+  }
+
+  /* ── El mazo de premios ──
+     abrirMazo: las cartas arrancan juntas y se abren en abanico (el CSS
+     escalona cada una). barajar: la de adelante se va, vuelve atrás con
+     la foto del premio que sigue y las otras dos pasan adelante. */
+  var mazoFotos = [], mazoSigue = 3, relojMazo = null;
+  function mazoQuieto() {
+    try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+  }
+  function abrirMazo() {
+    var m = document.querySelector('#todo .mazo');
+    if (!m) { return; }
+    m.classList.remove('abierto');
+    void m.offsetWidth;
+    requestAnimationFrame(function () { requestAnimationFrame(function () { m.classList.add('abierto'); }); });
+    /* "Ya te alcanzan 5": el número cuenta desde 0. */
+    var n = document.querySelector('#todo .mazo-n');
+    if (n && !mazoQuieto()) {
+      var fin = Number(n.getAttribute('data-n')) || 0, t0 = null;
+      var paso = function (ts) {
+        if (!t0) { t0 = ts; }
+        var k = Math.min(1, (ts - t0) / 650);
+        n.textContent = String(Math.round(fin * (1 - Math.pow(1 - k, 3))));
+        if (k < 1) { requestAnimationFrame(paso); }
+      };
+      n.textContent = '0';
+      requestAnimationFrame(paso);
+    }
+    if (!relojMazo && !mazoQuieto()) { relojMazo = setInterval(barajar, 4000); }
+  }
+  function barajar() {
+    var m = document.querySelector('#todo .mazo.abierto');
+    if (!m || document.hidden || !$('vTarjeta') || $('vTarjeta').hidden) { return; }
+    var cartas = m.querySelectorAll('.mazo-carta');
+    if (cartas.length < 2) { return; }
+    var tope = cartas.length - 1;
+    var frente = m.querySelector('.mazo-carta[data-pos="' + tope + '"]');
+    if (!frente) { return; }
+    frente.classList.add('sale');
+    setTimeout(function () {
+      Array.prototype.forEach.call(cartas, function (c) {
+        if (c !== frente) { c.setAttribute('data-pos', String(Number(c.getAttribute('data-pos')) + 1)); }
+      });
+      /* Si hay más premios que cartas, la que vuelve trae el que sigue. */
+      if (mazoFotos.length > cartas.length) {
+        var img = frente.querySelector('img');
+        if (img) { img.src = mazoFotos[mazoSigue % mazoFotos.length]; }
+        mazoSigue++;
+      }
+      frente.setAttribute('data-pos', '0');
+      frente.classList.remove('sale');
+    }, 420);
   }
 
   var K_DORSO = 'vdh_club_dorso';
@@ -4408,6 +4500,7 @@
     if (v === 'niveles') pintarNiveles();
     if (v === 'movs') pintarMovs();
     if (v === 'premios') pintarPremios();
+    if (v === 'tarjeta') abrirMazo();
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('.tab[data-vista]'), function (b) {
