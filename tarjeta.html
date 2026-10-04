@@ -1773,21 +1773,26 @@
      accesos redondos. El código queda afuera, abajo, a todo el ancho: es lo
      que se usa en la caja y no puede competir con nada. */
   .hola { font: 700 24px/1.2 var(--sans); letter-spacing: -.3px; }
-  /* Sin caja ni franja dorada (04/10/2026, Mauricio: Inicio y Mi tarjeta
-     arrancaban las dos con una tarjeta dorada con "Oro" y los puntos). La
-     tarjeta de verdad está en Mi tarjeta; acá, los puntos sueltos, el
-     nivel con un puntito de su metal y los accesos. */
-  .ti { display: grid; gap: 2px; }
+  /* La caja dorada se probó sacar el 04/10/2026 y Mauricio la quiso de
+     vuelta: el dorado arriba le da a Inicio la cara del club. */
+  .ti { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); overflow: hidden;
+        box-shadow: 0 1px 2px rgba(28, 28, 26, .06), 0 10px 24px -16px rgba(28, 28, 26, .35); }
+  .ti-franja { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 16px; }
+  .ti-franja span { font: 700 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; }
+  .ti-franja b { font: 600 11.5px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase;
+                 border: 1.5px solid currentColor; border-radius: 999px; padding: 4px 9px; }
+  .ti-franja.nv-plata { background: linear-gradient(135deg, #C9CDD3 0%, #979DA6 45%, #B9BEC5 100%); color: #121417; }
+  .ti-franja.nv-oro { background: linear-gradient(135deg, #EED79E 0%, #C99A3E 45%, #E0BC6C 100%); color: #1A1406; }
+  .ti-franja.nv-platino { background: linear-gradient(135deg, #3A3935 0%, #1A1A18 55%, #46443F 100%); color: #F1EEE7; }
+  .ti-cuerpo { padding: 12px 12px 14px 16px; display: grid; gap: 2px; }
   .ti-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .ti-rot { font: 600 14px var(--sans); color: var(--txt-2); }
-  .ti-nivel { display: inline-flex; align-items: center; gap: 7px; margin-top: 4px; font: 600 14px var(--sans); }
-  .ti-metal { width: 10px; height: 10px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(28, 28, 26, .18); }
+  .ti-rot { font: 600 15px var(--sans); }
   .ti-ver { border: 0; background: none; padding: 4px 0; display: inline-flex; align-items: center; gap: 2px;
             font: 500 14px var(--sans); color: var(--txt); cursor: pointer; }
   .ti-ver svg { width: 16px; height: 16px; }
-  .ti-pts { font: 700 46px/1.05 var(--sans); letter-spacing: -1.6px; font-variant-numeric: tabular-nums; }
+  .ti-pts { font: 700 34px/1.1 var(--sans); letter-spacing: -1px; font-variant-numeric: tabular-nums; }
   .ti-vence { font: 500 13px/1.45 var(--sans); color: var(--mal-txt); }
-  .ti-acc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--linea); }
+  .ti-acc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: 10px; }
   .ti-btn { border: 0; background: none; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 5px;
             font: 500 11.5px/1.2 var(--sans); letter-spacing: -.1px; color: var(--txt); text-align: center; position: relative; }
   .ti-ico { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
@@ -2567,10 +2572,11 @@
         '<span class="ti-ico">' + icono(ico) + '</span>' + txt + (extra || '') + '</button>';
     };
     return '<div class="ti">' +
+      '<div class="ti-franja ' + claseNivel(nv.nombre) + '"><span>VDH Club</span><b>Nivel ' + esc(nv.nombre) + '</b></div>' +
+      '<div class="ti-cuerpo">' +
         '<div class="ti-fila"><span class="ti-rot">Puntos disponibles</span>' +
           '<button type="button" class="ti-ver" data-atajo="tarjeta">Ver mi tarjeta' + icono('flecha') + '</button></div>' +
         '<b class="ti-pts" data-cuenta="' + (t.puntos || 0) + '">' + miles(t.puntos || 0) + '</b>' +
-        '<span class="ti-nivel"><i class="ti-metal ' + claseNivel(nv.nombre) + '"></i>Nivel ' + esc(nv.nombre) + '</span>' +
         /* El vencimiento, acá sólo cuando se acerca: dos meses antes. Antes
            de eso está en Mi tarjeta y en Niveles, sin apurar a nadie. */
         (faltan !== null && faltan >= 0 && faltan <= 60
@@ -2582,7 +2588,7 @@
           boton('cupones', 'ticket', 'Mis cupones', cupones ? '<span class="ti-cuenta">' + cupones + '</span>' : '') +
           boton('niveles', 'trofeo', 'Niveles') +
         '</div>' +
-      '</div>';
+      '</div></div>';
   }
 
   /* "Sumá más puntos": las misiones que le faltan, hasta tres. La de
