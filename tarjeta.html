@@ -1410,6 +1410,14 @@
   .lm-nom { position: absolute; top: -13px; left: 14px; max-width: calc(100% - 28px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
             padding: 6px 14px; border-radius: 999px; background: #1C1C1A; color: #fff; font: 700 14px/1.2 var(--sans); }
   .lm-zona { font-size: 12.5px; color: var(--txt-3); margin-top: -2px; }
+  /* "Tu local": dorada, montada sobre el borde a la derecha. */
+  .lm-tuyo { position: absolute; top: -11px; right: 14px; padding: 5px 11px; border-radius: 999px;
+             background: linear-gradient(135deg, #EED79E, #B8872E); color: #1A1406;
+             font: 700 11px/1.2 var(--sans); letter-spacing: .06em; text-transform: uppercase; }
+  .lm-tarjeta.es-tuyo .lm-nom { max-width: calc(100% - 130px); }
+  .local-tuyo { display: inline-block; vertical-align: 2px; margin-left: 8px; padding: 3px 9px; border-radius: 999px;
+                background: linear-gradient(135deg, #EED79E, #B8872E); color: #1A1406;
+                font: 700 10.5px/1.3 var(--sans); letter-spacing: .06em; text-transform: uppercase; }
   .lm-dato { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.4; color: var(--txt-2); }
   .lm-dato svg { width: 17px; height: 17px; flex: none; margin-top: 2px; color: var(--txt-3); }
   .lm-dato small { font-size: 12.5px; color: var(--txt-3); }
@@ -1430,6 +1438,8 @@
               transition: transform .25s ease, background .25s ease; }
   .lm-pin img { width: 24px; height: 24px; border-radius: 50%; transform: rotate(45deg); }
   .lm-pin.activo i { background: linear-gradient(135deg, #EED79E, #B8872E); transform: rotate(-45deg) scale(1.28); }
+  /* Su local, aunque no esté elegido: un aro dorado. */
+  .lm-pin.tuyo i { box-shadow: 0 0 0 3px #D9B263, 0 5px 12px -5px rgba(0, 0, 0, .55); }
   .lm-yo { width: 16px; height: 16px; border-radius: 50%; background: #2F6FED; border: 3px solid #fff;
            box-shadow: 0 0 0 7px rgba(47, 111, 237, .18), 0 2px 6px rgba(0, 0, 0, .3); }
   .lm .maplibregl-ctrl-attrib { font-size: 10px; }
@@ -5484,14 +5494,27 @@
     return cargaMapa;
   }
 
-  /* El local de referencia: el más cercano si dijo dónde está; si no, el de
-     su última compra. Decide dónde arranca el mapa y qué tarjeta. */
+  /* "Tu local" (04/10/2026): donde más compró, en sus últimos 60
+     movimientos (los que trae la tarjeta), sin la tienda online. Si
+     empatan, el de la compra más nueva: ultimas viene de la más nueva a la
+     más vieja, y el primero que llega al máximo gana. */
+  function tuLocal() {
+    var cuenta = {}, mejor = null, max = 0;
+    ((socioCodigo || {}).ultimas || []).forEach(function (m) {
+      if (m.tipo !== 'compra' || !m.local || m.local === 'TIENDA ONLINE') { return; }
+      cuenta[m.local] = (cuenta[m.local] || 0) + 1;
+    });
+    ((socioCodigo || {}).ultimas || []).forEach(function (m) {
+      var n = cuenta[m.local] || 0;
+      if (n > max) { max = n; mejor = m.local; }
+    });
+    return mejor ? datosLocal(mejor) : null;
+  }
+  /* El local de referencia: el más cercano si dijo dónde está; si no, su
+     local. Decide dónde arranca el mapa y qué tarjeta. */
   function referenciaLocal() {
     if (miPosicion) { return tarjetasOrden[0] || null; }
-    var compra = ((socioCodigo || {}).ultimas || []).filter(function (m) {
-      return m.tipo === 'compra' && m.local && m.local !== 'TIENDA ONLINE';
-    })[0];
-    return compra ? datosLocal(compra.local) : null;
+    return tuLocal();
   }
   function lejosDeBsAs(l) { return distanciaKm(CENTRO_BSAS.lat, CENTRO_BSAS.lng, l.lat, l.lng) > 100; }
   function margenMapa() {
@@ -5527,9 +5550,10 @@
       if (at) { at.classList.remove('maplibregl-compact-show'); at.removeAttribute('open'); }
     });
     setTimeout(function () { if (!mapaListo && modoLocales === 'mapa') { mostrarLista(); } }, 12000);
+    var suyo = tuLocal();
     LOCALES_VDH.forEach(function (l) {
       var el = document.createElement('div');
-      el.className = 'lm-pin';
+      el.className = 'lm-pin' + (l === suyo ? ' tuyo' : '');
       el.setAttribute('role', 'button');
       el.setAttribute('aria-label', l.nombre);
       el.innerHTML = '<i><img src="icon-192.png" alt=""></i>';
@@ -5551,11 +5575,13 @@
       lista.sort(function (a, b) { return a._km - b._km; });
     }
     tarjetasOrden = lista;
+    var suyo = tuLocal();
     caja.innerHTML = lista.map(function (l, k) {
       var zona = (l.zona && l.zona !== l.nombre) ? '<span class="lm-zona">' + esc(l.zona) + '</span>' : '';
+      var tuyo = l === suyo ? '<span class="lm-tuyo">Tu local</span>' : '';
       var dist = (miPosicion && l._km !== undefined) ? '<span class="lm-dist">a ' + distanciaLinda(l._km) + '</span>' : '';
-      return '<article class="lm-tarjeta" role="listitem" data-k="' + k + '">' +
-        '<span class="lm-nom">' + esc(l.nombre) + '</span>' + zona +
+      return '<article class="lm-tarjeta' + (tuyo ? ' es-tuyo' : '') + '" role="listitem" data-k="' + k + '">' +
+        '<span class="lm-nom">' + esc(l.nombre) + '</span>' + tuyo + zona +
         '<span class="lm-dato">' + icono('pin') + '<span>' + esc(l.dir) + '</span></span>' +
         '<span class="lm-dato">' + icono('reloj') + '<span>' + estadoHtml(l, 'lm-estado') + '<small>' + esc(l.hora) + '</small></span></span>' +
         '<span class="lm-pie"><a class="lm-ir" target="_blank" rel="noopener" href="' + esc(comoLlegar(l)) + '">Cómo llegar' + icono('flecha') + '</a>' + dist + '</span>' +
@@ -5653,11 +5679,15 @@
     /* Ordenados por cercanía si el cliente compartió dónde está; si no,
        como vienen, que es alfabético. */
     var lista = LOCALES_VDH.slice();
+    var suyo = tuLocal();
     if (miPosicion) {
       lista.forEach(function (l) {
         l._km = distanciaKm(miPosicion.lat, miPosicion.lng, l.lat, l.lng);
       });
       lista.sort(function (a, b) { return a._km - b._km; });
+    } else if (suyo) {
+      /* Sin ubicación, su local va primero. */
+      lista.sort(function (a, b) { return (b === suyo) - (a === suyo); });
     }
 
     caja.innerHTML = lista.map(function (l) {
@@ -5670,8 +5700,9 @@
       var dist = (miPosicion && l._km !== undefined)
         ? '<span class="local-dist">a ' + distanciaLinda(l._km) + '</span>' : '';
 
+      var tuyo = l === suyo ? '<span class="local-tuyo">Tu local</span>' : '';
       return '<div class="local">' +
-        '<b>' + esc(l.nombre) + dist + '</b>' + zona +
+        '<b>' + esc(l.nombre) + tuyo + dist + '</b>' + zona +
         '<div class="local-dato">' + pin + '<span>' + esc(l.dir) + '</span></div>' +
         '<div class="local-dato">' + reloj + '<span>' + estadoHtml(l, 'local-estado') + esc(l.hora) + '</span></div>' +
         '<a class="local-ir" target="_blank" rel="noopener" href="' + esc(comoLlegar(l)) + '">' +
