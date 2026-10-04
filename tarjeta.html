@@ -1903,6 +1903,15 @@
   .carru-nom { display: block; font: 600 16px/1.25 var(--sans); }
   .carru-pts { display: block; font: 500 13.5px var(--sans); color: var(--txt-2); margin-top: 2px; }
   .carru-item.agotado .carru-foto { opacity: .55; }
+  /* El rótulo chiquito sobre la primera foto: blanco, porque las fotos
+     pueden ser claras u oscuras. */
+  .carru-rotulo { position: absolute; top: 12px; left: 12px; padding: 6px 11px; border-radius: 999px;
+                  background: rgba(255, 255, 255, .92); color: #1C1C1A; font: 700 10.5px/1 var(--sans);
+                  letter-spacing: .12em; text-transform: uppercase; }
+  /* La última: "Ver todos los premios". */
+  .carru-ver { background: #1C1C1A; color: #F5F3EE; display: grid; align-content: end; gap: 14px; padding: 20px;
+               font: 700 24px/1.1 var(--sans); letter-spacing: -.3px; }
+  .carru-ver svg { width: 28px; height: 28px; }
 </style>
 </head>
 <body>
@@ -3095,21 +3104,27 @@
      Inicio, de costado y con la foto grande. */
   function carruselPremios(t, premios) {
     var orden = ordenPremios(premios);
-    return '<div class="carru-caja"><div class="sec-cab"><h2>Canjeá tus puntos</h2>' +
-        '<button type="button" class="movs-ver" data-atajo="premios">Ver todos</button></div>' +
-      '<div class="carru" tabindex="0" aria-label="Premios">' +
-        orden.map(function (p) {
+    /* Sin el renglón de título arriba (04/10/2026, Mauricio: hacía de
+       separación). "Canjeá tus puntos" va chiquito sobre la primera foto y
+       "Ver todos" es la última tarjeta. */
+    return '<div class="carru-caja"><h2 class="solo-lector">Canjeá tus puntos</h2>' +
+      '<div class="carru" tabindex="0" aria-label="Canjeá tus puntos">' +
+        orden.map(function (p, k) {
           var pild = p.agotado ? '<span class="carru-pild">Ya canjeado este año</span>'
                    : p.alcanzado ? '<span class="carru-pild si">Te alcanza</span>'
                    : '<span class="carru-pild">Te faltan ' + miles(p.falta) + ' puntos</span>';
+          var rotulo = k === 0 ? '<span class="carru-rotulo" aria-hidden="true">Canjeá tus puntos</span>' : '';
           var foto = p.imagen
-            ? '<span class="carru-foto"><img src="' + esc(p.imagen) + '" alt="" loading="lazy" decoding="async" onerror="this.style.visibility=\'hidden\'">' + pild + '</span>'
-            : '<span class="carru-foto sin-foto">' + icono('regalo') + '<span>' + esc(p.nombre) + '</span>' + pild + '</span>';
+            ? '<span class="carru-foto"><img src="' + esc(p.imagen) + '" alt="" loading="lazy" decoding="async" onerror="this.style.visibility=\'hidden\'">' + rotulo + pild + '</span>'
+            : '<span class="carru-foto sin-foto">' + icono('regalo') + '<span>' + esc(p.nombre) + '</span>' + rotulo + pild + '</span>';
           return '<button type="button" class="carru-item toca' + (p.agotado ? ' agotado' : '') + '" data-premio="' + premiosPintados.indexOf(p) + '">' +
             foto + '<span><span class="carru-nom">' + esc(p.nombre) + '</span>' +
             '<span class="carru-pts">' + miles(p.puntos) + ' puntos' + (p.valor ? ' · vale $' + miles(p.valor) : '') + '</span></span>' +
           '</button>';
         }).join('') +
+        '<button type="button" class="carru-item carru-todos" data-atajo="premios">' +
+          '<span class="carru-foto carru-ver"><span>Ver todos<br>los premios</span>' + icono('flecha') + '</span>' +
+        '</button>' +
       '</div></div>';
   }
 
