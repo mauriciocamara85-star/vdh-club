@@ -1297,24 +1297,37 @@
   .tv-aviso { margin: -8px 0 16px; font-size: 12.5px; line-height: 1.45; color: var(--txt-3); }
   .pz { text-decoration: none; }
   .tv-chip[aria-pressed="true"] { background: var(--txt); border-color: var(--txt); color: var(--hoja); }
-  /* El menú: un panel desde la izquierda, como en Zara. */
+  /* El menú, a pantalla completa como el de King (04/10/2026): arriba una
+     franja con la ✕, las categorías en mayúscula y letra fina entre líneas,
+     y abajo el nivel y la tienda entera. */
   .tv-cajon { position: fixed; inset: 0; z-index: 75; }
   .tv-cajon[hidden] { display: none; }
-  .tv-cajon-velo { position: absolute; inset: 0; background: rgba(0, 0, 0, .4); }
-  .tv-cajon-panel {
-    position: absolute; top: 0; bottom: 0; left: 0; width: min(86vw, 380px); overflow-y: auto;
-    padding: calc(env(safe-area-inset-top) + 18px) 24px calc(env(safe-area-inset-bottom) + 24px);
-    background: var(--hoja); display: flex; flex-direction: column; gap: 6px;
-  }
-  .tv-cajon-cab { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .tv-cajon-cab b { font: 800 30px/1 var(--display); letter-spacing: -1px; }
-  .tv-cajon-cab button { width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--bg); display: grid; place-items: center; cursor: pointer; }
-  .tv-cajon-cab svg { width: 20px; height: 20px; }
-  .tv-cajon ul { list-style: none; margin: 0; padding: 0; }
-  .tv-cajon-item { display: block; width: 100%; padding: 9px 0; border: 0; background: none; text-align: left; cursor: pointer;
-                   font: 700 19px/1.2 var(--sans); letter-spacing: .02em; text-transform: uppercase; color: var(--txt); }
-  .tv-cajon ul ul .tv-cajon-item { padding: 6px 0 6px 16px; font: 500 15px/1.2 var(--sans); text-transform: none; color: var(--txt-2); }
-  .tv-cajon-nivel { margin-top: auto; padding-top: 22px; }
+  .tvm { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--hoja);
+         overflow-y: auto; overscroll-behavior: contain; animation: tvmEntra .2s ease-out; }
+  @keyframes tvmEntra { from { opacity: 0; transform: translateY(10px); } }
+  .tvm-cab { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+             min-height: calc(env(safe-area-inset-top) + 66px); padding: env(safe-area-inset-top) 12px 0 18px; background: var(--bg); }
+  .tvm-x { width: 48px; height: 48px; border: 0; background: none; display: grid; place-items: center; cursor: pointer; color: var(--txt); }
+  .tvm-x svg { width: 28px; height: 28px; stroke-width: 1.4; }
+  .tvm-volver { display: inline-flex; align-items: center; gap: 6px; padding: 8px 4px; border: 0; background: none; cursor: pointer;
+                font: 400 15px var(--sans); letter-spacing: .04em; text-transform: uppercase; color: var(--txt); }
+  .tvm-volver svg { width: 20px; height: 20px; stroke-width: 1.6; }
+  .tvm-lista { list-style: none; margin: 0; padding: 0; }
+  .tvm-fila { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 0 20px 0 24px;
+              border: 0; border-bottom: 1px solid var(--linea); background: none; text-align: left; cursor: pointer;
+              font: 400 16px/1.3 var(--sans); letter-spacing: .04em; text-transform: uppercase; color: var(--txt); }
+  .tvm-fila > span { flex: 1; min-width: 0; }
+  .tvm-fila > svg { width: 18px; height: 18px; flex: none; stroke-width: 1.6; }
+  .tvm-fila:active { background: var(--bg); }
+  /* La categoría en la que está, apenas más marcada. */
+  .tvm-fila[aria-current="page"] > span { font-weight: 600; }
+  /* El SALE dice hasta cuánto, en rojo. */
+  .tvm-off { font-style: normal; font-weight: 600; color: var(--mal-txt); }
+  .tvm-pie { margin-top: auto; display: grid; gap: 14px; justify-items: start;
+             padding: 20px 24px calc(env(safe-area-inset-bottom) + 24px); border-top: 1px solid var(--linea); }
+  .tvm-web { display: inline-flex; align-items: center; gap: 6px; font: 500 15px var(--sans); color: var(--txt); text-decoration: none; }
+  .tvm-web svg { width: 16px; height: 16px; }
+  @media (prefers-reduced-motion: reduce) { .tvm { animation: none; } }
   /* El video de una promo, de fondo, con el velo de abajo encima. */
   .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .hero-velo { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 11, 12, .84) 0%, rgba(10, 11, 12, .5) 24%, rgba(10, 11, 12, 0) 50%); }
@@ -4630,6 +4643,7 @@
     if (hoja && !hoja.hidden) { cerrarCodigo(true); return; }
     if (cerrarCanje(true)) { return; }
     if (cerrarColeccion(true)) { return; }
+    if (cerrarMenuTienda(true)) { return; }
     if (((e.state && e.state.v) || (location.hash || '').replace('#', '')) === 'tienda') {
       var cat = (e.state && e.state.cat) || 'Todo';
       if (cat !== tiendaCat) { tiendaCat = cat; if ($('vTienda') && !$('vTienda').hidden) { dibujarTienda(); window.scrollTo(0, 0); return; } }
@@ -4717,7 +4731,7 @@
       if (ev.target === hoja) { cerrarCodigo(false); }
     };
     document.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Escape') { cerrarCodigo(false); if (!cerrarCanje(false)) { cerrarColeccion(false); } }
+      if (ev.key === 'Escape') { cerrarCodigo(false); if (!cerrarCanje(false) && !cerrarColeccion(false)) { cerrarMenuTienda(false); } }
     });
   })();
 
@@ -5339,30 +5353,83 @@
     arrancarVideos(caja);
   }
 
-  /* ☰: el menú de la tienda, con sus subcategorías y la línea del nivel. */
+  /* ☰: el menú de la tienda, a pantalla completa como el de King
+     (04/10/2026, Mauricio, con una captura). Las categorías en un renglón
+     cada una; las que tienen subcategorías llevan "›" y las abren en la
+     misma hoja, con "Ver todo" primero. Tiene su entrada en el historial:
+     "atrás" lo cierra. Abajo, su nivel y la tienda entera. */
   function abrirMenuTienda() {
-    var menu = (tiendaCargada && tiendaCargada.menu) || [];
     var capa = $('tvCajon');
     if (!capa) {
       capa = document.createElement('div'); capa.id = 'tvCajon'; capa.className = 'tv-cajon'; capa.hidden = true;
       document.body.appendChild(capa);
     }
-    capa.innerHTML = '<div class="tv-cajon-velo" data-cerrar></div>' +
-      '<nav class="tv-cajon-panel" aria-label="Categorías de la tienda">' +
-        '<div class="tv-cajon-cab"><b>Tienda</b><button type="button" data-cerrar aria-label="Cerrar">' + icono('cruz') + '</button></div>' +
-        '<ul>' + menu.map(function (m) {
-          return '<li><button type="button" class="tv-cajon-item" data-ir="cat:' + esc(m.handle) + '">' + esc(m.nombre) + '</button>' +
-            ((m.hijos || []).length ? '<ul>' + m.hijos.map(function (h) {
-              return '<li><button type="button" class="tv-cajon-item" data-ir="cat:' + esc(h.handle) + '">' + esc(h.nombre) + '</button></li>';
-            }).join('') + '</ul>' : '') + '</li>';
-        }).join('') + '</ul>' +
-        '<div class="tv-cajon-nivel">' + nivelLinea() + '</div>' +
-      '</nav>';
+    pintarMenuTienda(null);
     capa.hidden = false;
-    Array.prototype.forEach.call(capa.querySelectorAll('[data-cerrar]'), function (b) { b.onclick = function () { capa.hidden = true; }; });
-    Array.prototype.forEach.call(capa.querySelectorAll('[data-ir]'), function (b) {
-      b.onclick = function () { capa.hidden = true; irATienda(b.dataset.ir); };
+    try {
+      var st = {}, viejo = history.state || {};
+      for (var k in viejo) { if (Object.prototype.hasOwnProperty.call(viejo, k)) { st[k] = viejo[k]; } }
+      st.menuTienda = true;
+      history.pushState(st, '', location.pathname + location.search + location.hash);
+    } catch (e) {}
+  }
+  function pintarMenuTienda(padre) {
+    var capa = $('tvCajon');
+    var menu = (tiendaCargada && tiendaCargada.menu) || [], todos = (tiendaCargada && tiendaCargada.productos) || [];
+    var actual = /^cat:/.test(tiendaCat) ? tiendaCat.slice(4) : '';
+    var fila = function (handle, nombre, hijos, extra) {
+      return '<li><button type="button" class="tvm-fila"' +
+        (hijos ? ' data-abrir="' + esc(handle) + '"' : ' data-ir="cat:' + esc(handle) + '"' + (handle === actual ? ' aria-current="page"' : '')) + '>' +
+        '<span>' + esc(nombre) + (extra || '') + '</span>' + (hijos ? icono('flecha') : '') + '</button></li>';
+    };
+    var hasta = function (m) {
+      var off = deCategoria(todos, m).reduce(function (x, p) { return Math.max(x, offDe(p)); }, 0);
+      return off ? '<em class="tvm-off"> · Hasta ' + off + '%</em>' : '';
+    };
+    var filas = padre
+      ? fila(padre.handle, 'Ver todo') + padre.hijos.map(function (h) { return fila(h.handle, h.nombre); }).join('')
+      : menu.map(function (m) { return fila(m.handle, m.nombre, (m.hijos || []).length > 0, /sale/i.test(m.nombre) ? hasta(m) : ''); }).join('');
+    capa.innerHTML =
+      '<nav class="tvm" aria-label="Categorías de la tienda">' +
+        '<div class="tvm-cab">' +
+          (padre ? '<button type="button" class="tvm-volver" data-volver>' + icono('volver') + esc(padre.nombre) + '</button>' : '<span></span>') +
+          '<button type="button" class="tvm-x" data-cerrar aria-label="Cerrar">' + icono('cruz') + '</button>' +
+        '</div>' +
+        '<ul class="tvm-lista">' + filas + '</ul>' +
+        '<div class="tvm-pie">' + nivelLinea() +
+          '<a class="tvm-web" target="_blank" rel="noopener" href="https://vdh.com.ar/">vdh.com.ar' + icono('flecha') + '</a></div>' +
+      '</nav>';
+    capa.querySelector('[data-cerrar]').onclick = function () { cerrarMenuTienda(false); };
+    if (capa.querySelector('[data-volver]')) { capa.querySelector('[data-volver]').onclick = function () { pintarMenuTienda(null); }; }
+    Array.prototype.forEach.call(capa.querySelectorAll('[data-abrir]'), function (b) {
+      b.onclick = function () { var n = nodoMenu(b.dataset.abrir); if (n) { pintarMenuTienda(n.nodo); } };
     });
+    Array.prototype.forEach.call(capa.querySelectorAll('[data-ir]'), function (b) {
+      b.onclick = function () { irDesdeMenu(b.dataset.ir); };
+    });
+  }
+  /* Elegir una categoría: la entrada del menú en el historial pasa a ser la
+     de la categoría (como "Ver locales" en la colección), así "atrás" vuelve
+     a donde estaba antes de abrir el menú. */
+  function irDesdeMenu(cat) {
+    $('tvCajon').hidden = true;
+    if (!(history.state && history.state.menuTienda)) { irATienda(cat); return; }
+    try { history.replaceState({ v: 'tienda', cat: cat }, '', '#tienda'); } catch (e) {}
+    tiendaCat = cat;
+    dibujarTienda();
+    window.scrollTo(0, 0);
+  }
+  /* desdeAtras: lo cerró el "atrás", que ya sacó su entrada. Si lo cerró la
+     ✕, hay que sacarla a mano. */
+  function cerrarMenuTienda(desdeAtras) {
+    var capa = $('tvCajon');
+    if (!capa || capa.hidden) { return false; }
+    capa.hidden = true;
+    if (!desdeAtras && history.state && history.state.menuTienda) {
+      atrasPropio = true;
+      try { history.back(); } catch (e) { atrasPropio = false; }
+    }
+    return true;
   }
 
   /* tiendaCat: 'Todo' (la portada), un tipo ("Remeras"), 'sale' (todo lo
