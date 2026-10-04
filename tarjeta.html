@@ -1522,30 +1522,30 @@
   .hola { font: 700 24px/1.2 var(--sans); letter-spacing: -.3px; }
   .ti { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); overflow: hidden;
         box-shadow: 0 1px 2px rgba(28, 28, 26, .06), 0 10px 24px -16px rgba(28, 28, 26, .35); }
-  .ti-franja { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 18px; }
+  .ti-franja { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 16px; }
   .ti-franja span { font: 700 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; }
   .ti-franja b { font: 600 11.5px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase;
-                 border: 1.5px solid currentColor; border-radius: 999px; padding: 5px 10px; }
+                 border: 1.5px solid currentColor; border-radius: 999px; padding: 4px 9px; }
   .ti-franja.nv-plata { background: linear-gradient(135deg, #C9CDD3 0%, #979DA6 45%, #B9BEC5 100%); color: #121417; }
   .ti-franja.nv-oro { background: linear-gradient(135deg, #EED79E 0%, #C99A3E 45%, #E0BC6C 100%); color: #1A1406; }
   .ti-franja.nv-platino { background: linear-gradient(135deg, #3A3935 0%, #1A1A18 55%, #46443F 100%); color: #F1EEE7; }
-  .ti-cuerpo { padding: 16px 18px 18px; display: grid; gap: 4px; }
+  .ti-cuerpo { padding: 12px 12px 14px 16px; display: grid; gap: 2px; }
   .ti-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .ti-rot { font: 600 15px var(--sans); }
   .ti-ver { border: 0; background: none; padding: 4px 0; display: inline-flex; align-items: center; gap: 2px;
             font: 500 14px var(--sans); color: var(--txt); cursor: pointer; }
   .ti-ver svg { width: 16px; height: 16px; }
-  .ti-pts { font: 700 40px/1.1 var(--sans); letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+  .ti-pts { font: 700 34px/1.1 var(--sans); letter-spacing: -1px; font-variant-numeric: tabular-nums; }
   .ti-vence { font: 500 13px/1.45 var(--sans); color: var(--mal-txt); }
-  .ti-acc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
-  .ti-btn { border: 0; background: none; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 7px;
-            font: 500 12.5px/1.2 var(--sans); color: var(--txt); text-align: center; position: relative; }
-  .ti-ico { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+  .ti-acc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: 10px; }
+  .ti-btn { border: 0; background: none; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 5px;
+            font: 500 11.5px/1.2 var(--sans); letter-spacing: -.1px; color: var(--txt); text-align: center; position: relative; white-space: nowrap; }
+  .ti-ico { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
             background: var(--hoja); border: 1px solid var(--linea); box-shadow: 0 2px 6px -2px rgba(28, 28, 26, .18); }
-  .ti-ico svg { width: 24px; height: 24px; }
+  .ti-ico svg { width: 22px; height: 22px; }
   .ti-btn:active .ti-ico { transform: scale(.94); }
   .ti-btn:focus-visible .ti-ico { outline: 2px solid var(--txt); outline-offset: 2px; }
-  .ti-cuenta { position: absolute; top: -2px; left: calc(50% + 14px); min-width: 20px; height: 20px; padding: 0 6px;
+  .ti-cuenta { position: absolute; top: -4px; left: calc(50% + 11px); min-width: 20px; height: 20px; padding: 0 6px;
                border-radius: 999px; background: var(--ok); color: #fff; font: 700 11.5px/20px var(--sans); }
 
   /* ── Sumá más puntos ──
@@ -1761,6 +1761,46 @@
   .pasos b { color: var(--txt); }
   .canje .btn { margin-top: 0; }
   .canje { z-index: 80; }
+
+  /* ── La ficha del premio (03/10/2026): la misma hoja, a pantalla
+     completa, con la foto arriba como en Kong. La X flota sobre la foto. */
+  .canje.ficha .canje-hoja { top: 0; max-height: none; border-radius: 0; padding: 0; gap: 0; align-content: start; }
+  .canje.ficha .canje-asa { display: none; }
+  .canje.ficha .canje-cab { position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 14px; z-index: 2; }
+  .canje.ficha .canje-cab h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .canje.ficha .canje-x { background: rgba(20, 20, 18, .72); color: #fff; width: 44px; height: 44px; }
+  .canje.ficha .canje-hoja { display: flex; flex-direction: column; }
+  .canje.ficha #canjeCuerpo { gap: 0 !important; flex: 1 0 auto; grid-template-rows: auto 1fr auto; }
+  .pf-foto { display: block; width: 100%; aspect-ratio: 1 / 1; max-height: 58vh; object-fit: cover; background: var(--fondo-foto); }
+  .pf-foto.sin-foto { display: grid; place-content: center; justify-items: center; gap: 12px; background: #1C1C1A; color: #F5F3EE; font: 700 30px/1.15 var(--sans); padding: 24px; text-align: center; }
+  .pf-foto.sin-foto svg { width: 44px; height: 44px; opacity: .7; }
+  .pf-cuerpo { padding: 22px 20px 20px; display: grid; gap: 16px; align-content: start; }
+  .pf-nom { font: 700 24px/1.2 var(--sans); letter-spacing: -.3px; }
+  .pf-pts { font: 500 15.5px var(--sans); color: var(--txt-2); margin-top: 4px; }
+  .pf-pts b { color: var(--txt); font-weight: 700; }
+  .pf-falta { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: center; padding: 14px 16px;
+                 border: 1.5px solid var(--txt); border-radius: var(--r-sm); font-size: 14.5px; line-height: 1.45; }
+  .pf-falta svg { width: 22px; height: 22px; }
+  .pf-pie { position: sticky; bottom: 0; padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
+               background: var(--hoja); border-top: 1px solid var(--linea); }
+
+  /* ── "Canjeá tus puntos" en Inicio: el carrusel de premios ── */
+  .carru { display: grid; grid-auto-flow: column; grid-auto-columns: 74%; gap: 12px; overflow-x: auto;
+           scroll-snap-type: x mandatory; margin: 0 -20px; padding: 0 20px 4px; scroll-padding: 0 20px; scrollbar-width: none; }
+  .carru::-webkit-scrollbar { display: none; }
+  .carru-item { scroll-snap-align: start; border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; display: grid; gap: 10px; }
+  .carru-foto { position: relative; display: block; aspect-ratio: 1 / 1; border-radius: 20px; overflow: hidden; background: var(--fondo-foto); }
+  .carru-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .carru-foto.sin-foto { background: #1C1C1A; color: #F5F3EE; display: grid; place-content: center; justify-items: center; gap: 10px;
+                         padding: 20px; text-align: center; font: 700 22px/1.15 var(--sans); }
+  .carru-foto.sin-foto svg { width: 36px; height: 36px; opacity: .7; }
+  .carru-pild { position: absolute; left: 12px; bottom: 12px; right: 12px; justify-self: start; width: max-content; max-width: calc(100% - 24px);
+                padding: 8px 14px; border-radius: 999px; font: 600 13.5px var(--sans); color: #fff; background: rgba(20, 20, 18, .78);
+                backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .carru-pild.si { background: var(--ok); }
+  .carru-nom { display: block; font: 600 16px/1.25 var(--sans); }
+  .carru-pts { display: block; font: 500 13.5px var(--sans); color: var(--txt-2); margin-top: 2px; }
+  .carru-item.agotado .carru-foto { opacity: .55; }
 </style>
 </head>
 <body>
@@ -2135,6 +2175,7 @@
        repetían. */
     var todo =
       carnetHtml(t, nv) +
+      botonWallet() +
       dosNumeros +
       (premios.length ? filaPremios(premios) : '') +
       nivelHtml +
@@ -2154,12 +2195,9 @@
     var primerNombre = String(t.nombre || '').split(' ')[0];
     var inicio =
       '<h1 class="hola">Hola, ' + esc(primerNombre) + '</h1>' +
-      '<div class="carnet-bloque">' + tarjetaInicio(t, nv) + botonCodigo() + botonWallet() + '</div>' +
+      '<div class="carnet-bloque">' + tarjetaInicio(t, nv) + botonCodigo() + botonWallet(true) + '</div>' +
       bonus +
-      (destacado
-        ? '<div><div class="sec-cab"><h2>' + (destacado.alcanzado ? 'Ya podés canjear' : 'Tu próximo premio') +
-          '</h2></div>' + bloquePremio(t, destacado, true) + '</div>'
-        : '') +
+      (premios.length ? carruselPremios(t, premios) : '') +
       misionesHtml(t) +
       opinionHtml(t) +
       ayudaHtml();
@@ -2540,8 +2578,10 @@
      el mismo botón dice "Ver en Google Wallet" y abre el pase. */
   var K_WALLET = 'vdh_club_wallet';
   function walletGuardada() { try { return localStorage.getItem(K_WALLET) === '1'; } catch (e) { return false; } }
-  function botonWallet() {
-    if (esIOS()) { return ''; }
+  /* enInicio: ya guardada, el botón se va de Inicio (03/10/2026, Mauricio:
+     dos botones negros era mucho) y queda en Mi tarjeta. */
+  function botonWallet(enInicio) {
+    if (esIOS() || (enInicio && walletGuardada())) { return ''; }
     return '<button type="button" class="btn-wallet toca" data-wallet>' +
       '<svg viewBox="0 0 24 20" aria-hidden="true">' +
         '<rect x="1" y="1" width="22" height="8" rx="2.5" fill="#34A853"/>' +
@@ -2642,6 +2682,34 @@
       '</div>' +
       '<span class="barra"><i style="width:' + av + '%"></i></span>' +
     '</div>';
+  }
+
+  /* "Canjeá tus puntos" (03/10/2026, sobre Kong): todos los premios en
+     Inicio, de costado y con la foto grande. Primero los que le alcanzan
+     (el más caro adelante), después los que le faltan (el más cerca
+     adelante) y al final los que ya se llevó este año. */
+  function carruselPremios(t, premios) {
+    var orden = premios.slice().sort(function (a, b) {
+      var ga = a.agotado ? 2 : a.alcanzado ? 0 : 1, gb = b.agotado ? 2 : b.alcanzado ? 0 : 1;
+      if (ga !== gb) { return ga - gb; }
+      return ga === 0 ? b.puntos - a.puntos : (a.falta || 0) - (b.falta || 0);
+    });
+    return '<div><div class="sec-cab"><h2>Canjeá tus puntos</h2>' +
+        '<button type="button" class="movs-ver" data-atajo="premios">Ver todos</button></div>' +
+      '<div class="carru" tabindex="0" aria-label="Premios">' +
+        orden.map(function (p) {
+          var pild = p.agotado ? '<span class="carru-pild">Ya canjeado este año</span>'
+                   : p.alcanzado ? '<span class="carru-pild si">Te alcanza</span>'
+                   : '<span class="carru-pild">Te faltan ' + miles(p.falta) + ' puntos</span>';
+          var foto = p.imagen
+            ? '<span class="carru-foto"><img src="' + esc(p.imagen) + '" alt="" loading="lazy" decoding="async" onerror="this.style.visibility=\'hidden\'">' + pild + '</span>'
+            : '<span class="carru-foto sin-foto">' + icono('regalo') + '<span>' + esc(p.nombre) + '</span>' + pild + '</span>';
+          return '<button type="button" class="carru-item toca' + (p.agotado ? ' agotado' : '') + '" data-premio="' + premiosPintados.indexOf(p) + '">' +
+            foto + '<span><span class="carru-nom">' + esc(p.nombre) + '</span>' +
+            '<span class="carru-pts">' + miles(p.puntos) + ' puntos' + (p.valor ? ' · vale $' + miles(p.valor) : '') + '</span></span>' +
+          '</button>';
+        }).join('') +
+      '</div></div>';
   }
 
   /* Los premios, de costado y con foto. Cada uno se toca y abre su hoja.
@@ -2818,40 +2886,51 @@
     var t = socioCodigo || {};
     var nv = t.nivel || {};
     var multi = Number(nv.multiplica) || 1;
-    var h =
-      '<div class="canje-premio">' + fotoPremio(p, 'miniatura') +
-        '<div><div class="listo-nom">' + esc(p.nombre) + '</div>' +
-        '<div class="listo-sub" style="margin-bottom:6px">' + miles(p.puntos) + ' puntos' +
-          (p.valor ? ' · vale $' + miles(p.valor) : '') + '</div>' + estadoPremio(p) + '</div>' +
-      '</div>' +
+    /* A pantalla completa (03/10/2026, sobre Kong): la foto arriba; abajo
+       los puntos, el estado y el detalle. Si le alcanza, los pasos y
+       "Mostrar código" fijo abajo, siempre a la vista. */
+    var foto = p.imagen
+      ? '<img class="pf-foto" src="' + esc(p.imagen) + '" alt="' + esc(p.nombre) + '" decoding="async" onerror="this.style.visibility=\'hidden\'">'
+      : '<span class="pf-foto sin-foto">' + icono('regalo') + '<span>' + esc(p.nombre) + '</span></span>';
+    var cuerpo =
+      '<div><h3 class="pf-nom">' + esc(p.nombre) + '</h3>' +
+        '<p class="pf-pts"><b>' + miles(p.puntos) + ' puntos</b>' + (p.valor ? ' · vale $' + miles(p.valor) : '') + '</p></div>' +
+      (p.alcanzado ? '<div>' + estadoPremio(p) + '</div>' : '') +
       (p.detalle ? '<p class="canje-txt">' + esc(p.detalle) + '</p>' : '');
+    var pie = '';
     if (p.alcanzado) {
       $('canjeTit').textContent = 'Cómo canjear';
-      h += '<ol class="pasos">' +
+      cuerpo += '<ol class="pasos">' +
           '<li><span>Andá a <b>cualquier local VDH</b>. No hace falta reservar.</span></li>' +
           '<li><span>En la caja pedí <b>' + esc(p.nombre) + '</b> y mostrá tu código.</span></li>' +
           '<li><span>Te descontamos <b>' + miles(p.puntos) + ' puntos</b> y te quedan ' +
             miles((t.puntos || 0) - p.puntos) + '. Tu nivel no baja.</span></li>' +
-        '</ol>' + botonCodigo();
+        '</ol>';
+      pie = '<div class="pf-pie">' + botonCodigo() + '</div>';
     } else if (p.agotado) {
       $('canjeTit').textContent = 'Ya lo canjeaste';
-      h += '<p class="canje-txt">Te lo llevaste las veces que se puede por año. Vuelve a estar ' +
-           'disponible cuando pasen 12 meses de tu canje.</p>';
+      cuerpo += '<p class="pf-falta"><span>' + icono('regalo') + '</span><span>Te lo llevaste las veces que se puede por año. ' +
+                'Vuelve a estar disponible cuando pasen 12 meses de tu canje.</span></p>';
     } else {
       $('canjeTit').textContent = 'Te falta poco';
-      h += '<p class="canje-txt">Te faltan <b>' + miles(p.falta) + ' puntos</b>. Cada $100 de compra ' +
-           'suma ' + (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + '. Cuando te alcance, lo pedís ' +
-           'en la caja de cualquier local.</p>';
+      cuerpo += '<p class="pf-falta"><span>' + ICONO_ATENCION + '</span><span>Te faltan <b>' + miles(p.falta) +
+                ' puntos</b> para este premio. Cada $100 de compra suma ' + (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + '.</span></p>';
     }
-    $('canjeCuerpo').innerHTML = h;
-    subirHoja();
+    $('canjeCuerpo').innerHTML = foto + '<div class="pf-cuerpo">' + cuerpo + '</div>' + pie;
+    subirHoja(true);
+    $('canje').querySelector('.canje-hoja').scrollTop = 0;
   }
+  var ICONO_ATENCION = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
+    '<circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 17h.01"/></svg>';
 
   /* La hoja que sube desde abajo. La usan "Cómo canjear" y las condiciones
      de una promo: lo de adentro lo pone cada una. */
-  function subirHoja() {
+  function subirHoja(ficha) {
     var capa = $('canje');
     if (!capa || !capa.hidden) { return; }
+    /* ficha: la del premio, a pantalla completa. Las condiciones de una
+       promo siguen siendo la hoja de abajo. */
+    capa.classList.toggle('ficha', !!ficha);
     capa.hidden = false;
     /* Dos cuadros: el primero pinta la hoja abajo de todo y el segundo la
        sube. En uno solo el navegador junta los dos y no hay animación. */
