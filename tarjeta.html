@@ -1736,8 +1736,10 @@
 
   /* ── Niveles ── */
   .niveles { display: grid; gap: 12px; }
-  .niv { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r); padding: 16px 18px; display: grid; gap: 10px; }
-  .niv.actual { border: 2px solid var(--txt); }
+  /* Sin recuadro (04/10/2026): uno abajo del otro con una línea finita,
+     como una lista. El suyo lo marca "Tu nivel". */
+  .niv-lista { display: grid; margin-top: 6px; }
+  .niv { padding: 20px 2px; display: grid; gap: 10px; border-top: 1px solid var(--linea); }
   .niv-cab { display: flex; align-items: center; gap: 12px; }
   .niv-cab .trofeo { width: 44px; height: 44px; flex: none; }
   .niv-cab .trofeo svg { width: 22px; height: 22px; }
@@ -1752,11 +1754,6 @@
   .niv li svg { width: 18px; height: 18px; flex: none; margin-top: 1px; color: var(--ok); }
   .niv-avance { display: grid; gap: 6px; }
   .niv-avance .barra { height: 8px; }
-  .aviso-vence { background: var(--mal-bg); border: 1px solid var(--mal-borde); color: var(--mal-txt);
-                 border-radius: var(--r-sm); padding: 12px 14px; font: 500 14px/1.45 var(--sans); }
-  .aviso-vence.tranqui { background: var(--hoja); border-color: var(--linea); color: var(--txt-2); }
-  /* La vigencia de los puntos, separada de las tarjetas de los niveles. */
-  .niv-vigencia { margin-top: 14px; }
   /* "Cómo se mantiene mi nivel": un enlace chico que se despliega. */
   .niv-regla { margin: -4px 2px 0; }
   .niv-regla summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none;
@@ -2053,7 +2050,6 @@
   <section class="vista" id="vNiveles" hidden>
     <button type="button" class="datos-volver" id="nivelesVolver"></button>
     <h1 class="datos-tit">Niveles</h1>
-    <p class="datos-sub">Cuanto más comprás, más sumás.</p>
     <div id="nivelesCuerpo"></div>
   </section>
 
@@ -2736,7 +2732,6 @@
           '<div class="sec-cab" style="margin:0"><h2>' + miles(xp) + ' <small style="font-weight:500;color:var(--txt-2)">de ' +
             miles(nv.hasta_xp) + ' puntos de compras</small></h2></div>' +
           '<span class="barra"><i style="width:' + Math.max(0, Math.min(100, Math.round(xp * 100 / nv.hasta_xp))) + '%"></i></span>' +
-          '<p class="vacio">Te faltan <b>' + miles(nv.falta_xp) + '</b> para llegar a <b>' + esc(nv.sigue) + '</b>.</p>' +
         '</div>'
       : '<div class="caja" style="margin-top:0"><h2>Estás en el nivel más alto</h2></div>';
 
@@ -2749,7 +2744,7 @@
       return '<div class="niv' + (i === yo ? ' actual' : '') + '">' +
         '<div class="niv-cab"><div class="trofeo ' + claseNivel(n.nombre) + '">' + icono('trofeo') + '</div>' +
           '<div><div class="niv-nom">' + esc(n.nombre) + '</div><div class="niv-desde">' +
-            (Number(n.desde_xp) ? 'Desde ' + miles(n.desde_xp) + ' puntos de compras' : 'Desde que te anotás') +
+            (Number(n.desde_xp) ? 'Desde ' + miles(n.desde_xp) + ' puntos' : 'Desde que te anotás') +
           '</div></div>' + marca + '</div>' +
         '<ul>' +
           '<li>' + ok + '<span>' + (multi > 1 ? '<b>' + coma(multi) + ' puntos</b> por cada $100' : '<b>1 punto</b> por cada $100') + '</span></li>' +
@@ -2763,17 +2758,10 @@
        nivel?", que lo tiene entero). Mauricio: esta pantalla tiene que ser
        lo más limpia posible. */
 
-    /* La vigencia, aparte y con su título (29/09/2026): abajo de las
-       tarjetas de los niveles, "vencen el…" se leía como el vencimiento
-       del nivel Oro. Vencen los puntos para canjear, no el nivel. */
-    var faltan = t.vence_puntos ? diasHasta(t.vence_puntos) : null;
-    var vence = t.vence_puntos
-      ? '<div class="niv-vigencia"><div class="sec-cab"><h2>Vigencia de tus puntos para canjear</h2></div>' +
-          '<p class="aviso-vence' + (faltan > 60 ? ' tranqui' : '') + '">Vencen el <b>' +
-          fechaConAnio(t.vence_puntos) + '</b> si no comprás antes. Cada compra los renueva por 12 meses.</p></div>'
-      : '';
-
-    $('nivelesCuerpo').innerHTML = '<div class="niveles">' + avance + tarjetas + vence + '</div>';
+    /* "Vigencia de tus puntos para canjear" se fue el 04/10/2026: no es del
+       nivel. La regla está en Dudas ("¿Los puntos vencen?"), la fecha en
+       Movimientos, e Inicio avisa cuando falta poco. */
+    $('nivelesCuerpo').innerHTML = '<div class="niveles">' + avance + '<div class="niv-lista">' + tarjetas + '</div></div>';
   }
 
   /* Los que se pintaron, para que la hoja de canje sepa de cuál se habla. */
