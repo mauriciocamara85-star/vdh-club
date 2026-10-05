@@ -2750,10 +2750,11 @@
     volverDe('premios', 'premiosVolver');
     var t = socioCodigo || {};
     var l = t.premios || [];
-    $('premiosSub').innerHTML = t.hay ? 'Tenés <b>' + miles(t.puntos || 0) + ' puntos</b>. Se piden en la caja de cualquier local.' : '';
+    /* Sólo los puntos (04/10/2026): dónde y cómo se retira lo dice la ficha. */
+    $('premiosSub').innerHTML = t.hay ? 'Tenés <b>' + miles(t.puntos || 0) + ' puntos</b>.' : '';
     if (!l.length) {
       $('premiosCuerpo').innerHTML = '<div class="caja" style="margin-top:0"><h2>Todavía no hay premios</h2>' +
-        '<p class="vacio" style="margin-top:6px">Cuando los carguemos, aparecen acá.</p></div>';
+        '<p class="vacio" style="margin-top:6px">Muy pronto vas a verlos acá.</p></div>';
       return;
     }
     /* Los índices son los de premiosPintados (el mismo t.premios), que es
@@ -2766,20 +2767,14 @@
     var proximo = orden.filter(function (p) { return !p.alcanzado && !p.agotado; })[0];
     var tuyos = orden.filter(function (p) { return p.alcanzado && !p.agotado; });
     var hero = proximo || tuyos[tuyos.length - 1];
-    var multi = Number(((t.nivel || {}).multiplica)) || 1;
     var heroHtml = '';
     if (hero) {
-      /* Los puntos que faltan, en pesos de compra: cada $100 suman "multi"
-         puntos. Redondeado a mil para arriba: es una idea, no una cuenta. */
-      var pesos = proximo ? Math.ceil(proximo.falta / multi * 100 / 1000) * 1000 : 0;
       heroHtml = '<button type="button" class="cat-hero' + (hero.imagen ? '' : ' sin-foto') + '" data-premio="' + premiosPintados.indexOf(hero) + '"' +
           (hero.imagen ? ' style="--foto:url(&quot;' + esc(hero.imagen) + '&quot;)"' : '') + '>' +
         '<span class="cat-hero-pie">' +
           '<small>' + (proximo ? 'Tu próximo premio' : 'Ya es tuyo') + '</small>' +
           '<b>' + esc(hero.nombre) + '</b>' +
-          '<span class="cat-hero-dato">' + (proximo
-            ? 'Te faltan <strong>' + miles(proximo.falta) + ' puntos</strong>: con una compra de unos $' + miles(pesos) + ' es tuyo.'
-            : 'Te alcanza: pedilo en la caja de cualquier local.') + '</span>' +
+          '<span class="cat-hero-dato">' + (proximo ? faltanEnPesos(proximo.falta, t) : 'Retiralo en cualquier local.') + '</span>' +
           (proximo ? '<span class="barra"><i style="width:' + avance(proximo) + '%"></i></span>' : '') +
         '</span>' +
       '</button>';
@@ -2789,7 +2784,7 @@
       var foto = p.imagen
         ? '<img class="cat-item-foto" src="' + esc(p.imagen) + '" alt="" loading="lazy" decoding="async" onerror="this.style.visibility=\'hidden\'">'
         : '<span class="cat-item-foto sin-foto">' + icono('regalo') + '<span>' + esc(p.nombre) + '</span></span>';
-      var estado = p.agotado ? '<span class="cat-item-estado ya">Ya canjeado este año</span>'
+      var estado = p.agotado ? '<span class="cat-item-estado ya">Ya lo canjeaste</span>'
                  : p.alcanzado ? '<span class="cat-item-estado si">Te alcanza</span>'
                  : '<span class="barra"><i style="width:' + avance(p) + '%"></i></span>' +
                    '<span class="cat-item-estado">Te faltan ' + miles(p.falta) + '</span>';
@@ -3375,7 +3370,7 @@
      faltan puntos, o ya se lo llevó las veces que se puede en el año. El
      tercero es el que evita que llegue al local y se lo nieguen. */
   function estadoPremio(p) {
-    if (p.agotado) { return '<span class="chip chip-ya">Ya canjeado este año</span>'; }
+    if (p.agotado) { return '<span class="chip chip-ya">Ya lo canjeaste</span>'; }
     if (p.alcanzado) { return '<span class="chip chip-si">Te alcanza</span>'; }
     return '<span class="chip chip-falta">Faltan ' + miles(p.falta) + '</span>';
   }
@@ -3432,7 +3427,7 @@
           /* El estado, fino y abajo, como en Canjeá (04/10/2026): la
              pastilla verde en cada foto era ruido. */
           var av = Math.max(0, Math.min(100, Math.round((p.puntos - p.falta) * 100 / (p.puntos || 1))));
-          var estado = p.agotado ? '<span class="carru-estado ya">Ya canjeado este año</span>'
+          var estado = p.agotado ? '<span class="carru-estado ya">Ya lo canjeaste</span>'
                      : p.alcanzado ? '<span class="carru-estado si">Te alcanza</span>'
                      : '<span class="barra"><i style="width:' + av + '%"></i></span><span class="carru-estado">Te faltan ' + miles(p.falta) + '</span>';
           var foto = p.imagen
@@ -3597,8 +3592,6 @@
     var capa = $('canje');
     if (!p || !capa) { return; }
     var t = socioCodigo || {};
-    var nv = t.nivel || {};
-    var multi = Number(nv.multiplica) || 1;
     /* A pantalla completa (03/10/2026, sobre Kong): la foto arriba; abajo
        los puntos, el estado y el detalle. Si le alcanza, los pasos y
        "Mostrar código" fijo abajo, siempre a la vista. */
@@ -3613,25 +3606,31 @@
     var pie = '';
     if (p.alcanzado) {
       $('canjeTit').textContent = 'Cómo canjear';
+      /* Dos pasos (04/10/2026). "Tu nivel no baja" está en Dudas. */
       cuerpo += '<ol class="pasos">' +
-          '<li><span>Andá a <b>cualquier local VDH</b>. No hace falta reservar.</span></li>' +
-          '<li><span>En la caja pedí <b>' + esc(p.nombre) + '</b> y mostrá tu código.</span></li>' +
-          '<li><span>Te descontamos <b>' + miles(p.puntos) + ' puntos</b> y te quedan ' +
-            miles((t.puntos || 0) - p.puntos) + '. Tu nivel no baja.</span></li>' +
+          '<li><span>Pedilo en la caja de <b>cualquier local</b>.</span></li>' +
+          '<li><span>Mostrá tu código. Te quedan <b>' + miles((t.puntos || 0) - p.puntos) + ' puntos</b>.</span></li>' +
         '</ol>';
       pie = '<div class="pf-pie">' + botonCodigo() + '</div>';
     } else if (p.agotado) {
       $('canjeTit').textContent = 'Ya lo canjeaste';
-      cuerpo += '<p class="pf-falta"><span>' + icono('regalo') + '</span><span>Te lo llevaste las veces que se puede por año. ' +
-                'Vuelve a estar disponible cuando pasen 12 meses de tu canje.</span></p>';
+      cuerpo += '<p class="pf-falta"><span>' + icono('regalo') + '</span><span>Ya lo canjeaste. Vuelve a estar disponible 12 meses después.</span></p>';
     } else {
       $('canjeTit').textContent = 'Te falta poco';
-      cuerpo += '<p class="pf-falta"><span>' + ICONO_ATENCION + '</span><span>Te faltan <b>' + miles(p.falta) +
-                ' puntos</b> para este premio. Cada $100 de compra suma ' + (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + '.</span></p>';
+      cuerpo += '<p class="pf-falta"><span>' + ICONO_ATENCION + '</span><span>' + faltanEnPesos(p.falta, t) + '</span></p>';
     }
     $('canjeCuerpo').innerHTML = foto + '<div class="pf-cuerpo">' + cuerpo + '</div>' + pie;
     subirHoja(true);
     $('canje').querySelector('.canje-hoja').scrollTop = 0;
+  }
+  /* "Te faltan 1.800 puntos: unos $150.000 en compras." Cada $100 suman
+     los puntos de su nivel; redondeado a mil para arriba, porque es una
+     idea y no una cuenta. Lo usan el premio grande de Canjeá y la ficha
+     (con <strong>: en el premio grande, <b> es el nombre gigante). */
+  function faltanEnPesos(falta, t) {
+    var multi = Number(((t || {}).nivel || {}).multiplica) || 1;
+    var pesos = Math.ceil(falta / multi * 100 / 1000) * 1000;
+    return 'Te faltan <strong>' + miles(falta) + ' puntos</strong>: unos $' + miles(pesos) + ' en compras.';
   }
   var ICONO_ATENCION = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
     '<circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 17h.01"/></svg>';
