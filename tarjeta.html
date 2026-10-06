@@ -4043,10 +4043,6 @@
        camino a mano: se redibuja y el botón de verdad reemplaza al texto. */
     var c = $('instala');
     if (c && !c.hidden) { pintarInstalar(); }
-    /* Y si el renglón estaba escondido porque la misión ya se cumplió, este
-       aviso dice que en ESTE teléfono no está: vuelve. */
-    var f = $('filaInstalar');
-    if (f) { f.hidden = !quiereInstalar(); }
   });
 
   window.addEventListener('appinstalled', function () {
@@ -4320,9 +4316,12 @@
 
   /* El renglón del final de la tarjeta: el mismo camino, para el que cerró
      el cartel y después lo quiere. Un renglón, no una tarjeta — lo que se
-     saca de en medio de la pantalla no puede volver por la ventana. */
+     saca de en medio de la pantalla no puede volver por la ventana.
+     Está SIEMPRE que no esté instalada, aunque la misión ya esté cumplida
+     (06/10/2026): el que la desinstaló o cambió de teléfono no tenía cómo
+     volver a agregarla. */
   function filaInstalar() {
-    return '<button type="button" class="fila-instalar" id="filaInstalar"' + (quiereInstalar() ? '' : ' hidden') + '>' +
+    return '<button type="button" class="fila-instalar" id="filaInstalar">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
       'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
       '<rect x="5" y="2" width="14" height="20" rx="2.5"/>' +
