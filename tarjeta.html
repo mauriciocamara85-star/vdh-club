@@ -17,8 +17,21 @@
      lo pone el navegador, que se lo acuerda, y el día que lo pierda la app
      abre en "poné tu WhatsApp" y entra igual. Antes de eso un manifest
      habría instalado a todos apuntando a una página vacía, y por eso no
-     estaba. -->
-<link rel="manifest" href="tarjeta.webmanifest">
+     estaba.
+
+     Menos en Samsung Internet (06/10/2026): ahí el manifest hace aparecer
+     el botón de instalar de la BARRA del navegador, que fabrica un APK que
+     Play Protect frena con "Se bloqueó la app no segura" (le pasó a
+     Mauricio escaneando el QR). Ese botón es de Samsung y no lo controlamos;
+     sin manifest no aparece. En Samsung el camino es nuestro cartel, que
+     abre la tarjeta en Chrome y ahí se instala limpio (ver esSamsung). -->
+<script>
+  if (!/SamsungBrowser\//.test(navigator.userAgent || '')) {
+    var lm = document.createElement('link');
+    lm.rel = 'manifest'; lm.href = 'tarjeta.webmanifest';
+    document.head.appendChild(lm);
+  }
+</script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
