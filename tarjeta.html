@@ -4323,8 +4323,9 @@
       return 'Tocá <b>Abrir en Safari</b> (abajo a la derecha) y ahí: ' +
              compartir + ' <b>Compartir</b> → <b>Agregar a inicio</b>.';
     }
-    return 'Abrí el menú ' + menu + ' del navegador y tocá ' +
-           '<b>Agregar a la pantalla principal</b>.';
+    /* "Instalar", no "Agregar a la pantalla principal": en el Chrome de hoy
+       esa crea un acceso directo y no la app (06/10/2026). */
+    return 'Abrí el menú ' + menu + ' del navegador y tocá <b>Instalar</b>.';
   }
 
   /* ¿Hace falta ofrecerle instalar en ESTE teléfono? (29/09/2026: el
@@ -6584,7 +6585,7 @@
     var ios = /iPad|iPhone|iPod/.test(ua) ||
               (ua.indexOf('Macintosh') > -1 && 'ontouchend' in document);
 
-    if (!ios) return '<p>Abrí el menú del navegador y tocá <b>Agregar a la pantalla principal</b>.</p>';
+    if (!ios) return '<p>Abrí el menú del navegador y tocá <b>Instalar</b>. En Samsung Internet, primero abrila en Chrome.</p>';
     /* En iPhone, los mismos pasos que el cartel, según el navegador
        (pasosIOS). "Agregar a inicio" existe SÓLO en un navegador de verdad:
        dentro de Instagram o Facebook primero hay que salir a Safari. */
