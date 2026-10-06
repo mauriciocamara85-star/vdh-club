@@ -4047,15 +4047,42 @@
 
   window.addEventListener('appinstalled', function () {
     promptGuardado = null;
-    cerrarInstalar(true);
     var f = $('filaInstalar');
     if (f) { f.hidden = true; }
+    try { localStorage.setItem(K_INSTALA, '1'); } catch (e) {}
+    avisarYaInstalada();
   });
 
-  /* Cerrado a mano. Una vez, y no vuelve. */
+  /* Recién instalada (06/10/2026). Los puntos de la misión se cobran al
+     abrirla desde el ícono (club_mision_instalada), y eso no lo sabía
+     nadie: el cartel se cerraba y listo. Ahora el mismo cartel lo dice. */
+  function avisarYaInstalada() {
+    var c = $('instala'), p = $('instalaP'), pie = $('instalaPie');
+    if (!c || !p || !pie) { return; }
+    var mi = ((socioCodigo || {}).misiones || []).filter(function (x) { return x.clave === 'instalar' && !x.hecha; })[0];
+    var tit = c.querySelector('.instala-txt b');
+    if (tit) { tit.textContent = 'Listo, ya está en tu celular'; }
+    p.innerHTML = 'Abrila desde el ícono <b>VDH Club</b> de tu pantalla de inicio' +
+      (mi && Number(mi.puntos) ? ' y sumás <b>' + miles(mi.puntos) + ' puntos</b>.' : '.');
+    pie.innerHTML = '<button type="button" class="btn" id="instalaOk">Entendido</button>';
+    $('instalaOk').onclick = function () { c.hidden = true; };
+    var x = $('instalaX');
+    if (x) { x.onclick = function () { c.hidden = true; }; }
+    c.hidden = false;
+  }
+
+  /* Cerrado a mano. Una vez, y no vuelve.
+     "Abrir en Chrome" es otra cosa (06/10/2026): el que fue a Chrome y no
+     la instaló, a los 3 días lo vuelve a ver acá. Antes también era para
+     siempre, y en Samsung no volvía nunca. */
   var K_INSTALA = 'vdh_club_instalar_cerrado';
+  var K_INSTALA_CHROME = 'vdh_club_instalar_chrome';
   function instalarCerrado() {
-    try { return localStorage.getItem(K_INSTALA) === '1'; } catch (e) { return false; }
+    try {
+      if (localStorage.getItem(K_INSTALA) === '1') { return true; }
+      var fue = Number(localStorage.getItem(K_INSTALA_CHROME)) || 0;
+      return Date.now() - fue < 3 * 24 * 3600 * 1000;
+    } catch (e) { return false; }
   }
 
   /* Sólo en teléfonos. En una computadora el cartel es ruido: nadie se
@@ -4197,7 +4224,10 @@
       /* El que se va a Chrome no necesita volver a encontrar este cartel
          acá: del otro lado le va a aparecer el botón que instala de
          verdad. */
-      $('instalaChrome').onclick = function () { cerrarInstalar(true); };
+      $('instalaChrome').onclick = function () {
+        cerrarInstalar(false);
+        try { localStorage.setItem(K_INSTALA_CHROME, String(Date.now())); } catch (e) {}
+      };
       return;
     }
 
