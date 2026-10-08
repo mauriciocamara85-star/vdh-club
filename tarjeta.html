@@ -41,7 +41,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Poppins, la de vdh.com.ar: la tarjeta es la tienda en el bolsillo. -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   /* ── La tarjeta ──────────────────────────────────────────────────────────
      Esto lo abre alguien parado en la caja, con la fila atrás. Todo lo que
@@ -305,83 +305,97 @@
     cursor: pointer;
   }
 
-  /* ── El carnet ──
-     El material del tablero: grafito a negro y un resplandor rojo a la
-     derecha. Llevaba además una textura de rayas diagonales; se fue el
-     25/09/2026 junto con la de las tarjetas de números —Mauricio las vio y
-     no le gustaron— y no hizo falta reemplazarla: el resplandor ya evita
-     que el negro sea una tapa plana. Es lo único oscuro de la pantalla, así que
-     es lo primero que se mira —que es exactamente lo que tiene que pasar—.
-     El código de barras va sobre blanco adentro, porque un lector necesita
-     negro sobre blanco y nada más. */
-  /* ── El carnet, desde el rediseño del 28/09/2026 ──
-     Con la proporción de una tarjeta de verdad (85,6 × 54 mm). Se probó una
-     más baja para que entrara más debajo y Mauricio eligió ésta: en "Mi
-     tarjeta" la tarjeta es la protagonista, y el aire le da presencia.
-
-     El MATERIAL dice el nivel sin leer: plateada, dorada, o platino oscuro.
-     Toda la tarjeta es un botón: tocarla abre el código. */
+  /* ── El carnet: las tarjetas nuevas (07/10/2026) ──
+     Del diseño que trajo Mauricio: metal lleno en los tres niveles (Silver,
+     Gold y Black), todo el texto en blanco, el logo grande y dos palabras
+     gigantes estampadas en el metal —"CLUB" arriba y el nivel abajo— que
+     se cortan en el borde. Atrás: el logo chico, el código en su recuadro
+     blanco (un lector necesita negro sobre blanco y nada más) y un mensaje
+     con la foto del premio.
+     Con la proporción de una tarjeta de verdad (85,6 × 54 mm). Las medidas
+     van en cqw —por ciento del ancho de la tarjeta— para que se vea igual
+     en un celular de 360 que en uno de 430. Toda la tarjeta es un botón:
+     tocarla la da vuelta. */
+  .carnet-bloque { display: grid; gap: 12px; container-type: inline-size; }
   .carnet {
     position: relative; overflow: hidden;
-    display: flex; flex-direction: column; justify-content: space-between; gap: 18px;
+    display: flex; flex-direction: column; justify-content: space-between;
     width: 100%; aspect-ratio: 1.586;
-    border: 0; border-radius: 14px;
-    padding: 20px 22px;
-    text-align: left; font: inherit; cursor: pointer;
-    box-shadow: 0 1px 2px rgba(28, 28, 26, .08), 0 12px 28px -12px rgba(28, 28, 26, .35);
+    border: 0; border-radius: 16px;
+    padding: 5.4cqw 5.6cqw 5.2cqw;
+    text-align: left; font: inherit; cursor: pointer; color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .34), inset 0 -1px 0 rgba(0, 0, 0, .24),
+                0 2px 4px rgba(28, 28, 26, .10), 0 18px 34px -14px rgba(28, 28, 26, .5);
   }
   /* Un brillo que cruza una vez al entrar. */
   .carnet::after {
-    content: ''; position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .35) 45%, transparent 60%);
+    content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .30) 45%, transparent 60%);
     transform: translateX(-60%);
     animation: brillo 1.1s ease .2s 1 both;
   }
   @keyframes brillo { to { transform: translateX(60%); } }
-  /* Los tres metales. La plata era casi blanca y en el celular se fundía
-     con el fondo (29/09/2026): ahora es acero medio, con una luz arriba a
-     la izquierda y una banda clara en diagonal, como el dorado. Un canto
-     de luz adentro y la sombra de abajo le dan el espesor de una tarjeta. */
-  .carnet.nv-plata {
+  /* Los tres metales. Una luz arriba, un poco a la derecha, y una banda en
+     diagonal; abajo, donde va el texto, el metal se oscurece: el blanco
+     tiene que leerse siempre. */
+  .carnet.nv-silver {
     background:
-      radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 55%),
-      linear-gradient(135deg, #C9CDD3 0%, #979DA6 34%, #C3C7CD 52%, #8B919A 78%, #A9AEB6 100%);
-    color: #121417;
+      radial-gradient(52% 76% at 60% 10%, rgba(255, 255, 255, .58) 0%, rgba(255, 255, 255, .16) 46%, rgba(255, 255, 255, 0) 74%),
+      linear-gradient(116deg, rgba(255, 255, 255, 0) 36%, rgba(255, 255, 255, .20) 47%, rgba(255, 255, 255, 0) 58%),
+      linear-gradient(170deg, #A6A9AE 0%, #8D9095 38%, #6F7276 70%, #55575B 100%);
+    text-shadow: 0 1px 2px rgba(18, 20, 24, .38);
   }
-  .carnet.nv-oro {
+  .carnet.nv-gold {
     background:
-      radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, .45) 0%, rgba(255, 255, 255, 0) 55%),
-      linear-gradient(135deg, #EED79E 0%, #C99A3E 36%, #E6C47A 54%, #B8872E 80%, #D9B263 100%);
-    color: #1A1406;
+      radial-gradient(52% 76% at 60% 10%, rgba(255, 230, 150, .80) 0%, rgba(255, 214, 118, .28) 46%, rgba(255, 214, 118, 0) 74%),
+      linear-gradient(116deg, rgba(255, 244, 205, 0) 36%, rgba(255, 244, 205, .24) 47%, rgba(255, 244, 205, 0) 58%),
+      linear-gradient(170deg, #D89F38 0%, #C2861F 36%, #A46B12 68%, #83510A 100%);
+    text-shadow: 0 1px 2px rgba(66, 38, 0, .45);
   }
-  .carnet.nv-platino {
+  .carnet.nv-black {
     background:
-      radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 55%),
-      linear-gradient(135deg, #3A3935 0%, #1A1A18 55%, #46443F 100%);
-    color: #F1EEE7;
+      radial-gradient(52% 76% at 60% 10%, rgba(255, 255, 255, .15) 0%, rgba(255, 255, 255, .04) 46%, rgba(255, 255, 255, 0) 74%),
+      linear-gradient(116deg, rgba(255, 255, 255, 0) 36%, rgba(255, 255, 255, .05) 47%, rgba(255, 255, 255, 0) 58%),
+      linear-gradient(170deg, #2E2E32 0%, #1B1B1E 38%, #101012 70%, #060607 100%);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, .55);
   }
-  .carnet.nv-plata, .carnet.nv-oro, .carnet.nv-platino {
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), inset 0 -1px 0 rgba(0, 0, 0, .12),
-                0 2px 4px rgba(28, 28, 26, .10), 0 16px 32px -14px rgba(28, 28, 26, .45);
+  /* Las chapas .nv-* (más abajo) comparten la clase: acá gana la tarjeta. */
+  .carnet.nv-silver, .carnet.nv-gold, .carnet.nv-black {
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .34), inset 0 -1px 0 rgba(0, 0, 0, .24),
+                0 2px 4px rgba(28, 28, 26, .10), 0 18px 34px -14px rgba(28, 28, 26, .5);
   }
-  .carnet-arriba { display: flex; justify-content: space-between; align-items: flex-start; }
-  .carnet-vdh { display: block; font: 700 30px/1 var(--sans); letter-spacing: .04em; }
-  .carnet-club { display: block; margin-top: 6px; font: 600 11px/1 var(--sans); letter-spacing: .3em; text-transform: uppercase; }
-  .carnet-nivel {
-    font: 600 11px/1 var(--sans); letter-spacing: .2em; text-transform: uppercase;
-    border: 1.5px solid currentColor; border-radius: 999px; padding: 5px 10px;
-  }
-  .carnet-abajo { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+  /* Las palabras estampadas: del mismo metal, apenas más oscuras (más
+     claras en la negra). Se cortan en el borde a propósito. */
+  .carnet-agua { position: absolute; z-index: 0; pointer-events: none; white-space: nowrap; text-shadow: none;
+                 font: 800 23cqw/.78 var(--sans); letter-spacing: -.035em; text-transform: uppercase; }
+  .carnet-agua-club { left: -2.4cqw; top: -2.6cqw; }
+  .carnet-agua-nivel { right: -2.6cqw; bottom: -1.6cqw; font-size: 20.5cqw; }
+  .carnet.nv-silver .carnet-agua { color: rgba(30, 32, 36, .14); }
+  .carnet.nv-gold .carnet-agua { color: rgba(92, 52, 2, .20); }
+  .carnet.nv-black .carnet-agua { color: rgba(255, 255, 255, .055); }
+  .carnet-arriba, .carnet-logo, .carnet-abajo { position: relative; z-index: 2; }
+  .carnet-arriba { display: flex; justify-content: flex-end; }
+  /* El nivel, en una chapa con borde blanco. */
+  .carnet-nivel { font: 600 2.9cqw/1 var(--sans); letter-spacing: .24em; text-transform: uppercase;
+                  border: max(1.5px, .42cqw) solid rgba(255, 255, 255, .92); border-radius: 999px;
+                  padding: 1.7cqw 2.9cqw 1.7cqw 3.6cqw; }
+  /* El logo: VDH grande con la ®, y CLUB espaciado abajo, al medio. */
+  .carnet-logo { display: inline-grid; justify-items: center; align-self: flex-start; margin-left: 2.2cqw; line-height: 1; }
+  .carnet-vdh { display: block; font: 800 15.5cqw/.84 var(--sans); letter-spacing: -.012em; }
+  .carnet-vdh sup { position: relative; top: .14em; margin-left: .1em; vertical-align: top; font: 600 .17em/1 var(--sans); letter-spacing: 0; }
+  .carnet-club { display: block; margin-top: 1.5cqw; padding-left: .5em; font: 700 4.5cqw/1 var(--sans); letter-spacing: .5em; text-transform: uppercase; }
+  .carnet-abajo { display: flex; justify-content: space-between; align-items: flex-end; gap: 3cqw; }
+  .carnet-abajo > span:first-child { min-width: 0; }
   /* display:block porque adentro de un botón van <span>. */
-  .carnet-nom { display: block; font: 600 17px/1.2 var(--sans); }
-  .carnet-desde { display: block; font: 500 12.5px/1.4 var(--sans); margin-top: 2px; }
-  .carnet-num { font: 600 13px/1 var(--sans); letter-spacing: .08em; white-space: nowrap; font-variant-numeric: tabular-nums;
-                display: inline-flex; align-items: center; gap: 8px; }
-  /* El dibujito de barras: dice "tocame y sale el código" sin una palabra. */
-  .carnet-barras { display: inline-grid; place-content: center; width: 30px; height: 30px; border-radius: 9px;
-                   background: rgba(255, 255, 255, .28); border: 1px solid rgba(0, 0, 0, .12); }
-  .carnet-barras svg { width: 17px; height: 17px; }
-  .carnet-bloque { display: grid; gap: 12px; }
+  .carnet-nom { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font: 600 4.8cqw/1.2 var(--sans); }
+  .carnet-desde { display: block; margin-top: .7cqw; font: 400 3.4cqw/1.35 var(--sans); opacity: .94; }
+  .carnet-num { display: inline-flex; align-items: center; gap: 2.6cqw; flex: none; white-space: nowrap;
+                font: 500 4.4cqw/1 var(--sans); letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+  /* El dibujito de barras, en blanco: "tocame y sale el código". */
+  .carnet-barras { display: inline-grid; place-content: center; width: 8.4cqw; height: 8.4cqw; border-radius: 2cqw;
+                   background: #fff; color: #151515; text-shadow: none; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
+  .carnet-barras svg { width: 4.6cqw; height: 4.6cqw; }
 
   /* El botón del código: carbón lleno, a todo el ancho, abajo de la tarjeta.
      Es lo único que se toca en la caja. */
@@ -397,49 +411,49 @@
   /* ── La tarjeta que brilla y se da vuelta (04/10/2026) ──
      Como una tarjeta de crédito de metal. Con el celular en la mano el
      reflejo se mueve cuando lo inclinás (Android); en la compu o en
-     iPhone, siguiendo el mouse o el dedo. Tocarla la da vuelta: atrás van
-     la banda negra, el código de barras en su tira blanca (tocarlo lo
-     agranda) y un mensaje para el socio, distinto cada vez.
+     iPhone, siguiendo el mouse o el dedo. Tocarla la da vuelta.
      Tres capas: la escena da la perspectiva, .carnet-giro se inclina con
      el celular y .carnet-caras gira para darla vuelta. Separadas, porque
      la inclinación cambia 60 veces por segundo y el giro tiene su
      transición: en el mismo elemento se pisarían. */
   .carnet-escena { perspective: 1100px; }
   .carnet-giro { transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
-  .carnet-caras { position: relative; aspect-ratio: 1.586; transform-style: preserve-3d; border-radius: 14px;
+  .carnet-caras { position: relative; aspect-ratio: 1.586; transform-style: preserve-3d; border-radius: 16px;
                   transition: transform .7s cubic-bezier(.2, .8, .2, 1); cursor: pointer; outline: none;
                   -webkit-tap-highlight-color: transparent; }
   .carnet-caras:focus-visible { box-shadow: 0 0 0 3px var(--txt); }
   .carnet-caras.vuelta { transform: rotateY(180deg); }
   .carnet-caras > .carnet { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto;
                             -webkit-backface-visibility: hidden; backface-visibility: hidden; }
-  .carnet-dorso { transform: rotateY(180deg); }
+  .carnet-dorso { transform: rotateY(180deg); display: block; padding: 0; }
   .carnet-caras:not(.vuelta) .carnet-dorso, .carnet-caras.vuelta .carnet-frente { pointer-events: none; }
   /* El reflejo: una banda de luz y un punto más brillante, que se mueven
      con --bx, --lx y --ly (los pone el script según la inclinación). */
   .carnet-luz { position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none;
     background:
-      radial-gradient(circle at var(--lx, 30%) var(--ly, 20%), rgba(255, 255, 255, .30) 0%, rgba(255, 255, 255, 0) 42%),
-      linear-gradient(112deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, .26) 48%, rgba(255, 255, 255, .06) 54%, rgba(255, 255, 255, 0) 62%)
+      radial-gradient(circle at var(--lx, 30%) var(--ly, 20%), rgba(255, 255, 255, .24) 0%, rgba(255, 255, 255, 0) 42%),
+      linear-gradient(112deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, .20) 48%, rgba(255, 255, 255, .05) 54%, rgba(255, 255, 255, 0) 62%)
         var(--bx, 50%) 0 / 260% 100% no-repeat; }
-  /* El nombre y el número, grabados en el plástico. */
-  .carnet-frente .carnet-nom, .carnet-frente .carnet-num { text-shadow: 0 1px 0 rgba(255, 255, 255, .28), 0 -1px 0 rgba(0, 0, 0, .12); }
-  .carnet.nv-platino .carnet-nom, .carnet.nv-platino .carnet-num { text-shadow: 0 -1px 0 rgba(0, 0, 0, .5), 0 1px 0 rgba(255, 255, 255, .08); }
-  /* El dorso: medidas en % para que entre igual en un celular angosto. */
-  .dorso-banda { position: absolute; left: 0; right: 0; top: 9%; height: 17%; background: linear-gradient(180deg, #2B2A27, #0F0F0E); }
-  .dorso-codigo { position: absolute; left: 6%; right: 6%; top: 32%; height: 38%; z-index: 2;
-                  display: grid; grid-template-rows: 1fr auto; justify-items: center; gap: 3px;
-                  padding: 7px 14px 6px; border: 0; border-radius: 10px; background: #fff; color: #111; cursor: pointer; }
-  .dorso-codigo svg { display: block; width: 100%; height: 100%; }
-  .dorso-num { font: 600 10.5px/1 var(--sans); letter-spacing: .18em; font-variant-numeric: tabular-nums; }
-  .dorso-msj { position: absolute; left: 6%; right: 25%; bottom: 5%; height: 21%; z-index: 2;
-               display: flex; align-items: center; gap: 10px; font: 500 12.5px/1.3 var(--sans); }
-  .dorso-msj img { width: 34px; height: 34px; flex: none; border-radius: 8px; object-fit: cover; background: #fff; }
+  /* El dorso: el logo chico y el nivel arriba, el código en su recuadro
+     blanco y abajo el mensaje para el socio, uno distinto cada vez. */
+  .dorso-arriba { position: absolute; z-index: 2; left: 5.6cqw; right: 5.6cqw; top: 5.2cqw;
+                  display: flex; justify-content: space-between; align-items: flex-start; }
+  .carnet-logo.chico { margin: 0; }
+  .carnet-logo.chico .carnet-vdh { font-size: 9.2cqw; }
+  .carnet-logo.chico .carnet-club { margin-top: 1cqw; font-size: 2.8cqw; }
+  .dorso-rot { position: absolute; z-index: 2; left: 6cqw; top: 33%; font: 500 3.4cqw/1 var(--sans); }
+  .dorso-codigo { position: absolute; z-index: 2; left: 6cqw; right: 6cqw; top: 39.5%; height: 34%;
+                  display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: .9cqw;
+                  padding: 2.2cqw 5cqw 1.7cqw; border: 0; border-radius: 2.4cqw; background: #fff; color: #111;
+                  cursor: pointer; text-shadow: none; box-shadow: 0 2px 6px rgba(0, 0, 0, .18); }
+  /* El SVG trae su alto escrito (60px): acá lo decide el recuadro. */
+  .dorso-codigo svg { display: block; width: 100%; height: 100% !important; min-height: 0; }
+  .dorso-num { font: 600 3cqw/1 var(--sans); letter-spacing: .2em; font-variant-numeric: tabular-nums; }
+  .dorso-msj { position: absolute; z-index: 2; left: 6cqw; right: 6cqw; bottom: 4.4cqw; min-height: 10cqw;
+               display: flex; align-items: center; gap: 3cqw; font: 500 3.4cqw/1.3 var(--sans); }
+  .dorso-msj img { width: 10cqw; height: 10cqw; flex: none; border-radius: 2cqw; object-fit: cover; background: #fff;
+                   box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
   .dorso-msj b { font-weight: 700; }
-  /* La marca, donde una de crédito lleva el logo de Visa o Mastercard. */
-  .dorso-marca { position: absolute; right: 6%; bottom: 8%; z-index: 2; display: grid; justify-items: end; line-height: 1; opacity: .9; }
-  .dorso-marca b { font: 700 17px/1 var(--sans); letter-spacing: .04em; }
-  .dorso-marca i { font: 600 6.5px/1 var(--sans); font-style: normal; letter-spacing: .32em; text-transform: uppercase; margin-top: 3px; margin-right: -.32em; }
   @media (prefers-reduced-motion: reduce) {
     .carnet-caras { transition: none; }
     .carnet-giro { transform: none; }
@@ -709,9 +723,9 @@
     font: 700 11px/1 var(--sans); letter-spacing: .6px; text-transform: uppercase;
   }
   .chip-nivel svg { width: 12px; height: 12px; }
-  .nv-plata   { background: #DADDE2; color: #2A2D31; }
-  .nv-oro     { background: #F1D27A; color: #3A2A00; }
-  .nv-platino { background: #0B0C0E; color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6); }
+  .nv-silver { background: #DADDE2; color: #2A2D31; }
+  .nv-gold   { background: #F1D27A; color: #3A2A00; }
+  .nv-black  { background: #0B0C0E; color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6); }
 
   .carnet-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 
@@ -744,10 +758,10 @@
   .trofeo svg { width: 28px; height: 28px; }
   /* Tres metales que se reconocen sin leer. Más específicos que las chapas
      .nv-* del carnet, que comparten el nombre. */
-  .trofeo.nv-plata   { background: linear-gradient(145deg, #EEF0F3, #A9AFB8); color: #2A2D31; }
-  .trofeo.nv-oro     { background: linear-gradient(145deg, #F8DE8E, #C6921A); color: #3A2A00; }
-  .trofeo.nv-platino { background: linear-gradient(145deg, #34373E, #0B0C0E); color: #fff;
-                       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5); }
+  .trofeo.nv-silver { background: linear-gradient(145deg, #C2C5CA, #6F7276); color: #fff; }
+  .trofeo.nv-gold   { background: linear-gradient(145deg, #E2AE48, #8F5B12); color: #fff; }
+  .trofeo.nv-black  { background: linear-gradient(145deg, #34373E, #0B0C0E); color: #fff;
+                      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5); }
   .nivel-rotulo { display: block; font: 700 11.5px var(--sans); letter-spacing: .7px; text-transform: uppercase; color: var(--txt-3); }
   .nivel-nom { display: block; font: 700 26px/1.1 var(--display); letter-spacing: -.5px; }
   .beneficios { list-style: none; margin-top: 14px; display: grid; gap: 8px; }
@@ -1797,9 +1811,10 @@
   .ti-franja span { font: 700 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; }
   .ti-franja b { font: 600 11.5px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase;
                  border: 1.5px solid currentColor; border-radius: 999px; padding: 4px 9px; }
-  .ti-franja.nv-plata { background: linear-gradient(135deg, #C9CDD3 0%, #979DA6 45%, #B9BEC5 100%); color: #121417; }
-  .ti-franja.nv-oro { background: linear-gradient(135deg, #EED79E 0%, #C99A3E 45%, #E0BC6C 100%); color: #1A1406; }
-  .ti-franja.nv-platino { background: linear-gradient(135deg, #3A3935 0%, #1A1A18 55%, #46443F 100%); color: #F1EEE7; }
+  /* El metal de la tarjeta nueva, con el texto en blanco (07/10/2026). */
+  .ti-franja.nv-silver { background: linear-gradient(116deg, #67696E 0%, #95989D 52%, #707377 100%); color: #fff; text-shadow: 0 1px 1px rgba(0, 0, 0, .3); }
+  .ti-franja.nv-gold { background: linear-gradient(116deg, #8F5B12 0%, #C99434 52%, #9A6416 100%); color: #fff; text-shadow: 0 1px 1px rgba(60, 34, 0, .4); }
+  .ti-franja.nv-black { background: linear-gradient(116deg, #0B0B0C 0%, #2E2E32 52%, #111113 100%); color: #fff; }
   .ti-cuerpo { padding: 12px 12px 14px 16px; display: grid; gap: 2px; }
   .ti-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .ti-rot { font: 600 15px var(--sans); }
@@ -2432,7 +2447,7 @@
     if (esIOS() && t.misiones) { t.misiones = t.misiones.filter(function (m) { return m.accion !== 'wallet'; }); }
     var puntos  = t.puntos || 0;
     var premios = t.premios || [];
-    var nv      = t.nivel || { nombre: 'Plata', multiplica: 1 };
+    var nv      = t.nivel || { nombre: 'Silver', multiplica: 1 };
     var multi   = Number(nv.multiplica) || 1;
     socioCodigo = t;
     premiosPintados = premios;
@@ -2864,7 +2879,7 @@
   function pintarNiveles() {
     volverDe('niveles', 'nivelesVolver');
     var t = socioCodigo || {};
-    var nv = t.nivel || { nombre: 'Plata' };
+    var nv = t.nivel || { nombre: 'Silver' };
     var lista = t.niveles || [];
     var xp = Number(t.xp) || 0;
     var yo = -1;
@@ -2923,9 +2938,14 @@
     return faltan[0] || null;
   }
 
-  function claseNivel(nombre) {
-    return 'nv-' + String(nombre || 'Plata').toLowerCase().normalize('NFD').replace(/[^a-z]/g, '');
+  /* La clave del nivel: 'silver', 'gold' o 'black'. Acepta los nombres de
+     antes (Plata, Oro, Platino) por si la base todavía no cambió (SQL 54). */
+  var NIVEL_VIEJO = { plata: 'silver', oro: 'gold', platino: 'black' };
+  function nivelClave(nombre) {
+    var k = String(nombre || 'Silver').toLowerCase().normalize('NFD').replace(/[^a-z]/g, '');
+    return NIVEL_VIEJO[k] || k;
   }
+  function claseNivel(nombre) { return 'nv-' + nivelClave(nombre); }
 
   function botonCodigo() {
     return '<button type="button" class="btn-codigo toca" data-codigo>' + icono('barras') + 'Mostrar código</button>';
@@ -3080,23 +3100,31 @@
     return '<div class="carnet-bloque"><div class="carnet-escena"><div class="carnet-giro" id="carnetGiro">' +
       '<div class="carnet-caras" role="button" tabindex="0" data-girar aria-pressed="false" aria-label="Dar vuelta la tarjeta">' +
         '<div class="carnet carnet-frente ' + cls + '">' +
-          '<span class="carnet-arriba"><span><span class="carnet-vdh">VDH</span><span class="carnet-club">Club</span></span>' +
-            '<span class="carnet-nivel">' + esc(nv.nombre) + '</span></span>' +
+          '<span class="carnet-agua carnet-agua-club" aria-hidden="true">Club</span>' +
+          '<span class="carnet-agua carnet-agua-nivel" aria-hidden="true">' + esc(nv.nombre) + '</span>' +
+          '<span class="carnet-arriba"><span class="carnet-nivel">' + esc(nv.nombre) + '</span></span>' +
+          logoClub('') +
           '<span class="carnet-abajo"><span><span class="carnet-nom">' + esc(t.nombre) + '</span>' +
             '<span class="carnet-desde">Socio desde ' + mesAnio(t.desde) + '</span></span>' +
             '<span class="carnet-num">•••• ' + esc(cod.slice(-4)) + '<span class="carnet-barras">' + icono('barras') + '</span></span></span>' +
           '<span class="carnet-luz"></span>' +
         '</div>' +
         '<div class="carnet carnet-dorso ' + cls + '" aria-hidden="true">' +
-          '<span class="dorso-banda"></span>' +
+          '<span class="dorso-arriba">' + logoClub(' chico') + '<span class="carnet-nivel">' + esc(nv.nombre) + '</span></span>' +
+          '<span class="dorso-rot">Tu código de socio</span>' +
           '<button type="button" class="dorso-codigo" data-codigo aria-label="Agrandar el código" tabindex="-1">' +
             codigoDeBarras(cod, 60) + '<span class="dorso-num">' + esc(codigoBonito(cod)) + '</span></button>' +
           '<span class="dorso-msj"></span>' +
-          '<span class="dorso-marca" aria-hidden="true"><b>VDH</b><i>Club</i></span>' +
           '<span class="carnet-luz"></span>' +
         '</div>' +
       '</div>' +
     '</div></div></div>';
+  }
+
+  /* El logo de la tarjeta: VDH® y CLUB abajo, espaciado. */
+  function logoClub(extra) {
+    return '<span class="carnet-logo' + extra + '" role="img" aria-label="VDH Club">' +
+      '<span class="carnet-vdh" aria-hidden="true">VDH<sup>®</sup></span><span class="carnet-club" aria-hidden="true">Club</span></span>';
   }
 
   /* El mensaje del dorso: cosas del socio, útiles, una distinta cada vez
@@ -3277,12 +3305,12 @@
      Se compara con lo último que vio este celular (puntos y nivel). La
      primera vez sólo se anota: no hay nada que festejar todavía. */
   var K_FESTEJO = 'vdh_club_festejo';
-  var RANGO_NIVEL = { plata: 0, oro: 1, platino: 2 };
+  var RANGO_NIVEL = { silver: 0, gold: 1, black: 2 };
   function mirarFestejos(t) {
     if (!t || !t.codigo) { return; }
     var antes = null;
     try { antes = JSON.parse(localStorage.getItem(K_FESTEJO) || 'null'); } catch (e) {}
-    var nivel = (t.nivel && t.nivel.nombre) || 'Plata';
+    var nivel = (t.nivel && t.nivel.nombre) || 'Silver';
     var puntos = Number(t.puntos) || 0;
     try { localStorage.setItem(K_FESTEJO, JSON.stringify({ codigo: t.codigo, puntos: puntos, nivel: nivel })); } catch (e) {}
 
@@ -3294,7 +3322,7 @@
       if (!ya) { festejar('¡Feliz cumple!', 'Tu regalo te espera en cualquier local.'); return; }
     }
     if (!antes || antes.codigo !== t.codigo) { return; }
-    var r0 = RANGO_NIVEL[String(antes.nivel || '').toLowerCase()], r1 = RANGO_NIVEL[nivel.toLowerCase()];
+    var r0 = RANGO_NIVEL[nivelClave(antes.nivel)], r1 = RANGO_NIVEL[nivelClave(nivel)];
     if (r0 != null && r1 != null && r1 > r0) {
       var multi = Number(t.nivel.multiplica) || 1;
       festejar('¡Subiste a ' + nivel + '!', 'Desde ahora sumás ' + (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + ' por cada $100.');
@@ -3968,8 +3996,8 @@
   function coma(n) { return String(n).replace('.', ','); }
 
   function chipNivel(nombre) {
-    var n = String(nombre || 'Plata');
-    var clase = 'nv-' + n.toLowerCase().normalize('NFD').replace(/[^a-z]/g, '');
+    var n = String(nombre || 'Silver');
+    var clase = claseNivel(n);
     var estrella = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
       '<path d="m12 2 3 6.6 7 .8-5.2 4.8 1.5 7L12 17.8 5.7 21.2l1.5-7L2 9.4l7-.8Z"/></svg>';
     return '<span class="chip-nivel ' + clase + '">' + estrella + esc(n) + '</span>';
@@ -4472,9 +4500,9 @@
      'es la misma en toda la cadena.'],
     /* La tarjeta es compartida entre los 14 — ver club.sql. */
 
-    ['¿Qué son Plata, Oro y Platino?',
-     'Tu nivel, según lo que compraste en el último año. En Oro sumás 1,2 puntos ' +
-     'por cada $100 y en Platino 1,5. Llevarte un premio no te baja de nivel.'],
+    ['¿Qué son Silver, Gold y Black?',
+     'Tu nivel, según lo que compraste en el último año. En Gold sumás 1,2 puntos ' +
+     'por cada $100 y en Black 1,5. Llevarte un premio no te baja de nivel.'],
     /* club_niveles. El nivel sale del XP —lo ganado en 12 meses—, no del
        saldo: por eso canjear no lo toca. */
 
@@ -4786,7 +4814,7 @@
     var t = socioCodigo;
     if (!hoja || !t) { return; }
     $('hcNombre').textContent = t.nombre || '';
-    $('hcNivel').innerHTML = chipNivel((t.nivel && t.nivel.nombre) || 'Plata');
+    $('hcNivel').innerHTML = chipNivel((t.nivel && t.nivel.nombre) || 'Silver');
     /* Se dibuja al abrir y no al cargar: si la tarjeta se actualizó por
        detrás, el código es el de ahora. */
     /* 150 de alto: una pistola que llega torcida lee mejor barras largas. */
@@ -5405,7 +5433,7 @@
   }
   function nivelLinea() {
     var nv = (socioCodigo || {}).nivel || {}, multi = Number(nv.multiplica) || 1;
-    return '<span class="tv-nivel">' + icono('estrella') + '<span>Sos <b>' + esc(nv.nombre || 'Plata') + '</b> · cada $100 sumás ' +
+    return '<span class="tv-nivel">' + icono('estrella') + '<span>Sos <b>' + esc(nv.nombre || 'Silver') + '</b> · cada $100 sumás ' +
       (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + '</span></span>';
   }
 
@@ -5586,7 +5614,7 @@
     if (v === 'Todo') {
       var novedades = todos.filter(function (p) { return p.nuevo; });
       caja.innerHTML =
-        '<p class="tz-nivel">' + icono('estrella') + '<span>Sos <b>' + esc(nv.nombre || 'Plata') + '</b> · cada $100 te suma ' +
+        '<p class="tz-nivel">' + icono('estrella') + '<span>Sos <b>' + esc(nv.nombre || 'Silver') + '</b> · cada $100 te suma ' +
           (multi > 1 ? coma(multi) + ' puntos' : '1 punto') + '</span></p>' +
         (rebajados.length ? '<button type="button" class="tz-sale toca" data-cat="sale"><b>SALE</b><span>Hasta ' + maxOff(rebajados) +
           '% OFF<br>' + rebajados.length + ' productos ›</span></button>' : '') +
@@ -5660,7 +5688,7 @@
       '<div><div class="ficha-nom">' + esc(p.nombre) + '</div>' +
         '<div class="ficha-precio">$' + miles(precioDe(p)) + (off ? '<s>$' + miles(p.precio) + '</s><em>-' + offDe(p) + '%</em>' : '') + '</div></div>' +
       '<div class="ficha-pts">' + icono('estrella') + '<div><b>Sumás ' + miles(pts) + ' puntos</b>' +
-        '<span>Con tu nivel ' + esc(nv.nombre || 'Plata') + '.' +
+        '<span>Con tu nivel ' + esc(nv.nombre || 'Silver') + '.' +
         /* Lo que le falta para el próximo nivel, si hay próximo: con esta
            compra, ¿llega? */
         (nv.sigue && falta ? (pts >= falta ? ' ¡Con esta compra llegás a ' + esc(nv.sigue) + '!'
