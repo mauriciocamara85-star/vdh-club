@@ -114,6 +114,12 @@ var club = {
     return llamar('club_multi_publicos', {});
   },
 
+  /** Un texto del Club, el vigente: hoy, las bases y condiciones ('bases').
+      Devuelve {texto, actualizado} o null. Público (SQL 73). */
+  texto: function (clave) {
+    return llamar('club_texto', { p_clave: clave });
+  },
+
   /** "Mis datos": lo que el socio puede ver y corregir. El teléfono viene
       enmascarado y NO se cambia desde acá (abre la tarjeta: se cambia en el
       local). Ver SQL 25. */
