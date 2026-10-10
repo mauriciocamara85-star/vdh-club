@@ -4237,13 +4237,19 @@
        para hacerlo. Los puntos se dan al abrirla desde la pantalla de
        inicio (club_mision_instalada). */
     var mi = ((socioCodigo || {}).misiones || []).filter(function (x) { return x.clave === 'instalar' && !x.hecha; })[0];
+    /* En Samsung no se nombra el aviso que muestra ese navegador al
+       agregarla: asusta al cliente y no le hace falta saberlo, alcanza con
+       mandarlo a Chrome (Mauricio, 10/10/2026). */
     p.innerHTML = 'Agregá VDH Club a la pantalla de inicio y abrila con un toque.' +
       (modo === 'chrome'
         ? (esSamsung()
-            ? ' Desde este navegador Android muestra un aviso de seguridad, así que se agrega desde Chrome.'
+            ? ' Se descarga desde Chrome.'
             : ' La estás viendo dentro de otra app: se agrega desde Chrome.')
         : '') +
-      (mi && Number(mi.puntos) ? '<span class="instala-premio">Abrila desde ahí y te regalamos ' + miles(mi.puntos) + ' puntos.</span>' : '');
+      /* Con Chrome nombrado en el medio, "desde ahí" se leería "desde
+         Chrome": los puntos se dan al abrirla desde la pantalla de inicio. */
+      (mi && Number(mi.puntos) ? '<span class="instala-premio">Abrila desde ' + (modo === 'chrome' ? 'la pantalla de inicio' : 'ahí') +
+        ' y te regalamos ' + miles(mi.puntos) + ' puntos.</span>' : '');
 
     if (modo === 'directo') {
       pie.innerHTML = '<button type="button" class="btn" id="instalaYa">Instalar VDH Club</button>';
