@@ -1894,6 +1894,9 @@
                background: var(--bg); border-radius: 6px; padding: 10px 12px 10px 14px; }
   .cupon-cod b { font: 700 19px/1.2 var(--sans); letter-spacing: .06em; word-break: break-all;
                  user-select: all; -webkit-user-select: all; }
+  .cupon-cod.sin-cod { justify-content: flex-start; gap: 12px; padding: 12px 14px; font: 500 14.5px/1.4 var(--sans); color: var(--txt-2); }
+  .cupon-cod.sin-cod svg { flex: none; width: 22px; height: 22px; color: var(--txt); }
+  .cupon-cod.sin-cod b { font: inherit; font-weight: 700; letter-spacing: 0; word-break: normal; color: var(--txt); user-select: auto; -webkit-user-select: auto; }
   .cupon-copiar { flex: none; border: 1px solid var(--linea); background: var(--hoja); border-radius: 10px; padding: 7px 12px;
                   font: 600 13px var(--sans); color: var(--txt); cursor: pointer; }
   .cupon-cond { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13.5px; color: var(--txt-2); line-height: 1.45; }
@@ -2872,8 +2875,14 @@
         '<div class="cupon-arriba"><span class="cupon-pct">' + esc(c.pct) + '%<small>de descuento</small></span>' +
           '<span class="cupon-clase">' + (c.clase === 'campana' ? 'Para todos' : 'Para vos') + '</span></div>' +
         '<div class="cupon-cuerpo">' +
-          '<div class="cupon-cod"><b>' + esc(c.codigo) + '</b>' +
-            '<button type="button" class="cupon-copiar" data-copiar="' + esc(c.codigo) + '">Copiar</button></div>' +
+          /* Sin código (29/10/2026): el cupón es de SU teléfono, no al
+             portador, y en la caja lo buscan por el WhatsApp. Antes quedaba
+             el recuadro vacío con un "Copiar" que no copiaba nada. */
+          (c.codigo
+            ? '<div class="cupon-cod"><b>' + esc(c.codigo) + '</b>' +
+                '<button type="button" class="cupon-copiar" data-copiar="' + esc(c.codigo) + '">Copiar</button></div>'
+            : '<div class="cupon-cod sin-cod">' + icono('charla') +
+                '<span>No necesita código: en la caja <b>decí tu WhatsApp</b> y te lo aplican.</span></div>') +
           '<ul class="cupon-cond">' + cond.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
         '</div></div>';
     }).join('') + '</div>' +
